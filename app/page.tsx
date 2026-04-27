@@ -27,7 +27,7 @@ export default function Home() {
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center z-10">
-        <Link href="/dashboard">
+        <Link href="/dashboard/festival">
           <p className="text-[16px] md:text-[12px] lg:text-[20px] font-black uppercase tracking-tight whitespace-nowrap text-white cursor-pointer transition-colors duration-300 hover:text-yellow-400">
             ENTER THE ENERGY
           </p>

@@ -3,25 +3,9 @@
 import Image from "next/image";
 import AboutImg from "@/public/images/secondImg_1920x1080.jpeg";
 import { useEffect, useState } from "react";
+import { navItems } from "../../components/navItems";
+import Link from "next/link";
 
-const navItems = [
-  { label: "MAIN STAGE" },
-  { label: "QVEVRI" },
-  { label: "TECHNO QVEVRI" },
-  { label: "LINEUP" },
-  { label: "JOKER" },
-  { label: "UKRAINIAN DAY" },
-  { label: "4 STAGES" },
-  { label: "OUR STORY" },
-  { label: "TICKET" },
-  { label: "MISSION" },
-  { label: "PARTNERS" },
-  { label: "NEWS" },
-  { label: "FOOD ZONE" },
-  { label: "VACANCIES" },
-  { label: "CONTACT US" },
-  { label: "FESTIVAL RULES & TERMS" },
-];
 
 const slogan =
   "STAND IN THE CENTRE OF THE WORLD WITH BIG STARS AND FEEL THEIR ENERGY";
@@ -46,54 +30,6 @@ export default function AboutPage() {
 
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Top bar */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 py-5">
-        <span
-          style={{
-            fontFamily: "'Courier New', monospace",
-            letterSpacing: "0.1em",
-          }}
-          className="text-white text-2xl font-bold uppercase hidden sm:block"
-        >
-          Tbilisi Style 21
-        </span>
-
-        <div className="flex items-center gap-5">
-          <a
-            href="#"
-            style={{
-              fontFamily: "'Courier New', monospace",
-              letterSpacing: "0.1em",
-            }}
-            className="text-white text-sm font-bold uppercase hover:text-yellow-300 transition-colors hidden sm:block"
-          >
-            Buy Ticket
-          </a>
-
-          <button
-            onClick={() => setNavOpen((prev) => !prev)}
-            className="relative z-50 flex flex-col justify-center items-center w-9 h-9 cursor-pointer"
-          >
-            <span
-              className="block w-6 h-[2px] bg-white absolute transition-all"
-              style={{
-                transform: navOpen ? "rotate(45deg)" : "translateY(-7px)",
-              }}
-            />
-            <span
-              className="block w-6 h-[2px] bg-white absolute transition-all"
-              style={{ opacity: navOpen ? 0 : 1 }}
-            />
-            <span
-              className="block w-6 h-[2px] bg-white absolute transition-all"
-              style={{
-                transform: navOpen ? "rotate(-45deg)" : "translateY(7px)",
-              }}
-            />
-          </button>
-        </div>
-      </div>
-
       <div
         className="fixed inset-0 z-40 bg-black transition-opacity duration-300"
         style={{
@@ -103,7 +39,6 @@ export default function AboutPage() {
         onClick={() => setNavOpen(false)}
       />
 
-      {/* Drawer */}
       <div
         className="fixed top-0 right-0 z-50 h-full flex flex-col transition-transform duration-300"
         style={{
@@ -123,7 +58,6 @@ export default function AboutPage() {
             <span className="block w-6 h-[2px] bg-white -rotate-45 absolute" />
           </button>
 
-          {/* Nav */}
           <nav className="flex flex-col flex-1 justify-center">
             {navItems.map((item, i) => (
               <a
@@ -171,34 +105,7 @@ export default function AboutPage() {
       <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-16 text-white uppercase">
 
-          {/* LEFT SIDE */}
           <div className="flex flex-col gap-10">
-
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Ukrainian Day
-              </p>
-              <p className="text-xs md:text-sm opacity-70 mt-1">
-                20.08.2027
-              </p>
-            </div>
-
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Joker Tickets
-              </p>
-            </div>
-
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Our Mission
-              </p>
-            </div>
-
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div className="flex flex-col gap-10 md:items-end md:text-right">
 
             <div>
               <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
@@ -218,6 +125,33 @@ export default function AboutPage() {
               </p>
               <p className="text-xs md:text-sm opacity-70 mt-1">
                 11.09.2027
+              </p>
+            </div>
+
+          </div>
+
+          <div className="flex flex-col gap-10 md:items-end md:text-right">
+
+            <Link href="/dashboard/ukrainianPage">
+              <div>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                Ukrainian Day
+              </p>
+              <p className="text-xs md:text-sm opacity-70 mt-1">
+                20.08.2027
+              </p>
+            </div>
+            </Link>
+
+            <div>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                Joker Tickets
+              </p>
+            </div>
+
+            <div>
+              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                Our Mission
               </p>
             </div>
 

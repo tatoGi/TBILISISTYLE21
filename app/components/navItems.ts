@@ -1,0 +1,18 @@
+export const navItems = [
+  { label: "MAIN STAGE" },
+  { label: "QVEVRI" },
+  { label: "TECHNO QVEVRI" },
+  { label: "LINEUP" },
+  { label: "JOKER" },
+  { label: "UKRAINIAN DAY" },
+  { label: "4 STAGES" },
+  { label: "OUR STORY" },
+  { label: "TICKET" },
+  { label: "MISSION" },
+  { label: "PARTNERS" },
+  { label: "NEWS" },
+  { label: "FOOD ZONE" },
+  { label: "VACANCIES" },
+  { label: "CONTACT US" },
+  { label: "FESTIVAL RULES & TERMS" },
+];
