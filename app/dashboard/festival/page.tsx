@@ -106,27 +106,32 @@ export default function AboutPage() {
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-16 text-white uppercase">
 
           <div className="flex flex-col gap-10">
+            <Link href="/dashboard/mainStage">
+              <div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  Main Stage
+                </p>
+              </div>
+            </Link>
 
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Main Stage
-              </p>
-            </div>
+            <Link href="/dashboard/qvevriStage">
+              <div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  Qvevri Stage
+                </p>
+              </div>
+            </Link>
 
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Qvevri Stage
-              </p>
-            </div>
-
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Techno Qvevri
-              </p>
-              <p className="text-xs md:text-sm opacity-70 mt-1">
-                11.09.2027
-              </p>
-            </div>
+            <Link href="/dashboard/technoQvevri">
+              <div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  Techno Qvevri
+                </p>
+                <p className="text-xs md:text-sm opacity-70 mt-1">
+                  11.09.2027
+                </p>
+              </div>
+            </Link>
 
           </div>
 
@@ -134,26 +139,22 @@ export default function AboutPage() {
 
             <Link href="/dashboard/ukrainianPage">
               <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Ukrainian Day
-              </p>
-              <p className="text-xs md:text-sm opacity-70 mt-1">
-                20.08.2027
-              </p>
-            </div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  Ukrainian Day
+                </p>
+                <p className="text-xs md:text-sm opacity-70 mt-1">
+                  20.08.2027
+                </p>
+              </div>
             </Link>
 
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Joker Tickets
-              </p>
-            </div>
-
-            <div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                Our Mission
-              </p>
-            </div>
+             <Link href="/dashboard/mission">
+              <div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  Our Mission
+                </p>
+              </div>
+             </Link>
 
           </div>
 
