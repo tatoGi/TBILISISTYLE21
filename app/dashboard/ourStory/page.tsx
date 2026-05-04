@@ -1,23 +1,23 @@
 import { getTranslations } from "next-intl/server";
 
-export default async function RulesPage() {
-  const t = await getTranslations("rulesAndTerms");
+export default async function OurStoryPage() {
+  const t = await getTranslations("ourStory");
 
   return (
     <main
       style={{
         maxWidth: "900px",
         margin: "0 auto",
-        padding: "100px 40px",
+        padding: "140px 40px 80px",
         lineHeight: "1.8",
       }}
     >
       <h1
         style={{
-          textAlign: "center",
           fontSize: "36px",
-          marginBottom: "60px",
           fontWeight: "bold",
+          textAlign: "center",
+          marginBottom: "60px",
         }}
       >
         {t("title")}
