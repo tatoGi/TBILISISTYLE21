@@ -1,0 +1,97 @@
+{
+  "common": {
+    "slogan": "STAND IN THE CENTRE OF THE WORLD WITH BIG STARS AND FEEL THEIR ENERGY",
+    "buyTicket": "Buy Ticket",
+    "buyTickets": "Buy Tickets",
+    "language": "Language"
+  },
+  "nav": {
+    "mainStage": "MAIN STAGE",
+    "qvevri": "QVEVRI",
+    "technoQvevri": "TECHNO QVEVRI",
+    "lineup": "LINEUP",
+    "joker": "JOKER",
+    "ukrainianDay": "UKRAINIAN DAY",
+    "fourStages": "4 STAGES",
+    "ourStory": "OUR STORY",
+    "ticket": "TICKET",
+    "mission": "MISSION",
+    "partners": "PARTNERS",
+    "news": "NEWS",
+    "foodZone": "FOOD ZONE",
+    "vacancies": "VACANCIES",
+    "contactUs": "CONTACT US",
+    "festivalRulesTerms": "FESTIVAL RULES & TERMS"
+  },
+  "home": {
+    "title": "TBILISI STYLE 21",
+    "subtitle": "ELECTRONIC MUSIC FESTIVAL",
+    "enter": "ENTER THE ENERGY"
+  },
+  "festival": {
+    "mainStage": "Main Stage",
+    "qvevriStage": "Qvevri Stage",
+    "technoQvevri": "Techno Qvevri",
+    "ukrainianDay": "Ukrainian Day",
+    "ourMission": "Our Mission",
+    "jokerTicket": "Joker Ticket"
+  },
+  "mainStage": {
+    "title": "Main Stage",
+    "p1": "On the Main Stage, you can expect exciting surprises. At Tbilisi Style, DJs will have a unique DJ booth where well-known artists will showcase their skills and energize the space with a powerful vibe. In the background, you will see a 50-60 meter long vineyard wall, approximately 15 meters high, filled with hanging grape clusters. There will also be large screens and laser shows. Of course, everything will be executed at a European level with a Georgian style.",
+    "p2": "Musically, the Main Stage will bring together different genres - Techno, Melodic Techno, Peak-Time Techno, House, and Afro House, creating a different energy and atmosphere every day.",
+    "p3": "Every day, 6 DJs will perform on the Main Stage.",
+    "p4": "The Main Stage experience will be made even more special by the fact that each day one young and talented DJ will have the opportunity to perform alongside major artists. This will be a unique chance for the new generation to share the stage, gain experience, and collaborate with professional DJs.",
+    "p5": "The stage will also be equipped with moving screens, which will take on different shapes every day, creating a unique visual atmosphere and making each day visually distinctive."
+  },
+  "qvevriStage": {
+    "title": "Qvevri Stage",
+    "intro": "Qvevri Stage - Tbilisi Style 21 Festival",
+    "p1": "At the Tbilisi Style 21 festival, you will encounter a massive Qvevri-shaped structure. Since ancient times, Georgians have used qvevris for winemaking, a tradition that spans centuries and represents one of the most important parts of Georgian culture. The unique method of fermenting wine in qvevris has introduced Georgia to the world as one of the oldest and most distinguished homelands of winemaking art.",
+    "p2": "Now, you will have the opportunity to fully \"squeeze yourselves like grapes\" inside the giant qvevri, where techno-loving DJs will perform. Unlike the main stage, they will deliver a heavier, darker, and more industrial sound direction including hard techno, industrial techno, peak-time techno, and underground rave sounds, providing guests with maximum energy and intensity throughout the festival.",
+    "p3": "Inside the qvevri, the ceiling will feature the unique three Georgian alphabets. In the center of the stage, there will be a massive inverted triangular LED screen, creating a strong visual focal point for the entire space. Additionally, there will be two balconies for Joker and VIP zones. The total capacity of the qvevri will be 7,000 people."
+  },
+  "technoQvevri": {
+    "title": "TECHNO RAVE - QVEVRI",
+    "date": "September 11",
+    "eventName": "QVEVRI & TECHNO RAVE",
+    "p1": "We begin a new night inside the Qvevri.",
+    "p2": "This is not a lounge.",
+    "p3": "This is not soft techno.",
+    "p4": "This is unstoppable, heavy TECHNO RAVE.",
+    "p5": "After Tbilisi Style 21 and the Qvevri Festival, on September 11, 2027, we invite you into the Great Qvevri, where the music will not stop.",
+    "p6": "Leading European DJs will try to saturate the thick walls of the Qvevri with the energy of heavy and relentless techno.",
+    "p7": "This will be the first night when the Great Qvevri in Georgia turns completely red, and the people inside will feel like pressed grapes.",
+    "p8": "If you have never experienced true exhaustion while dancing - this is your night.",
+    "p9": "A unique night with European techno artists.",
+    "p10": "We welcome only those who are ready for pure energy on the dancefloor.",
+    "ticketNote": "To purchase tickets, visit the tickets section."
+  },
+  "mission": {
+    "title": "Mission & Vision",
+    "subtitle": "Tbilisi Style 21",
+    "p1": "Through Tbilisi Style, I want to unite Georgian culture with the modernity of today's music.",
+    "p2": "I want to show the world what Georgians are capable of when we create the right space and the right opportunities. We have the potential to create a festival that will make its mark on the world stage.",
+    "p3": "The Tbilisi Style festival will give many talented young people the chance to explore the club and festival world more deeply and fully express their talent.",
+    "p4": "Georgians have always been closely connected to music. A sense of rhythm, energy, and emotion comes naturally to us.",
+    "p5": "I believe that after Tbilisi Style, even more powerful DJs will emerge in Georgia - artists who will show the world Georgian potential and Georgian character.",
+    "p6": "My goal is to bring Tbilisi Style 21 to the global market and, through this path, contribute to the development of this industry in Georgia, which will inspire even greater interest among young people.",
+    "p7": "I want to show the world a festival created in Georgia, in the spirit of Tbilisi, with its own unique energy and character.",
+    "p8": "I look at the world: in France, Spain, Dubai, Egypt - festivals are created everywhere. Georgia possesses everything needed for an event of this scale: mountains, the sea, the unique atmosphere of Old Tbilisi, and easily accessible locations.",
+    "highlight": "I believe we have the potential to create a festival that will make its mark on the world stage.",
+    "signature": "Tbilisi Style 21"
+  },
+  "ukrainianDay": {
+    "title": "Ukrainian Day",
+    "dateLine": "28.08.2027 - Tbilisi Style 21",
+    "p1": "The second day of the Tbilisi Style 21 festival will be dedicated to Ukrainian Day. On this day, the Main Stage, Qvevri, and other central areas will be fully powered by the energy of Ukrainian DJs, creating a unique atmosphere.",
+    "p2": "Ukrainian representatives will open and close the festival, sharing their energy and showcasing their talent on a global stage.",
+    "p3": "If you have never experienced Ukrainian artists on a big stage, this is your opportunity to become part of it.",
+    "highlight": "Don't miss the Ukrainian vibe in Tbilisi.",
+    "p4": "The organization of Ukrainian Day is led by Aisha from Kyiv, a talented and dedicated young professional who is shaping the future of this project.",
+    "closing": "28.08.2027 - See you in Tbilisi for Ukrainian Day."
+  },
+  "jokerTicket": {
+    "body": "The Joker Ticket is a special category ticket for the Tbilisi Style 21 electronic music festival. The ticket gives its holder access to the Joker Zone.\nA person who purchases a Joker Ticket becomes an official \"Joker User\" of Tbilisi Style 21 and receives a special status.\nTbilisi Style 21 will have its own selected \"Joker DJ\" artist, who will be chosen according to the audience's wishes and engagement. Users can message us or tag us on social media and name their favorite DJ. The organization will definitely contact the selected artist and will try, based on the people's request, to officially name them the DJ Joker of Tbilisi Style 21. The artist will also receive a memorable gift from the festival and the Joker symbol.\nJust as Gotham had its own Joker in the world of Gotham City, Tbilisi Style 21 will also have its own chosen Joker, who at the very first festival will be supported by 5,000 \"Joker People.\" This number will grow every year, with 200-300 new Joker People added each season.\nThe Joker Ticket will be available under a promotional offer until November 30, 2026.\n\"Joker People\" will hold a status higher than VIP ticket holders, because they will receive: Discounts on all future Tbilisi Style 21 events\nSpecial Joker privileges and permanent access to the advantages of the Joker system\nThe Joker Card does not lose its validity at any future Tbilisi Style 21 festival. The more the number of Joker People grows, the more surprises and exclusive experiences will be added to the Tbilisi Style 21 community."
+  }
+}

@@ -3,15 +3,13 @@
 import Image from "next/image";
 import AboutImg from "@/public/images/secondImg_1920x1080.jpeg";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { navItems } from "../../components/navItems";
 import Link from "next/link";
 
-
-const slogan =
-  "STAND IN THE CENTRE OF THE WORLD WITH BIG STARS AND FEEL THEIR ENERGY";
-
 export default function AboutPage() {
   const [navOpen, setNavOpen] = useState(false);
+  const t = useTranslations();
 
   useEffect(() => {
     document.body.style.overflow = navOpen ? "hidden" : "auto";
@@ -49,7 +47,6 @@ export default function AboutPage() {
         }}
       >
         <div className="flex flex-col h-full overflow-y-auto px-8 pt-28 pb-8 relative">
-          
           <button
             onClick={() => setNavOpen(false)}
             className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center"
@@ -61,7 +58,7 @@ export default function AboutPage() {
           <nav className="flex flex-col flex-1 justify-center">
             {navItems.map((item, i) => (
               <a
-                key={item.label}
+                key={item.labelKey}
                 href="#"
                 onClick={() => setNavOpen(false)}
                 style={{
@@ -76,7 +73,7 @@ export default function AboutPage() {
                 }}
                 className="uppercase font-bold text-white hover:text-yellow-300 transition-all"
               >
-                {item.label}
+                {t(`nav.${item.labelKey}`)}
               </a>
             ))}
           </nav>
@@ -90,26 +87,25 @@ export default function AboutPage() {
             }}
             className="text-white/50 uppercase"
           >
-            {slogan}
+            {t("common.slogan")}
           </p>
 
           <a
             href="#"
             className="sm:hidden mt-6 text-center text-white border border-white/40 hover:border-yellow-300 hover:text-yellow-300 transition uppercase font-bold py-3"
           >
-            Buy Ticket
+            {t("common.buyTicket")}
           </a>
         </div>
       </div>
 
       <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-16 text-white uppercase">
-
           <div className="flex flex-col gap-10">
             <Link href="/dashboard/mainStage">
               <div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                  Main Stage
+                  {t("festival.mainStage")}
                 </p>
               </div>
             </Link>
@@ -117,7 +113,7 @@ export default function AboutPage() {
             <Link href="/dashboard/qvevriStage">
               <div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                  Qvevri Stage
+                  {t("festival.qvevriStage")}
                 </p>
               </div>
             </Link>
@@ -125,42 +121,45 @@ export default function AboutPage() {
             <Link href="/dashboard/technoQvevri">
               <div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                  Techno Qvevri
+                  {t("festival.technoQvevri")}
                 </p>
                 <p className="text-xs md:text-sm opacity-70 mt-1">
                   11.09.2027
                 </p>
               </div>
             </Link>
-
           </div>
 
           <div className="flex flex-col gap-10 md:items-end md:text-right">
-
             <Link href="/dashboard/ukrainianPage">
               <div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                  Ukrainian Day
+                  {t("festival.ukrainianDay")}
                 </p>
                 <p className="text-xs md:text-sm opacity-70 mt-1">
-                  20.08.2027
+                  28.08.27
                 </p>
               </div>
             </Link>
 
-             <Link href="/dashboard/mission">
+            <Link href="/dashboard/mission">
               <div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
-                  Our Mission
+                  {t("festival.ourMission")}
                 </p>
               </div>
-             </Link>
+            </Link>
 
+            <Link href="/dashboard/jokerTicket">
+              <div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold cursor-pointer transition-all duration-200 hover:text-yellow-300 hover:scale-[1.03]">
+                  {t("festival.jokerTicket")}
+                </p>
+              </div>
+            </Link>
           </div>
-
         </div>
       </div>
-
-      </main>
+    </main>
   );
 }

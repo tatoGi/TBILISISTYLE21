@@ -1,45 +1,63 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { navItems } from "./navItems";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 
+type FestivalMenuProps = {
+  navOpen: boolean;
+  setNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const slogan =
-  "STAND IN THE CENTRE OF THE WORLD WITH BIG STARS AND FEEL THEIR ENERGY";
+export default function FestivalMenu({ navOpen, setNavOpen }: FestivalMenuProps) {
+  const t = useTranslations();
 
-export default function FestivalMenu({ navOpen, setNavOpen }: any) {
   return (
     <>
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-5 py-5">
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between gap-4 px-5 py-5">
 
-        <Link href="/dashboard/festival">
-          <span className="text-white text-3xl sm:text-4xl font-extrabold uppercase hidden sm:block tracking-wider">
+        <Link
+          href="/dashboard/festival"
+          className="flex shrink-0 items-center"
+          aria-label="Tbilisi Style 21"
+        >
+          <span className="max-w-[44vw] text-[clamp(0.95rem,4.5vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:max-w-none sm:text-4xl sm:tracking-wider">
             Tbilisi Style 21
           </span>
         </Link>
 
-        <button
-          onClick={() => setNavOpen(!navOpen)}
-          className="relative z-50 w-9 h-9 flex flex-col justify-center items-center"
-        >
-          <span
-            className="w-6 h-[2px] bg-white absolute"
-            style={{
-              transform: navOpen ? "rotate(45deg)" : "translateY(-7px)",
-            }}
-          />
-          <span
-            className="w-6 h-[2px] bg-white absolute"
-            style={{ opacity: navOpen ? 0 : 1 }}
-          />
-          <span
-            className="w-6 h-[2px] bg-white absolute"
-            style={{
-              transform: navOpen ? "rotate(-45deg)" : "translateY(7px)",
-            }}
-          />
-        </button>
+        <div className="ml-auto flex items-center gap-3">
+          <Link
+            href="/dashboard/jokerTicket"
+            className="rounded-full border border-yellow-300/60 bg-yellow-300 px-4 py-2 text-xs font-extrabold uppercase tracking-normal text-black shadow-[0_0_24px_rgba(253,224,71,0.28)] transition-all duration-200 hover:bg-white hover:border-white"
+          >
+            {t("common.buyTickets")}
+          </Link>
+
+          <button
+            onClick={() => setNavOpen(!navOpen)}
+            className="relative z-50 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/25 backdrop-blur-md"
+          >
+            <span
+              className="absolute h-[2px] w-5 bg-white transition-transform duration-200"
+              style={{
+                transform: navOpen ? "rotate(45deg)" : "translateY(-6px)",
+              }}
+            />
+            <span
+              className="absolute h-[2px] w-5 bg-white transition-opacity duration-200"
+              style={{ opacity: navOpen ? 0 : 1 }}
+            />
+            <span
+              className="absolute h-[2px] w-5 bg-white transition-transform duration-200"
+              style={{
+                transform: navOpen ? "rotate(-45deg)" : "translateY(6px)",
+              }}
+            />
+          </button>
+        </div>
       </div>
 
       <div
@@ -68,13 +86,20 @@ export default function FestivalMenu({ navOpen, setNavOpen }: any) {
             <span className="w-6 h-[2px] bg-white -rotate-45 absolute" />
           </button>
 
+          <div className="mb-8">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/45">
+              {t("common.language")}
+            </p>
+            <LanguageSwitcher />
+          </div>
+
           <nav className="flex flex-col flex-1 justify-center gap-0">
             {navItems.map((item, i) => (
-              <a
-                key={item.label}
-                href="#"
+              <Link
+                key={item.labelKey}
+                href={item.href}
                 onClick={() => setNavOpen(false)}
-                className="uppercase font-bold text-white hover:text-yellow-300 hover:pl-2 transition-all duration-200"
+                className="uppercase font-bold text-white hover:text-yellow-300 hover:pl-2 transition-all duration-200 block"
                 style={{
                   fontFamily: "'Courier New', monospace",
                   letterSpacing: "0.1em",
@@ -86,15 +111,15 @@ export default function FestivalMenu({ navOpen, setNavOpen }: any) {
                       : "none",
                 }}
               >
-                {item.label}
-              </a>
+                {t(`nav.${item.labelKey}`)}
+              </Link>
             ))}
           </nav>
 
           <div className="w-full h-[1px] bg-white/20 my-4" />
 
           <p className="text-white/50 uppercase text-xs leading-6">
-            {slogan}
+            {t("common.slogan")}
           </p>
         </div>
       </div>
