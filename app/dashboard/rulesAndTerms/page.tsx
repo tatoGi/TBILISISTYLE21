@@ -8,7 +8,7 @@ export default async function RulesPage() {
       style={{
         maxWidth: "900px",
         margin: "0 auto",
-        padding: "100px 40px",
+        padding: "140px 40px",
         lineHeight: "1.8",
       }}
     >

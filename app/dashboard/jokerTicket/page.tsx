@@ -7,7 +7,7 @@ export default async function JokerTicketPage() {
   const t = await getTranslations("jokerTicket");
 
   return (
-    <main style={{ maxWidth: "900px", margin: "0 auto", padding: "40px" }}>
+    <main style={{ maxWidth: "900px", margin: "0 auto", padding: "140px 40px" }}>
       <div style={{ marginBottom: "40px" }}>
         <Image
           src={joker1}

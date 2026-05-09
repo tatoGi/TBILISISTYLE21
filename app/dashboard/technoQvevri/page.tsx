@@ -6,7 +6,7 @@ export default async function TechnoRavePage() {
   const t = await getTranslations("technoQvevri");
 
   return (
-    <main className="w-full min-h-screen bg-black text-white">
+    <main className="w-full min-h-screen bg-black text-white pt-28">
       <section className="max-w-4xl mx-auto px-6 py-16 flex flex-col gap-12 items-center">
         <div className="text-center flex flex-col gap-2">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-[0.2em]">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { navItems } from "./navItems";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -13,10 +14,12 @@ type FestivalMenuProps = {
 
 export default function FestivalMenu({ navOpen, setNavOpen }: FestivalMenuProps) {
   const t = useTranslations();
+  const pathname = usePathname();
+  const isFestivalPage = pathname === "/dashboard/festival";
 
   return (
     <>
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between gap-4 px-5 py-5">
+      <div className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-4 px-5 py-5 ${isFestivalPage ? 'bg-transparent' : 'bg-black/95 backdrop-blur-md'}`}>
 
         <Link
           href="/dashboard/festival"
@@ -30,7 +33,7 @@ export default function FestivalMenu({ navOpen, setNavOpen }: FestivalMenuProps)
 
         <div className="ml-auto flex items-center gap-3">
           <Link
-            href="/dashboard/jokerTicket"
+            href="/dashboard/tickets"
             className="rounded-full border border-yellow-300/60 bg-yellow-300 px-4 py-2 text-xs font-extrabold uppercase tracking-normal text-black shadow-[0_0_24px_rgba(253,224,71,0.28)] transition-all duration-200 hover:bg-white hover:border-white"
           >
             {t("common.buyTickets")}

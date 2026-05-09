@@ -6,7 +6,7 @@ export default async function MissionVisionPage() {
   const t = await getTranslations("mission");
 
   return (
-    <main className="w-full min-h-screen bg-black text-white">
+    <main className="w-full min-h-screen bg-black text-white pt-28">
       <section className="max-w-5xl mx-auto px-6 py-16 flex flex-col gap-14">
         <div className="text-center flex flex-col gap-2">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold uppercase tracking-[0.2em]">

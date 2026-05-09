@@ -14,7 +14,7 @@ export default async function LineUpPage() {
       style={{
         maxWidth: "1100px",
         margin: "0 auto",
-        padding: "100px 40px 40px",
+        padding: "140px 40px 40px",
       }}
     >
       <section style={{ marginBottom: "80px" }}>
