@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('❌ API Error:', error)
     return NextResponse.json(
-      { error: 'სერვერის შეცდომა', details: error.message },
+      { error: 'სერვერის შეცდომა', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
