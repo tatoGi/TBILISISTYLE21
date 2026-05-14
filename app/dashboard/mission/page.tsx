@@ -37,8 +37,6 @@ export default async function MissionVisionPage() {
             <p>{t("p5")}</p>
             <p>{t("p6")}</p>
             <p>{t("p7")}</p>
-            <p>{t("p8")}</p>
-            <p className="text-yellow-300 font-semibold">{t("highlight")}</p>
             <p className="text-white font-bold mt-4">{t("signature")}</p>
           </div>
         </div>

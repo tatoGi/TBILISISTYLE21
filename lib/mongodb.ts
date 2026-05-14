@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, Collection } from "mongodb";
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -27,4 +27,16 @@ function getClientPromise() {
 export async function getDb() {
   const client = await getClientPromise();
   return client.db(process.env.MONGODB_DB || "tbilisistyle21");
+}
+
+// 👇 დაამატე ეს ფუნქციები
+
+export async function getTicketsCollection(): Promise<Collection> {
+  const db = await getDb();
+  return db.collection("tickets");
+}
+
+export async function getEventsCollection(): Promise<Collection> {
+  const db = await getDb();
+  return db.collection("events");
 }
