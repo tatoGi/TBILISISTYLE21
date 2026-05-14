@@ -95,11 +95,10 @@ export async function generateTicketPDF(data: TicketData): Promise<Buffer> {
     color: rgb(0.5, 0.5, 0.5),
   })
 
-  // QR Code
-  const qrImage = await pdfDoc.embedPng(data.qrCodeDataUrl.split(',')[1], {
-    width: 140,
-    height: 140,
-  })
+  const qrImage = await pdfDoc.embedPng(
+  data.qrCodeDataUrl.split(',')[1]
+)
+
   page.drawImage(qrImage, {
     x: 400,
     y: 270,
