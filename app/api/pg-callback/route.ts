@@ -1,72 +1,87 @@
-// app/api/pg-webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { getTicketsCollection } from '@/lib/mongodb'  // მხოლოდ tickets
+import { getTicketsCollection } from '@/lib/mongodb'
 import { getOrderDetails } from '@/lib/pgClient'
 import { generateTicketPDF } from '@/lib/pdf'
 import { sendTicketEmail } from '@/lib/email'
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams
-  const id = searchParams.get('id')
-  const password = searchParams.get('password')
+  const { searchParams } = req.nextUrl
+  
+  const id = searchParams.get('ID') || searchParams.get('id')
+  const status = searchParams.get('STATUS') || searchParams.get('status')
 
-  if (!id || !password) {
+  console.log('📥 PG Callback received:', { id, status })
+
+  if (!id) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/buy?error=invalid_callback`
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=invalid_callback`
     )
   }
 
-  // Get order details from PG
-  const orderDetails = await getOrderDetails(parseInt(id), password)
-  console.log('📥 Order details:', orderDetails)
+  try {
+    const ticketsCollection = await getTicketsCollection()
+    
+    // 👇 password DB-დან ამოიღე
+    const ticket = await ticketsCollection.findOne({ pgOrderId: parseInt(id) })
 
-  const ticketsCollection = await getTicketsCollection()
+    if (!ticket) {
+      console.log('❌ Ticket not found for pgOrderId:', id)
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=ticket_not_found`
+      )
+    }
 
-  // Find ticket in MongoDB
-  const ticket = await ticketsCollection.findOne({ pgOrderId: parseInt(id) })
+    // 👇 DB-ში შენახული password გამოიყენე
+    const orderDetails = await getOrderDetails(parseInt(id), ticket.pgPassword)
+    console.log('📋 Order details:', orderDetails)
 
-  if (!ticket) {
-    console.log('❌ Ticket not found for pgOrderId:', id)
+    const isPaid =
+      orderDetails.order?.status === 'Paid' ||
+      orderDetails.order?.status === 'Completed' ||
+      orderDetails.order?.status === 'FullyPaid' ||
+      status === 'FullyPaid' ||
+      status === 'Paid'
+
+    console.log('💰 isPaid:', isPaid, '| DB status:', ticket.status)
+
+    if (isPaid && ticket.status === 'pending') {
+      await ticketsCollection.updateOne(
+        { id: ticket.id },
+        { $set: { status: 'paid', paidAt: new Date() } }
+      )
+
+      try {
+        const pdfBuffer = await generateTicketPDF({
+          id: ticket.id,
+          name: ticket.name,
+          surname: ticket.surname,
+          personalNumber: ticket.personalNumber,
+          eventName: ticket.eventName || 'Event',
+          eventDate: ticket.eventDate || new Date(),
+          amount: ticket.amount,
+          currency: 'GEL',
+          qrCodeDataUrl: ticket.qrCode,
+        })
+
+        await sendTicketEmail(ticket.email, ticket.name, pdfBuffer, ticket.id)
+        console.log('📧 Email sent to:', ticket.email)
+      } catch (emailError) {
+        console.error('❌ Email error:', emailError)
+      }
+
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/success?ticketId=${ticket.id}`
+      )
+    }
+
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/buy?error=ticket_not_found`
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/fail?orderId=${id}`
+    )
+
+  } catch (error) {
+    console.error('❌ Callback error:', error)
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=server_error`
     )
   }
-
-  // Check payment status
-  const isPaid =
-    orderDetails.order?.status === 'Paid' ||
-    orderDetails.order?.status === 'Completed'
-
-  console.log('💰 Payment status:', isPaid ? 'Paid' : 'Not paid', orderDetails.order?.status)
-
-  if (isPaid && ticket.status === 'pending') {
-    // Update ticket status
-    await ticketsCollection.updateOne(
-      { id: ticket.id },
-      { $set: { status: 'paid', paidAt: new Date() } }
-    )
-    console.log('✅ Ticket status updated to paid')
-
-    // Generate PDF
-    const pdfBuffer = await generateTicketPDF({
-      id: ticket.id,
-      name: ticket.name,
-      surname: ticket.surname,
-      personalNumber: ticket.personalNumber,
-      eventName: ticket.eventName || 'Event',
-      eventDate: ticket.eventDate || new Date(),
-      amount: ticket.amount,
-      currency: 'GEL',
-      qrCodeDataUrl: ticket.qrCode,
-    })
-
-    // Send email
-    await sendTicketEmail(ticket.email, ticket.name, pdfBuffer, ticket.id)
-    console.log('📧 Email sent to:', ticket.email)
-  }
-
-  // Redirect to success page
-  return NextResponse.redirect(
-    `${process.env.NEXT_PUBLIC_APP_URL}/success?ticketId=${ticket.id}`
-  )
 }

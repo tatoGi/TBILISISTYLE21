@@ -8,21 +8,16 @@ import { ObjectId } from 'mongodb'
 export async function POST(req: NextRequest) {
   try {
     console.log('🚀 API called: /api/create-order')
-    
+
     const body = await req.json()
-    console.log('📦 Request body:', body)
-    
-    const { name, surname, personalNumber, email, ticketId, amount, title } = body
+    const { name, surname, personalNumber, email, ticketId, amount } = body
 
     const ticketsCollection = await getTicketsCollection()
-    console.log('✅ Connected to MongoDB')
 
-    // Validate personal number limit
     const paidTicketsCount = await ticketsCollection.countDocuments({
-      personalNumber: personalNumber,
+      personalNumber,
       status: 'paid',
     })
-    console.log(`📊 User ${personalNumber} has ${paidTicketsCount} paid tickets`)
 
     if (paidTicketsCount >= 3) {
       return NextResponse.json(
@@ -31,39 +26,24 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Search by ObjectId
     let existingTicket = null
-    
-    console.log(`🔍 Searching for ticket with ID: ${ticketId}`)
-    
     if (ObjectId.isValid(ticketId)) {
-      console.log('✅ Valid ObjectId, searching by _id')
       existingTicket = await ticketsCollection.findOne({ _id: new ObjectId(ticketId) })
     } else {
-      console.log('❌ Invalid ObjectId, searching by id field')
       existingTicket = await ticketsCollection.findOne({ id: ticketId })
     }
-    
-    if (!existingTicket) {
-      console.log('❌ Ticket not found!')
-      return NextResponse.json({ 
-        error: 'ბილეთი არ მოიძებნა',
-        searchedId: ticketId 
-      }, { status: 404 })
-    }
-    
-    console.log('✅ Ticket found:', { id: existingTicket._id, title: existingTicket.title, quantity: existingTicket.quantity })
 
-    // Check quantity
+    if (!existingTicket) {
+      return NextResponse.json({ error: 'ბილეთი არ მოიძებნა' }, { status: 404 })
+    }
+
     if (existingTicket.quantity <= 0) {
       return NextResponse.json({ error: 'ბილეთები გაყიდულია' }, { status: 400 })
     }
 
-    // Get client IP
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
     const userAgent = req.headers.get('user-agent') || ''
 
-    // Build Create Order request for PG
     const pgOrderBody = {
       order: {
         typeRid: process.env.PG_TEST_TYPE_RID,
@@ -71,50 +51,45 @@ export async function POST(req: NextRequest) {
         currency: 'GEL',
         description: `${existingTicket.title} - ${name} ${surname}`,
         language: 'ka',
-        hppRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-webhook`,
+        hppRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-callback`,
         initiationEnvKind: 'Browser',
         consumerDevice: {
           browser: {
             javaEnabled: false,
             jsEnabled: true,
             acceptHeader: 'application/json',
-            ip: ip,
+            ip,
             colorDepth: '24',
             screenW: '1920',
             screenH: '1080',
             tzOffset: '-240',
             language: 'ka-GE',
-            userAgent: userAgent,
+            userAgent,
           },
         },
       },
     }
-    
-    console.log('📤 Sending order to PG:', JSON.stringify(pgOrderBody, null, 2))
 
     const pgResponse = await callPGOrder(pgOrderBody)
     console.log('📥 PG Response:', pgResponse)
 
-    if (!pgResponse.order || !pgResponse.order.id) {
-      console.error('PG Error:', pgResponse)
+    if (!pgResponse.order?.id) {
       return NextResponse.json(
         { error: 'გადახდის სისტემასთან კავშირის შეცდომა', details: pgResponse },
         { status: 500 }
       )
     }
 
-    // Generate unique ticket ID for this purchase
     const newTicketId = uuidv4().slice(0, 8).toUpperCase()
     const qrData = generateTicketQRData(newTicketId, personalNumber, ticketId)
     const qrCodeDataUrl = await generateQRCode(qrData)
 
-    // Save purchased ticket
-    const newTicket = {
+    await ticketsCollection.insertOne({
       id: newTicketId,
-      personalNumber: personalNumber,
-      email: email,
-      name: name,
-      surname: surname,
+      personalNumber,
+      email,
+      name,
+      surname,
       pgOrderId: pgResponse.order.id,
       pgPassword: pgResponse.order.password,
       amount: parseFloat(amount),
@@ -126,20 +101,17 @@ export async function POST(req: NextRequest) {
       eventDate: existingTicket.eventDate,
       location: existingTicket.location,
       createdAt: new Date(),
-    }
-    
-    console.log('💾 Saving ticket to DB:', newTicket)
-    await ticketsCollection.insertOne(newTicket)
-    console.log('✅ Ticket saved successfully')
+    })
+
+    const redirectUrl = `${pgResponse.order.hppUrl}?id=${pgResponse.order.id}&password=${pgResponse.order.password}`
 
     return NextResponse.json({
       success: true,
-      redirectUrl: pgResponse.order.hppUrl,
+      redirectUrl,
       orderId: pgResponse.order.id,
-      password: pgResponse.order.password,
       ticketId: newTicketId,
     })
-    
+
   } catch (error) {
     console.error('❌ API Error:', error)
     return NextResponse.json(
