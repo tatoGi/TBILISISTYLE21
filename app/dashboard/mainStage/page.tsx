@@ -1,6 +1,6 @@
 import Image from "next/image";
-import MainStage1 from "@/public/images/mainStage1.jpeg";
-import MainStage2 from "@/public/images/mainStage2.jpeg";
+import MainStage1 from "@/public/images/mainstage11.jpeg";
+import MainStage2 from "@/public/images/mainstage22.jpeg";
 import { getTranslations } from "next-intl/server";
 
 export default async function MainStagePage() {
