@@ -2,22 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
+import { TicketInfo } from './scan.type';
 
-interface TicketInfo {
-  valid: boolean
-  ticket?: {
-    id: string
-    name: string
-    surname: string
-    personalNumber: string
-    eventName: string
-    eventDate: string
-    amount?: number
-    paidAt: string
-  }
-  error?: string
-  scannedAt?: string
-}
+
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<TicketInfo | null>(null)
@@ -123,9 +110,13 @@ export default function ScanPage() {
             <div className="min-h-[360px] border border-white/10 bg-black p-3">
               {scanning ? (
                 <div
-                  id="qr-reader"
-                  className="overflow-hidden bg-white text-black [&_button]:border [&_button]:border-black/20 [&_button]:bg-black [&_button]:px-3 [&_button]:py-2 [&_button]:text-sm [&_button]:font-bold [&_button]:uppercase [&_button]:text-white [&_select]:border [&_select]:border-black/20 [&_select]:px-2 [&_select]:py-2"
-                />
+                    id="qr-reader"
+                    className="overflow-hidden [&_button]:border [&_button]:border-black/20 [&_button]:bg-black [&_button]:px-3 [&_button]:py-2 [&_button]:text-sm [&_button]:font-bold [&_button]:uppercase [&_button]:text-white [&_select]:border [&_select]:border-black/20 [&_select]:px-2 [&_select]:py-2
+                      [&_#qr-reader__dashboard]:bg-black
+                      [&_#qr-reader__dashboard]:text-white
+                      [&_#qr-reader__header_message]:text-white/60
+                      [&_#qr-reader__status_span]:text-white/60"
+                  />
               ) : (
                 <div className="flex min-h-[330px] items-center justify-center border border-white/10 bg-white/[0.02] text-center">
                   <div>

@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib"
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
 
 interface TicketData {
   id: string
@@ -39,7 +39,7 @@ export async function generateTicketPDF(
 
 
   const bgBytes = await fetch(
-    "http://localhost:3000/images/person2.jpeg"
+    `${process.env.NEXT_PUBLIC_APP_URL}/images/person2.jpeg`,
   ).then(res => res.arrayBuffer())
 
   const bgImage = await pdfDoc.embedJpg(bgBytes)
