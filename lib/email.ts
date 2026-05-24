@@ -15,9 +15,9 @@ export async function sendTicketEmail(
   ticketId: string
 ) {
   await transporter.sendMail({
-    from: `"Ticket Shop" <${process.env.GMAIL_USER}>`,
+    from: `"TbilisiStyle21" <${process.env.GMAIL_USER}>`,
     to,
-    subject: `🎫 Your Ticket #${ticketId}`,
+    subject: `Your Ticket #${ticketId}`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -26,7 +26,7 @@ export async function sendTicketEmail(
       </head>
       <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <h1 style="color: #2c3e50; text-align: center;">🎫 Thank You!</h1>
+          <h1 style="color: #2c3e50; text-align: center;">Thank You!</h1>
           <p style="font-size: 16px; color: #333;">Dear <strong>${name}</strong>,</p>
           <p style="font-size: 16px; color: #333;">Your ticket purchase has been completed successfully.</p>
           
@@ -43,7 +43,7 @@ export async function sendTicketEmail(
           </p>
           
           <p style="font-size: 12px; color: #95a5a6; text-align: center; margin-top: 20px;">
-            © ${new Date().getFullYear()} Ticket Shop
+            © ${new Date().getFullYear()} TbilisiStyle21
           </p>
         </div>
       </body>

@@ -54,7 +54,6 @@ export async function POST(
     const ticketsCollection = db.collection("tickets");
     const purchasesCollection = db.collection("purchases");
 
-    // Get the ticket
     const ticket = await ticketsCollection.findOne({ _id: new ObjectId(id) });
     if (!ticket) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
@@ -64,20 +63,18 @@ export async function POST(
       return NextResponse.json({ error: "Not enough tickets available" }, { status: 400 });
     }
 
-    // Create purchase record
     const now = new Date().toISOString();
     const purchase = {
       ticketId: id,
       ...purchaseData,
       totalPrice: ticket.priceGel * purchaseData.quantity,
-      status: "pending", // pending, paid, cancelled
+      status: "pending", 
       createdAt: now,
       updatedAt: now,
     };
 
     const result = await purchasesCollection.insertOne(purchase);
 
-    // Update ticket quantity
     await ticketsCollection.updateOne(
       { _id: new ObjectId(id) },
       {

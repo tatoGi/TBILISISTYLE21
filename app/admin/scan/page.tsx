@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
+
 interface TicketInfo {
   valid: boolean
   ticket?: {
@@ -11,14 +12,17 @@ interface TicketInfo {
     personalNumber: string
     eventName: string
     eventDate: string
+    amount?: number
     paidAt: string
   }
   error?: string
+  scannedAt?: string
 }
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<TicketInfo | null>(null)
   const [scanning, setScanning] = useState(true)
+  const [scannerKey, setScannerKey] = useState(0)
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner(
@@ -36,76 +40,204 @@ export default function ScanPage() {
         scanner.pause()
         setScanning(false)
 
-        const res = await fetch('/api/validate-ticket', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ qrData: decodedText }),
-        })
+        try {
+          const res = await fetch('/api/validate-ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ qrData: decodedText }),
+          })
 
-        const data = await res.json()
-        setScanResult(data)
+          const data = (await res.json()) as TicketInfo
+          setScanResult(data)
+        } catch {
+          setScanResult({
+            valid: false,
+            error: 'Ticket verification failed. Please try again.',
+          })
+        }
       },
-      (error) => {
-        console.error('QR Scan Error:', error)
+      () => {
+        // The scanner fires often while searching; keep the UI quiet.
       }
     )
 
     return () => {
-      scanner.clear()
+      scanner.clear().catch(() => undefined)
     }
-  }, [])
+  }, [scannerKey])
+
+  function startNewScan() {
+    setScanResult(null)
+    setScanning(true)
+    setScannerKey((key) => key + 1)
+  }
+
+  const statusLabel = scanning
+    ? 'Camera active'
+    : scanResult?.valid
+      ? 'Approved'
+      : 'Rejected'
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-6">🎫 QR სკანერი</h1>
-
-        {scanning && (
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div id="qr-reader" className="w-full"></div>
-            <p className="text-center text-gray-500 mt-4">
-              მიმართეთ კამერა QR კოდს
+    <main className="min-h-screen bg-black px-5 py-8 text-white md:px-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <header className="flex flex-col gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
+              Entrance Control
             </p>
+            <h1 className="mt-2 text-3xl font-black uppercase md:text-5xl">
+              Ticket Scanner
+            </h1>
           </div>
-        )}
+          <div className="flex items-center gap-3 self-start border border-white/15 bg-white/[0.04] px-4 py-3 md:self-auto">
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                scanResult?.valid
+                  ? 'bg-emerald-400'
+                  : scanning
+                    ? 'bg-yellow-300'
+                    : 'bg-red-400'
+              }`}
+            />
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/70">
+              {statusLabel}
+            </span>
+          </div>
+        </header>
 
-        {scanResult && (
-          <div className={`mt-6 p-6 rounded-xl shadow-md ${
-            scanResult.valid ? 'bg-green-100' : 'bg-red-100'
-          }`}>
-            {scanResult.valid && scanResult.ticket ? (
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <div className="border border-white/10 bg-white/[0.03] p-4 md:p-6">
+            <div className="mb-4 flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-green-800 mb-4">
-                  ✅ ბილეთი ვალიდურია
-                </h2>
-                <div className="space-y-2">
-                  <p><strong>ID:</strong> {scanResult.ticket.id}</p>
-                  <p><strong>სახელი:</strong> {scanResult.ticket.name} {scanResult.ticket.surname}</p>
-                  <p><strong>პირადი ნომერი:</strong> {scanResult.ticket.personalNumber}</p>
-                  <p><strong>ღონისძიება:</strong> {scanResult.ticket.eventName}</p>
-                  <p><strong>თარიღი:</strong> {new Date(scanResult.ticket.eventDate).toLocaleString()}</p>
-                  <p><strong>გადახდილია:</strong> {new Date(scanResult.ticket.paidAt).toLocaleString()}</p>
+                <h2 className="text-lg font-black uppercase">Live Camera</h2>
+                <p className="mt-1 text-sm text-white/55">
+                  Point the camera at the QR code on the ticket.
+                </p>
+              </div>
+              <span className="border border-yellow-300/40 px-3 py-2 text-xs font-black uppercase text-yellow-300">
+                Scan
+              </span>
+            </div>
+
+            <div className="min-h-[360px] border border-white/10 bg-black p-3">
+              {scanning ? (
+                <div
+                  id="qr-reader"
+                  className="overflow-hidden bg-white text-black [&_button]:border [&_button]:border-black/20 [&_button]:bg-black [&_button]:px-3 [&_button]:py-2 [&_button]:text-sm [&_button]:font-bold [&_button]:uppercase [&_button]:text-white [&_select]:border [&_select]:border-black/20 [&_select]:px-2 [&_select]:py-2"
+                />
+              ) : (
+                <div className="flex min-h-[330px] items-center justify-center border border-white/10 bg-white/[0.02] text-center">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/45">
+                      Scanner paused
+                    </p>
+                    <p className="mt-2 text-sm text-white/65">
+                      Review the result or start a new scan.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <aside className="border border-white/10 bg-white/[0.03] p-5 md:p-6">
+            {scanResult && scanResult.valid && scanResult.ticket ? (
+              <div className="grid gap-5">
+                <div className="border border-emerald-400/30 bg-emerald-400/10 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">
+                    Valid Ticket
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black uppercase text-white">
+                    Entry Approved
+                  </h2>
+                </div>
+
+                <dl className="grid gap-3 text-sm">
+                  <TicketField label="Ticket ID" value={scanResult.ticket.id} />
+                  <TicketField
+                    label="Holder"
+                    value={`${scanResult.ticket.name} ${scanResult.ticket.surname}`}
+                  />
+                  <TicketField
+                    label="Personal Number"
+                    value={scanResult.ticket.personalNumber}
+                  />
+                  <TicketField label="Event" value={scanResult.ticket.eventName} />
+                  <TicketField
+                    label="Event Date"
+                    value={new Date(scanResult.ticket.eventDate).toLocaleString('en-US')}
+                  />
+                  <TicketField
+                    label="Paid At"
+                    value={new Date(scanResult.ticket.paidAt).toLocaleString('en-US')}
+                  />
+                </dl>
+              </div>
+            ) : scanResult ? (
+              <div className="grid gap-5">
+                <div className="border border-red-400/30 bg-red-500/10 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-300">
+                    Invalid Ticket
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black uppercase text-white">
+                    Entry Rejected
+                  </h2>
+                </div>
+
+                <div className="border border-white/10 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">
+                    Reason
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-white/80">
+                    {scanResult.error}
+                  </p>
+                  {scanResult.scannedAt && (
+                    <p className="mt-3 text-sm text-red-200">
+                      Used at:{' '}
+                      {new Date(scanResult.scannedAt).toLocaleString('en-US')}
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
-              <div>
-                <h2 className="text-xl font-bold text-red-800 mb-4">❌ {scanResult.error}</h2>
+              <div className="flex min-h-[360px] items-center border border-white/10 p-5">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/45">
+                    Waiting For Scan
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black uppercase">
+                    No Ticket Checked
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-white/60">
+                    Scan a ticket QR code to verify payment status and prevent duplicate entry.
+                  </p>
+                </div>
               </div>
             )}
 
-            <button
-              onClick={() => {
-                setScanResult(null)
-                setScanning(true)
-                window.location.reload()
-              }}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              გადატვირთვა
-            </button>
-          </div>
-        )}
+            {scanResult && (
+              <button
+                onClick={startNewScan}
+                className="mt-5 w-full bg-yellow-300 px-5 py-4 text-xs font-black uppercase text-black transition hover:bg-white"
+              >
+                New Scan
+              </button>
+            )}
+          </aside>
+        </section>
       </div>
+    </main>
+  )
+}
+
+function TicketField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border border-white/10 p-3">
+      <dt className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">
+        {label}
+      </dt>
+      <dd className="mt-1 break-words font-semibold text-white">{value}</dd>
     </div>
   )
 }

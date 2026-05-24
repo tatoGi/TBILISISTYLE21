@@ -1,52 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTicketsCollection } from '@/lib/mongodb'
 
-export async function POST(req: NextRequest) {
-  const { qrData } = await req.json()
+type TicketQrPayload = {
+  ticketId?: unknown
+  personalNumber?: unknown
+  eventId?: unknown
+}
 
-  if (!qrData) {
-    return NextResponse.json({ error: 'QR მონაცემები არასწორია' }, { status: 400 })
+export async function POST(req: NextRequest) {
+  let qrData: unknown
+
+  try {
+    const body = await req.json()
+    qrData = body.qrData
+  } catch {
+    return NextResponse.json({ valid: false, error: 'Invalid request.' }, { status: 400 })
   }
 
-  let parsedData
+  if (!qrData || typeof qrData !== 'string') {
+    return NextResponse.json({ valid: false, error: 'Invalid QR data.' }, { status: 400 })
+  }
+
+  let parsedData: TicketQrPayload
+
   try {
     parsedData = JSON.parse(qrData)
   } catch {
-    return NextResponse.json({ error: 'QR კოდი არასწორია' }, { status: 400 })
+    return NextResponse.json({ valid: false, error: 'Invalid QR code.' }, { status: 400 })
   }
 
-  const { ticketId, personalNumber } = parsedData
+  const { ticketId, personalNumber, eventId } = parsedData
+
+  if (typeof ticketId !== 'string' || typeof personalNumber !== 'string') {
+    return NextResponse.json({ valid: false, error: 'Ticket data is missing from the QR code.' }, { status: 400 })
+  }
 
   const ticketsCollection = await getTicketsCollection()
-  const ticket = await ticketsCollection.findOne({ id: ticketId })
+  const ticket = await ticketsCollection.findOne({
+    id: ticketId,
+    personalNumber,
+    ...(typeof eventId === 'string' ? { originalTicketId: eventId } : {}),
+  })
 
   if (!ticket) {
-    return NextResponse.json({ valid: false, error: 'ბილეთი არ მოიძებნა' }, { status: 404 })
+    return NextResponse.json({ valid: false, error: 'Ticket was not found in the database.' }, { status: 404 })
   }
 
   if (ticket.status !== 'paid') {
-    return NextResponse.json({ 
-      valid: false, 
-      error: ticket.status === 'pending' ? 'გადახდა დასრულებული არ არის' : 'ბილეთი გაუქმებულია' 
+    return NextResponse.json({
+      valid: false,
+      error: ticket.status === 'pending' ? 'Payment is not completed.' : 'Ticket is cancelled.',
     })
   }
 
-  // Check if already scanned (add scanned flag if needed)
-  const isScanned = ticket.scannedAt ? true : false
-  
-  if (isScanned) {
-    return NextResponse.json({ 
-      valid: false, 
-      error: 'ბილეთი უკვე გამოყენებულია',
-      scannedAt: ticket.scannedAt 
+  if (ticket.scannedAt) {
+    return NextResponse.json({
+      valid: false,
+      error: 'Ticket has already been used.',
+      scannedAt: ticket.scannedAt,
     })
   }
 
-  // Mark as scanned
-  await ticketsCollection.updateOne(
-    { id: ticket.id },
+  const scanResult = await ticketsCollection.updateOne(
+    { id: ticket.id, scannedAt: { $exists: false } },
     { $set: { scannedAt: new Date(), scannedBy: 'admin' } }
   )
+
+  if (scanResult.modifiedCount !== 1) {
+    return NextResponse.json({
+      valid: false,
+      error: 'Ticket has already been used.',
+    })
+  }
 
   return NextResponse.json({
     valid: true,

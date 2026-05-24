@@ -25,7 +25,7 @@ export default function SuccessPage() {
         </p>
 
         <Link
-          href="/"
+          href="/dashboard/tickets"
           className="w-full inline-flex items-center justify-center bg-emerald-400 text-black font-bold py-4 rounded-2xl hover:scale-[1.02] transition duration-300 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
         >
           BACK TO HOME

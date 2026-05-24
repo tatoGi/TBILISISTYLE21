@@ -7,7 +7,7 @@ import { ObjectId } from 'mongodb'
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('🚀 API called: /api/create-order')
+    console.log('API called: /api/create-order')
 
     const body = await req.json()
     const { name, surname, personalNumber, email, ticketId, amount } = body
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     const pgResponse = await callPGOrder(pgOrderBody)
-    console.log('📥 PG Response:', pgResponse)
+    console.log('PG Response:', pgResponse)
 
     if (!pgResponse.order?.id) {
       return NextResponse.json(
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ API Error:', error)
+    console.error(' API Error:', error)
     return NextResponse.json(
       { error: 'სერვერის შეცდომა', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

@@ -44,12 +44,11 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
     const checkData = await checkRes.json()
 
     if (!checkData.allowed) {
-      setError(`თქვენ უკვე შეიძინეთ მაქსიმუმ 3 ბილეთი`)
+      setError(`You have already purchased a maximum of 3 tickets`)
       setLoading(false)
       return
     }
 
-    // Create order
     const orderRes = await fetch('/api/create-order', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -58,7 +57,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
       surname: formData.surname,
       personalNumber: formData.personalNumber,
       email: formData.email,
-      ticketId: ticket.id,        // 👈 დარწმუნდი რომ ეს არის სწორი ID
+      ticketId: ticket.id,      
       amount: ticket.priceGel.toString(),
       title: ticket.title,
     }),
@@ -72,7 +71,6 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
       return
     }
 
-    // Redirect to bank payment page
     if (orderData.redirectUrl) {
       onClose()
       window.open(orderData.redirectUrl, '_blank')
@@ -96,7 +94,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-white/60 mb-1">სახელი *</label>
+            <label className="block text-sm text-white/60 mb-1">Name *</label>
             <input
               type="text"
               required
@@ -107,7 +105,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-1">გვარი *</label>
+            <label className="block text-sm text-white/60 mb-1">Surname *</label>
             <input
               type="text"
               required
@@ -118,7 +116,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-1">პირადი ნომერი *</label>
+            <label className="block text-sm text-white/60 mb-1">Personal number *</label>
             <input
               type="text"
               required
@@ -149,7 +147,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
             disabled={loading}
             className="w-full bg-yellow-300 py-3 font-black uppercase text-black hover:bg-white transition disabled:opacity-50"
           >
-            {loading ? 'მიმდინარეობს...' : 'გადახდა'}
+            {loading ? 'in progress...' : 'payment'}
           </button>
         </form>
       </div>
