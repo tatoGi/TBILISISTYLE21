@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTicketsCollection } from '@/lib/mongodb'
+import { getSoldTicketsCollection, getTicketsCollection } from '@/lib/mongodb'
 import { getOrderDetails } from '@/lib/pgClient'
-import { generateTicketPDF } from '@/lib/pdf'
-import { sendTicketEmail } from '@/lib/email'
+import { enqueueTicketEmail, processTicketEmailJobs } from '@/lib/message-broker'
+import { isJokerTicketName, upsertJokerTicket } from '@/lib/sold-tickets'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -19,9 +19,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const soldTicketsCollection = await getSoldTicketsCollection()
     const ticketsCollection = await getTicketsCollection()
     
-    const ticket = await ticketsCollection.findOne({ pgOrderId: parseInt(id) })
+    const ticket = await soldTicketsCollection.findOne({ pgOrderId: parseInt(id) })
 
     if (!ticket) {
       console.log(' Ticket not found for pgOrderId:', id)
@@ -43,29 +44,59 @@ export async function GET(req: NextRequest) {
     console.log(' isPaid:', isPaid, '| DB status:', ticket.status)
 
     if (isPaid && ticket.status === 'pending') {
-      await ticketsCollection.updateOne(
+      const paidAt = new Date()
+
+      await soldTicketsCollection.updateOne(
         { id: ticket.id },
-        { $set: { status: 'paid', paidAt: new Date() } }
+        { $set: { status: 'paid', paidAt } }
       )
 
-      try {
-        const pdfBuffer = await generateTicketPDF({
-          id: ticket.id,
-          name: ticket.name,
-          surname: ticket.surname,
-          personalNumber: ticket.personalNumber,
-          eventName: ticket.eventName || 'Event',
-          eventDate: ticket.eventDate || new Date(),
-          amount: ticket.amount,
-          currency: 'GEL',
-          qrCodeDataUrl: ticket.qrCode,
-        })
+      await ticketsCollection.updateOne(
+        ticket.originalTicketObjectId
+          ? { _id: ticket.originalTicketObjectId }
+          : { id: ticket.originalTicketId },
+        [
+          {
+            $set: {
+              quantity: { $max: [{ $subtract: ["$quantity", 1] }, 0] },
+              updatedAt: paidAt.toISOString(),
+            },
+          },
+          {
+            $set: {
+              status: {
+                $cond: [{ $lte: ["$quantity", 0] }, "sold_out", "$status"],
+              },
+            },
+          },
+        ]
+      )
 
-        await sendTicketEmail(ticket.email, ticket.name, pdfBuffer, ticket.id)
-        console.log(' Email sent to:', ticket.email)
-      } catch (emailError) {
-        console.error(' Email error:', emailError)
+      const paidTicket = {
+        ...ticket,
+        status: 'paid',
+        paidAt,
       }
+
+      if (isJokerTicketName(ticket.eventName)) {
+        await upsertJokerTicket(paidTicket)
+      }
+
+      await enqueueTicketEmail({
+        ticketId: ticket.id,
+        email: ticket.email,
+        name: ticket.name,
+        surname: ticket.surname,
+        personalNumber: ticket.personalNumber,
+        eventName: ticket.eventName || 'Event',
+        eventDate: ticket.eventDate || new Date(),
+        amount: ticket.amount,
+        currency: 'GEL',
+        qrCodeDataUrl: ticket.qrCode,
+      })
+
+      const brokerResult = await processTicketEmailJobs()
+      console.log(' Email broker result:', brokerResult)
 
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/success?ticketId=${ticket.id}`

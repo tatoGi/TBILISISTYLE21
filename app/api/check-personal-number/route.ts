@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTicketsCollection } from '@/lib/mongodb'
+import { getSoldTicketsCollection } from '@/lib/mongodb'
 
 export async function POST(req: NextRequest) {
   const { personalNumber } = await req.json()
 
-  const ticketsCollection = await getTicketsCollection()
+  const soldTicketsCollection = await getSoldTicketsCollection()
   
-  const paidTicketsCount = await ticketsCollection.countDocuments({
+  const paidTicketsCount = await soldTicketsCollection.countDocuments({
     personalNumber: personalNumber,
     status: 'paid',
   })

@@ -36,6 +36,21 @@ export async function getTicketsCollection(): Promise<Collection> {
   return db.collection("tickets");
 }
 
+export async function getSoldTicketsCollection(): Promise<Collection> {
+  const db = await getDb();
+  return db.collection("soldTickets");
+}
+
+export async function getJokerTicketsCollection(): Promise<Collection> {
+  const db = await getDb();
+  return db.collection("jokerTickets");
+}
+
+export async function getMessageJobsCollection(): Promise<Collection> {
+  const db = await getDb();
+  return db.collection("messageJobs");
+}
+
 export async function getEventsCollection(): Promise<Collection> {
   const db = await getDb();
   return db.collection("events");

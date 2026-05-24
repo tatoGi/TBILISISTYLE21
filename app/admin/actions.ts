@@ -64,6 +64,7 @@ export async function createTicket(formData: FormData) {
   await requireAdmin();
   await insertTicket(getTicketPayload(formData));
   revalidatePath("/admin");
+  revalidatePath("/admin/tickets");
   revalidatePath("/dashboard/tickets");
 }
 
@@ -72,6 +73,7 @@ export async function updateTicket(formData: FormData) {
   const id = String(formData.get("id") || "");
   await saveTicket(id, getTicketPayload(formData));
   revalidatePath("/admin");
+  revalidatePath("/admin/tickets");
   revalidatePath("/dashboard/tickets");
 }
 
@@ -80,5 +82,6 @@ export async function deleteTicket(formData: FormData) {
   const id = String(formData.get("id") || "");
   await removeTicket(id);
   revalidatePath("/admin");
+  revalidatePath("/admin/tickets");
   revalidatePath("/dashboard/tickets");
 }

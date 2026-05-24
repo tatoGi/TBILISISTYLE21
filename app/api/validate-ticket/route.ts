@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTicketsCollection } from '@/lib/mongodb'
+import { getSoldTicketsCollection } from '@/lib/mongodb'
 
 type TicketQrPayload = {
   ticketId?: unknown
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, error: 'Ticket data is missing from the QR code.' }, { status: 400 })
   }
 
-  const ticketsCollection = await getTicketsCollection()
-  const ticket = await ticketsCollection.findOne({
+  const soldTicketsCollection = await getSoldTicketsCollection()
+  const ticket = await soldTicketsCollection.findOne({
     id: ticketId,
     personalNumber,
     ...(typeof eventId === 'string' ? { originalTicketId: eventId } : {}),
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const scanResult = await ticketsCollection.updateOne(
+  const scanResult = await soldTicketsCollection.updateOne(
     { id: ticket.id, scannedAt: { $exists: false } },
     { $set: { scannedAt: new Date(), scannedBy: 'admin' } }
   )

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTicketsCollection } from '@/lib/mongodb'
+import { getSoldTicketsCollection, getTicketsCollection } from '@/lib/mongodb'
 import { createOrder as callPGOrder } from '@/lib/pgClient'
 import { generateQRCode, generateTicketQRData } from '@/lib/qr'
 import { v4 as uuidv4 } from 'uuid'
@@ -13,8 +13,9 @@ export async function POST(req: NextRequest) {
     const { name, surname, personalNumber, email, ticketId, amount } = body
 
     const ticketsCollection = await getTicketsCollection()
+    const soldTicketsCollection = await getSoldTicketsCollection()
 
-    const paidTicketsCount = await ticketsCollection.countDocuments({
+    const paidTicketsCount = await soldTicketsCollection.countDocuments({
       personalNumber,
       status: 'paid',
     })
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
     const qrData = generateTicketQRData(newTicketId, personalNumber, ticketId)
     const qrCodeDataUrl = await generateQRCode(qrData)
 
-    await ticketsCollection.insertOne({
+    await soldTicketsCollection.insertOne({
       id: newTicketId,
       personalNumber,
       email,
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest) {
       status: 'pending',
       qrCode: qrCodeDataUrl,
       originalTicketId: ticketId,
-      originalTicketObjectId: new ObjectId(ticketId),
+      ...(ObjectId.isValid(ticketId) ? { originalTicketObjectId: new ObjectId(ticketId) } : {}),
       eventName: existingTicket.title,
       eventDate: existingTicket.eventDate,
       location: existingTicket.location,
