@@ -3,6 +3,7 @@ import {
   getJokerTicketsCollection,
   getSoldTicketsCollection,
 } from "@/lib/mongodb";
+import { isJokerTicketName, serializeSoldTicket } from "@/lib/ticket-utils";
 
 export type SoldTicket = {
   id: string;
@@ -21,28 +22,7 @@ export type SoldTicket = {
   createdAt?: string | Date;
 };
 
-function serializeSoldTicket(ticket: Document): SoldTicket {
-  return {
-    id: ticket.id,
-    personalNumber: ticket.personalNumber,
-    email: ticket.email,
-    name: ticket.name,
-    surname: ticket.surname,
-    amount: ticket.amount,
-    status: ticket.status,
-    originalTicketId: ticket.originalTicketId,
-    eventName: ticket.eventName,
-    eventDate: ticket.eventDate,
-    location: ticket.location,
-    paidAt: ticket.paidAt,
-    scannedAt: ticket.scannedAt,
-    createdAt: ticket.createdAt,
-  };
-}
-
-export function isJokerTicketName(value: unknown) {
-  return typeof value === "string" && value.toLowerCase().includes("joker");
-}
+export { isJokerTicketName };
 
 export async function listSoldTickets(filter: Filter<Document> = {}) {
   const collection = await getSoldTicketsCollection();
