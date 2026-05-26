@@ -1,7 +1,6 @@
 import fetch from 'node-fetch'
 import https from 'https'
-import fs from 'fs'
-import path from 'path'
+
 
 interface PGOrderResponse {
   order?: {
@@ -29,15 +28,15 @@ interface PGOrderDetailsResponse {
 
 function getAgent() {
   return new https.Agent({
-    cert: fs.readFileSync(path.resolve(process.cwd(), process.env.PG_CERT_PATH!)),
-    key: fs.readFileSync(path.resolve(process.cwd(), process.env.PG_KEY_PATH!)),
-    ca: fs.readFileSync(path.resolve(process.cwd(), process.env.PG_CA_PATH!)),
+    cert: Buffer.from(process.env.PG_CERT_PATH!,"base64").toString(),
+    key: Buffer.from(process.env.PG_KEY_PATH!,"base64").toString(),
+    ca: Buffer.from(process.env.PG_CA_PATH!,"base64").toString(),
     rejectUnauthorized: false,
   })
 }
 
 export async function createOrder(body: unknown): Promise<PGOrderResponse> {
-  const response = await fetch('https://3dss2test.quipu.de:8000/order', {
+  const response = await fetch(`${process.env.PG_API_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -47,7 +46,7 @@ export async function createOrder(body: unknown): Promise<PGOrderResponse> {
 }
 
 export async function getOrderDetails(orderId: number, password: string): Promise<PGOrderDetailsResponse> {
-  const url = `https://3dss2test.quipu.de:8000/order/${orderId}?password=${password}&tokenDetailLevel=1&tranDetailLevel=1`
+  const url = `${process.env.PG_API_URL}/${orderId}?password=${password}&tokenDetailLevel=1&tranDetailLevel=1`
   const response = await fetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
