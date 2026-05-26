@@ -26,13 +26,14 @@ interface PGOrderDetailsResponse {
   errorDescription?: string
 }
 
+
 function getAgent() {
   return new https.Agent({
-    cert: Buffer.from(process.env.PG_CERT_PATH!,"base64").toString(),
-    key: Buffer.from(process.env.PG_KEY_PATH!,"base64").toString(),
-    ca: Buffer.from(process.env.PG_CA_PATH!,"base64").toString(),
+    cert: Buffer.from(process.env.PG_CERT_BASE64!, "base64"),
+    key: Buffer.from(process.env.PG_KEY_BASE64!, "base64"),
+    ca: Buffer.from(process.env.PG_CA_BASE64!, "base64"),
     rejectUnauthorized: false,
-  })
+  });
 }
 
 export async function createOrder(body: unknown): Promise<PGOrderResponse> {
