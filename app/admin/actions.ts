@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import {
   adminCookieName,
   createAdminToken,
+  getAdminTokenMaxAge,
   isAdminSession,
   verifyAdminPassword,
 } from "@/lib/admin-auth";
@@ -45,7 +46,7 @@ export async function loginAdmin(formData: FormData) {
   const store = await cookies();
   store.set(adminCookieName, createAdminToken(), {
     httpOnly: true,
-    maxAge: 60 * 60 * 8,
+    maxAge: getAdminTokenMaxAge(),
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { logoutAdmin } from "../actions";
+import { AdminLogoutButton } from "./AdminLogoutButton";
 
 const navItems = [
   { href: "/admin", label: "Dashboard" },
@@ -30,11 +30,7 @@ export function AdminShell({
               </p>
               <h1 className="mt-2 text-3xl font-black uppercase">{title}</h1>
             </div>
-            <form action={logoutAdmin}>
-              <button className="border border-white/20 px-4 py-3 text-xs font-bold uppercase text-white/70 transition hover:border-white hover:text-white">
-                Logout
-              </button>
-            </form>
+            <AdminLogoutButton />
           </div>
 
           <nav className="flex flex-wrap gap-3">

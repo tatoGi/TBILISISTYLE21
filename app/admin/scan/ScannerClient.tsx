@@ -26,9 +26,13 @@ export default function ScannerClient() {
         setScanning(false)
 
         try {
+          const accessToken = localStorage.getItem('accessToken')
           const res = await fetch('/api/validate-ticket', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+            },
             body: JSON.stringify({ qrData: decodedText }),
           })
 

@@ -45,31 +45,47 @@ export async function GET(req: NextRequest) {
 
     if (isPaid && ticket.status === 'pending') {
       const paidAt = new Date()
+      const ticketFilter = ticket.originalTicketObjectId
+        ? { _id: ticket.originalTicketObjectId }
+        : { id: ticket.originalTicketId }
 
-      await soldTicketsCollection.updateOne(
-        { id: ticket.id },
-        { $set: { status: 'paid', paidAt } }
-      )
-
-      await ticketsCollection.updateOne(
-        ticket.originalTicketObjectId
-          ? { _id: ticket.originalTicketObjectId }
-          : { id: ticket.originalTicketId },
+      const inventoryResult = await ticketsCollection.updateOne(
+        {
+          ...ticketFilter,
+          status: 'active',
+          quantity: { $gt: 0 },
+        },
         [
           {
             $set: {
-              quantity: { $max: [{ $subtract: ["$quantity", 1] }, 0] },
+              quantity: { $subtract: ['$quantity', 1] },
               updatedAt: paidAt.toISOString(),
             },
           },
           {
             $set: {
               status: {
-                $cond: [{ $lte: ["$quantity", 0] }, "sold_out", "$status"],
+                $cond: [{ $lte: ['$quantity', 0] }, 'sold_out', '$status'],
               },
             },
           },
         ]
+      )
+
+      if (inventoryResult.modifiedCount !== 1) {
+        await soldTicketsCollection.updateOne(
+          { id: ticket.id },
+          { $set: { status: 'failed', failedAt: paidAt, failReason: 'sold_out' } }
+        )
+
+        return NextResponse.redirect(
+          `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=sold_out`
+        )
+      }
+
+      await soldTicketsCollection.updateOne(
+        { id: ticket.id },
+        { $set: { status: 'paid', paidAt } }
       )
 
       const paidTicket = {

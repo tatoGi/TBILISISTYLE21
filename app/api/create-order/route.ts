@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     console.log('API called: /api/create-order')
 
     const body = await req.json()
-    const { name, surname, personalNumber, email, ticketId, amount } = body
+    const { name, surname, personalNumber, email, ticketId } = body
 
     const ticketsCollection = await getTicketsCollection()
     const soldTicketsCollection = await getSoldTicketsCollection()
@@ -38,9 +38,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'ბილეთი არ მოიძებნა' }, { status: 404 })
     }
 
-    if (existingTicket.quantity <= 0) {
+    if (existingTicket.status !== 'active' || existingTicket.quantity <= 0) {
       return NextResponse.json({ error: 'ბილეთები გაყიდულია' }, { status: 400 })
     }
+
+    const ticketPrice = Number(existingTicket.priceGel) || 0
 
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
     const userAgent = req.headers.get('user-agent') || ''
@@ -48,7 +50,7 @@ export async function POST(req: NextRequest) {
     const pgOrderBody = {
       order: {
         typeRid: process.env.PG_TEST_TYPE_RID,
-        amount: amount.toString(),
+        amount: ticketPrice.toString(),
         currency: 'GEL',
         description: `${existingTicket.title} - ${name} ${surname}`,
         language: 'ka',
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
       surname,
       pgOrderId: pgResponse.order.id,
       pgPassword: pgResponse.order.password,
-      amount: parseFloat(amount),
+      amount: ticketPrice,
       status: 'pending',
       qrCode: qrCodeDataUrl,
       originalTicketId: ticketId,

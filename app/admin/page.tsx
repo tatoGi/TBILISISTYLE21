@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isAdminConfigured, isAdminSession } from "@/lib/admin-auth";
-import { loginAdmin } from "./actions";
+import { AdminLoginForm } from "./_components/AdminLoginForm";
 import { AdminShell } from "./_components/AdminShell";
 
 export const metadata: Metadata = {
@@ -37,71 +37,17 @@ const dashboardLinks = [
   },
 ];
 
-function LoginField({
-  label,
-  name,
-  type = "text",
-  required = false,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="grid gap-2 text-sm font-semibold text-white/80">
-      {label}
-      <input
-        className="h-11 border border-white/15 bg-white/10 px-3 text-white outline-none transition focus:border-yellow-300"
-        name={name}
-        type={type}
-        required={required}
-      />
-    </label>
-  );
-}
-
-function LoginForm({ error }: { error?: string }) {
-  return (
-    <main className="grid min-h-screen place-items-center bg-black px-5 text-white">
-      <form
-        action={loginAdmin}
-        className="grid w-full max-w-sm gap-5 border border-white/10 p-6"
-      >
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">
-            Tbilisi Style 21
-          </p>
-          <h1 className="mt-2 text-3xl font-black uppercase">Admin</h1>
-        </div>
-
-        {!isAdminConfigured() ? (
-          <p className="border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-100">
-            ADMIN_PASSWORD is not configured yet.
-          </p>
-        ) : null}
-
-        {error ? (
-          <p className="border border-yellow-300/40 bg-yellow-300/10 p-3 text-sm text-yellow-100">
-            Password is incorrect or the session has expired.
-          </p>
-        ) : null}
-
-        <LoginField label="Password" name="password" type="password" required />
-        <button className="h-11 bg-yellow-300 px-5 text-sm font-black uppercase text-black transition hover:bg-white">
-          Login
-        </button>
-      </form>
-    </main>
-  );
-}
-
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
   const authenticated = await isAdminSession();
 
   if (!authenticated) {
-    return <LoginForm error={params.error} />;
+    return (
+      <AdminLoginForm
+        configured={isAdminConfigured()}
+        initialError={params.error}
+      />
+    );
   }
 
   return (

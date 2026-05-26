@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isAdminRequest } from '@/lib/admin-auth'
 import { getSoldTicketsCollection } from '@/lib/mongodb'
 
 type TicketQrPayload = {
@@ -8,6 +9,10 @@ type TicketQrPayload = {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let qrData: unknown
 
   try {
