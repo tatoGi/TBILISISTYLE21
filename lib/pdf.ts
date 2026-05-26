@@ -28,7 +28,10 @@ export async function generateTicketPDF(
       ? data.eventDate
       : new Date(data.eventDate)
 
-
+  const formattedDate = eventDate.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "long",
+  })
   page.drawRectangle({
     x: 0,
     y: 0,
@@ -148,8 +151,7 @@ export async function generateTicketPDF(
 
   const rows = [
     [
-      "Date:",
-      `${eventDate.toLocaleDateString()} ${eventDate.toLocaleTimeString()}`,
+     `Date: ${formattedDate}`
     ],
     ["Name:", `${data.name} ${data.surname}`],
     ["Personal Number:", data.personalNumber],
