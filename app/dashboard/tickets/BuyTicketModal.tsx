@@ -29,7 +29,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
     setLoading(true)
     setError('')
 
-    console.log('🎫 Sending ticket:', { 
+    console.log('Sending ticket:', { 
       ticketId: ticket.id, 
       title: ticket.title, 
       priceGel: ticket.priceGel 
@@ -100,7 +100,10 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
               required
               className="w-full bg-white/10 border border-white/20 p-3 text-white focus:border-yellow-300 outline-none"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                name: e.target.value.replace(/[^a-zA-Z\s]/g, ''), 
+              })}
             />
           </div>
 
@@ -111,7 +114,10 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
               required
               className="w-full bg-white/10 border border-white/20 p-3 text-white focus:border-yellow-300 outline-none"
               value={formData.surname}
-              onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+              onChange={(e) => setFormData({ 
+                ...formData, 
+                surname: e.target.value.replace(/[^a-zA-Z\s]/g, ''), 
+              })}
             />
           </div>
 
