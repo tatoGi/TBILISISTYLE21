@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# analysis docs (local-only)
+ADMIN_PANEL_DOC.md
+FRONTEND_REVIEW.md
+HANDOFF.md
+PROJECT_ANALYSIS.md
+TICKET_FLOW_REVIEW.md
+
+# UX mockup (separate git repo)
+/mockup/
+
+# diagnostic scripts
+/scripts/test-status.mjs
+/scripts/test-email.mjs
+/scripts/check-quipu-order.mjs
+.commitmsg.tmp

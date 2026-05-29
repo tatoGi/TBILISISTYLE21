@@ -17,8 +17,10 @@ export default async function AdminJokerTicketsPage() {
   const tickets = await listJokerTickets();
 
   return (
-    <AdminShell title="Joker Tickets">
+    <AdminShell title="Joker Tickets" eyebrow="Premium category">
       <SoldTicketsTable tickets={tickets} />
     </AdminShell>
   );
 }
+
+export const dynamic = "force-dynamic";

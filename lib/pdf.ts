@@ -149,10 +149,8 @@ export async function generateTicketPDF(
     color: orangeGlow,
   })
 
-  const rows = [
-    [
-     `Date: ${formattedDate}`
-    ],
+  const rows: [string, string][] = [
+    ["Date:", formattedDate],
     ["Name:", `${data.name} ${data.surname}`],
     ["Personal Number:", data.personalNumber],
     ["Amount Paid:", `${data.amount} ${data.currency}`],
@@ -162,8 +160,8 @@ export async function generateTicketPDF(
   let startY = 350
   const gap = 45
 
-  rows.forEach((row) => {
-    page.drawText(row[0], {
+  rows.forEach(([label, value]) => {
+    page.drawText(label, {
       x: 70,
       y: startY,
       size: 16,
@@ -171,7 +169,7 @@ export async function generateTicketPDF(
       color: orangeGlow,
     })
 
-    page.drawText(row[1], {
+    page.drawText(value ?? '', {
       x: 220,
       y: startY,
       size: 15,

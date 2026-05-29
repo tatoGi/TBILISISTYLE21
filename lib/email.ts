@@ -35,6 +35,22 @@ function getGmailTransporter(): Transporter {
   return gmailTransporter
 }
 
+function buildText(name: string, ticketId: string) {
+  return [
+    `Dear ${name},`,
+    ``,
+    `Your ticket purchase has been completed successfully.`,
+    ``,
+    `Ticket #${ticketId}`,
+    `(PDF is attached to this email.)`,
+    ``,
+    `Please present this ticket (digital or printed) at the entrance.`,
+    `The QR code will be scanned for validation.`,
+    ``,
+    `© ${new Date().getFullYear()} TbilisiStyle21`,
+  ].join("\n");
+}
+
 function buildHtml(name: string, ticketId: string) {
   return `<!DOCTYPE html>
 <html>
@@ -78,6 +94,7 @@ export async function sendTicketEmail(
 ) {
   const subject = `Your Ticket #${ticketId}`
   const html = buildHtml(name, ticketId)
+  const text = buildText(name, ticketId)
   const filename = `ticket_${ticketId}.pdf`
 
   // Prefer Resend (production-grade deliverability, DKIM/SPF, high rate limits)
@@ -87,7 +104,8 @@ export async function sendTicketEmail(
       to,
       subject,
       html,
-      replyTo: REPLY_TO,
+      text,
+      ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
       attachments: [
         {
           filename,
@@ -103,18 +121,38 @@ export async function sendTicketEmail(
   }
 
   // Fallback: Gmail SMTP (development / emergency). Has 500/day limit.
-  await getGmailTransporter().sendMail({
+  const mailOptions = {
     from: `"${FROM_NAME}" <${process.env.GMAIL_USER}>`,
     to,
-    replyTo: REPLY_TO,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
     subject,
+    text,
     html,
     attachments: [
       {
         filename,
         content: pdfBuffer,
-        contentType: 'application/pdf',
+        contentType: 'application/pdf' as const,
       },
     ],
+  }
+
+  // DEBUG — log what we're actually sending
+  console.log('[email] sendTicketEmail debug:', {
+    to,
+    name,
+    ticketId,
+    subject,
+    textType: typeof text,
+    textLength: text?.length,
+    textPreview: text?.slice(0, 60),
+    htmlType: typeof html,
+    htmlLength: html?.length,
+    pdfBufferType: pdfBuffer?.constructor?.name,
+    pdfBufferLength: pdfBuffer?.length,
+    mailOptionsKeys: Object.keys(mailOptions),
+    mailOptionsTextField: typeof mailOptions.text,
   })
+
+  await getGmailTransporter().sendMail(mailOptions)
 }

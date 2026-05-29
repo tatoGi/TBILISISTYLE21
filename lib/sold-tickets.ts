@@ -35,9 +35,14 @@ export async function listSoldTickets(filter: Filter<Document> = {}) {
 }
 
 export async function listJokerTickets() {
-  const collection = await getJokerTicketsCollection();
+  // Read from soldTickets so all paid joker purchases show up, regardless of
+  // whether the jokerTickets denormalized mirror was populated.
+  const collection = await getSoldTicketsCollection();
   const tickets = await collection
-    .find({})
+    .find({
+      status: "paid",
+      eventName: { $regex: /joker/i },
+    })
     .sort({ paidAt: -1, createdAt: -1 })
     .toArray();
 
