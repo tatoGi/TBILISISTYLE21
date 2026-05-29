@@ -12,6 +12,38 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, surname, personalNumber, email, ticketId } = body
 
+    // Server-side guards — clients may bypass UI validation
+    if (typeof name !== 'string' || !/^[A-Za-z\s]{2,}$/.test(name.trim())) {
+      return NextResponse.json(
+        { error: 'Name must contain Latin letters only (as written on your ID).' },
+        { status: 400 }
+      )
+    }
+    if (typeof surname !== 'string' || !/^[A-Za-z\s]{2,}$/.test(surname.trim())) {
+      return NextResponse.json(
+        { error: 'Surname must contain Latin letters only (as written on your ID).' },
+        { status: 400 }
+      )
+    }
+    if (typeof personalNumber !== 'string' || !/^\d{11}$/.test(personalNumber)) {
+      return NextResponse.json(
+        { error: 'Personal number must be exactly 11 digits.' },
+        { status: 400 }
+      )
+    }
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      return NextResponse.json(
+        { error: 'Please provide a valid email address.' },
+        { status: 400 }
+      )
+    }
+    if (typeof ticketId !== 'string' || !ticketId.trim()) {
+      return NextResponse.json(
+        { error: 'Missing ticket selection.' },
+        { status: 400 }
+      )
+    }
+
     const ticketsCollection = await getTicketsCollection()
     const soldTicketsCollection = await getSoldTicketsCollection()
 
@@ -22,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     if (paidTicketsCount >= 3) {
       return NextResponse.json(
-        { error: 'თქვენ უკვე შეიძინეთ მაქსიმუმ 3 ბილეთი' },
+        { error: 'You have already purchased the maximum of 3 tickets with this ID.' },
         { status: 400 }
       )
     }
@@ -35,11 +67,17 @@ export async function POST(req: NextRequest) {
     }
 
     if (!existingTicket) {
-      return NextResponse.json({ error: 'ბილეთი არ მოიძებნა' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'This ticket type is no longer available.' },
+        { status: 404 }
+      )
     }
 
     if (existingTicket.status !== 'active' || existingTicket.quantity <= 0) {
-      return NextResponse.json({ error: 'ბილეთები გაყიდულია' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Sorry, this ticket has just sold out. Please pick another option.' },
+        { status: 400 }
+      )
     }
 
     const ticketPrice = Number(existingTicket.priceGel) || 0
@@ -77,9 +115,15 @@ export async function POST(req: NextRequest) {
     console.log('PG Response:', pgResponse)
 
     if (!pgResponse.order?.id) {
+      const pgErr = pgResponse.errorDescription || pgResponse.errorCode
       return NextResponse.json(
-        { error: 'გადახდის სისტემასთან კავშირის შეცდომა', details: pgResponse },
-        { status: 500 }
+        {
+          error: pgErr
+            ? `Payment provider rejected the request: ${pgErr}. Please try again or contact support.`
+            : 'The payment system is temporarily unavailable. Please try again in a few minutes.',
+          details: pgResponse,
+        },
+        { status: 502 }
       )
     }
 
@@ -116,9 +160,15 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error(' API Error:', error)
+    console.error('create-order error:', error)
+    const message =
+      error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'სერვერის შეცდომა', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error:
+          'We could not start the payment right now. Please try again, or contact support if the issue persists.',
+        details: message,
+      },
       { status: 500 }
     )
   }
