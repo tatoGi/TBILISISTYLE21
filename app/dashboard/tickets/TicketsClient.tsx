@@ -19,6 +19,8 @@ export default function TicketsClient({ tickets }: { tickets: Ticket[] }) {
     id: string
     title: string
     priceGel: number
+    eventDate?: string
+    location?: string
   } | null>(null)
 
   return (
@@ -62,7 +64,9 @@ export default function TicketsClient({ tickets }: { tickets: Ticket[] }) {
                     onClick={() => setSelectedTicket({
                       id: ticket.id,
                       title: ticket.title,
-                      priceGel: ticket.priceGel
+                      priceGel: ticket.priceGel,
+                      eventDate: ticket.eventDate,
+                      location: ticket.location,
                     })}
                     className="bg-yellow-300 px-5 py-3 text-xs font-black uppercase text-black transition hover:bg-white"
                   >

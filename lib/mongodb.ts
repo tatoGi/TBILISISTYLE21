@@ -1,7 +1,24 @@
 import { MongoClient, Collection } from "mongodb";
+import dns from "dns";
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
+  var _mongoDnsConfigured: boolean | undefined;
+}
+
+// Workaround for corporate / restricted networks where the system DNS
+// resolver refuses Node.js SRV queries (querySrv ECONNREFUSED).
+// Set MONGO_DNS_SERVERS="8.8.8.8,1.1.1.1" in .env.local to override.
+// Production (Vercel) leaves this empty and uses platform DNS.
+if (!global._mongoDnsConfigured && process.env.MONGO_DNS_SERVERS) {
+  const servers = process.env.MONGO_DNS_SERVERS
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (servers.length) {
+    dns.setServers(servers);
+  }
+  global._mongoDnsConfigured = true;
 }
 
 function getClientPromise() {

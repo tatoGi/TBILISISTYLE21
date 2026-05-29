@@ -17,8 +17,10 @@ export default async function AdminSoldTicketsPage() {
   const tickets = await listSoldTickets({ status: "paid" });
 
   return (
-    <AdminShell title="Sold Tickets">
+    <AdminShell title="Sold Tickets" eyebrow="Transactions">
       <SoldTicketsTable tickets={tickets} />
     </AdminShell>
   );
 }
+
+export const dynamic = "force-dynamic";

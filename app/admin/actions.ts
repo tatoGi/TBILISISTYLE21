@@ -10,12 +10,15 @@ import {
   isAdminSession,
   verifyAdminPassword,
 } from "@/lib/admin-auth";
+import { ObjectId } from "mongodb";
 import {
   createTicket as insertTicket,
   deleteTicket as removeTicket,
   updateTicket as saveTicket,
   validateTicketInput,
 } from "@/lib/tickets";
+import { getMessageJobsCollection } from "@/lib/mongodb";
+import { processTicketEmailJobs } from "@/lib/message-broker";
 
 function getTicketPayload(formData: FormData) {
   return validateTicketInput({
@@ -85,4 +88,65 @@ export async function deleteTicket(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/tickets");
   revalidatePath("/dashboard/tickets");
+}
+
+// --- Email queue actions ---
+
+export async function retryEmailJob(formData: FormData) {
+  await requireAdmin();
+  const jobId = String(formData.get("jobId") || "");
+  if (!ObjectId.isValid(jobId)) return;
+
+  const jobs = await getMessageJobsCollection();
+  await jobs.updateOne(
+    { _id: new ObjectId(jobId) },
+    {
+      $set: {
+        status: "pending",
+        attempts: 0,
+        lastError: null,
+        updatedAt: new Date(),
+      },
+    },
+  );
+
+  await processTicketEmailJobs(1);
+  revalidatePath("/admin/emails");
+  revalidatePath("/admin");
+}
+
+export async function retryAllFailedEmails() {
+  await requireAdmin();
+  const jobs = await getMessageJobsCollection();
+  await jobs.updateMany(
+    { status: "failed" },
+    {
+      $set: {
+        status: "pending",
+        attempts: 0,
+        lastError: null,
+        updatedAt: new Date(),
+      },
+    },
+  );
+  await processTicketEmailJobs(20);
+  revalidatePath("/admin/emails");
+  revalidatePath("/admin");
+}
+
+export async function processEmailQueue() {
+  await requireAdmin();
+  await processTicketEmailJobs(20);
+  revalidatePath("/admin/emails");
+  revalidatePath("/admin");
+}
+
+export async function deleteEmailJob(formData: FormData) {
+  await requireAdmin();
+  const jobId = String(formData.get("jobId") || "");
+  if (!ObjectId.isValid(jobId)) return;
+
+  const jobs = await getMessageJobsCollection();
+  await jobs.deleteOne({ _id: new ObjectId(jobId) });
+  revalidatePath("/admin/emails");
 }
