@@ -1,257 +1,248 @@
 import Link from "next/link";
-import { getPayload, type Where } from "payload";
-import config from "@payload-config";
+import type { ReactNode } from "react";
+import { getPayloadClient, getPgPool } from "@/lib/payload";
 
-type CountConfig = {
+export const dynamic = "force-dynamic";
+
+type Tone = "amber" | "emerald" | "sky" | "violet" | "rose" | "slate";
+
+const tone: Record<Tone, { tile: string; value: string; ring: string }> = {
+  amber: { tile: "bg-amber-100 text-amber-700", value: "text-amber-700", ring: "hover:border-amber-300" },
+  emerald: { tile: "bg-emerald-100 text-emerald-700", value: "text-emerald-700", ring: "hover:border-emerald-300" },
+  sky: { tile: "bg-sky-100 text-sky-700", value: "text-sky-700", ring: "hover:border-sky-300" },
+  violet: { tile: "bg-violet-100 text-violet-700", value: "text-violet-700", ring: "hover:border-violet-300" },
+  rose: { tile: "bg-rose-100 text-rose-700", value: "text-rose-700", ring: "hover:border-rose-300" },
+  slate: { tile: "bg-slate-100 text-slate-700", value: "text-slate-900", ring: "hover:border-slate-300" },
+};
+
+type Kpi = {
   label: string;
-  collection:
-    | "pages"
-    | "posts"
-    | "tickets"
-    | "products"
-    | "soldTickets"
-    | "productOrders"
-    | "jokerTickets"
-    | "messageJobs"
-    | "media";
+  value: string;
+  hint: string;
+  tone: Tone;
+  icon: ReactNode;
   href: string;
-  tone: "amber" | "emerald" | "sky" | "violet" | "rose" | "slate";
-  where?: Where;
 };
 
-const stats: CountConfig[] = [
-  {
-    label: "Pages",
-    collection: "pages",
-    href: "/admin/collections/pages",
-    tone: "violet",
-  },
-  {
-    label: "News",
-    collection: "posts",
-    href: "/admin/collections/posts",
-    tone: "sky",
-  },
-  {
-    label: "Tickets",
-    collection: "tickets",
-    href: "/admin/collections/tickets",
-    tone: "amber",
-  },
-  {
-    label: "Products",
-    collection: "products",
-    href: "/admin/collections/products",
-    tone: "emerald",
-  },
-  {
-    label: "Paid Tickets",
-    collection: "soldTickets",
-    href: "/admin/collections/soldTickets",
-    tone: "rose",
-    where: { status: { equals: "paid" } },
-  },
-  {
-    label: "Product Orders",
-    collection: "productOrders",
-    href: "/admin/collections/productOrders",
-    tone: "slate",
-  },
-];
+async function loadStats() {
+  const payload = await getPayloadClient();
+  const pool = await getPgPool();
 
-const quickLinks = [
-  {
-    title: "Create Page",
-    description: "Build a localized content page with flexible blocks.",
-    href: "/admin/collections/pages/create",
-    tone: "violet",
-  },
-  {
-    title: "Write News",
-    description: "Publish festival updates, announcements and stories.",
-    href: "/admin/collections/posts/create",
-    tone: "sky",
-  },
-  {
-    title: "Ticket Catalog",
-    description: "Edit ticket prices, quantities and sale status.",
-    href: "/admin/collections/tickets",
-    tone: "amber",
-  },
-  {
-    title: "Merch Store",
-    description: "Manage products, stock by size and VIP badges.",
-    href: "/admin/collections/products",
-    tone: "emerald",
-  },
-  {
-    title: "Scanner",
-    description: "Validate QR codes at the entrance.",
-    href: "/admin/scanner",
-    tone: "rose",
-  },
-  {
-    title: "Email Queue",
-    description: "Inspect ticket email delivery jobs.",
-    href: "/admin/collections/messageJobs",
-    tone: "slate",
-  },
-] as const;
+  const countSold = (where: Record<string, unknown>) =>
+    payload.count({ collection: "soldTickets", where: where as never }).then((r) => r.totalDocs);
 
-const toneClasses = {
-  amber: { card: "border-amber-200 bg-amber-50", icon: "bg-amber-500 text-white", text: "text-amber-700" },
-  emerald: { card: "border-emerald-200 bg-emerald-50", icon: "bg-emerald-500 text-white", text: "text-emerald-700" },
-  rose: { card: "border-rose-200 bg-rose-50", icon: "bg-rose-500 text-white", text: "text-rose-700" },
-  sky: { card: "border-sky-200 bg-sky-50", icon: "bg-sky-500 text-white", text: "text-sky-700" },
-  slate: { card: "border-slate-200 bg-slate-50", icon: "bg-slate-900 text-white", text: "text-slate-700" },
-  violet: { card: "border-violet-200 bg-violet-50", icon: "bg-violet-500 text-white", text: "text-violet-700" },
-};
+  const [
+    revenue,
+    inventory,
+    ticketsSold,
+    pending,
+    scanned,
+    emailsPending,
+    emailsFailed,
+    ticketTypes,
+    products,
+  ] = await Promise.all([
+    pool.query("SELECT COALESCE(SUM(amount), 0) AS total FROM sold_tickets WHERE status = 'paid'"),
+    pool.query("SELECT COALESCE(SUM(quantity), 0) AS remaining FROM tickets"),
+    countSold({ status: { equals: "paid" } }),
+    countSold({ status: { equals: "pending" } }),
+    countSold({ and: [{ status: { equals: "paid" } }, { scannedAt: { exists: true } }] }),
+    payload.count({ collection: "messageJobs", where: { status: { in: ["pending", "processing"] } } }).then((r) => r.totalDocs),
+    payload.count({ collection: "messageJobs", where: { status: { equals: "failed" } } }).then((r) => r.totalDocs),
+    payload.count({ collection: "tickets" }).then((r) => r.totalDocs),
+    payload.count({ collection: "products" }).then((r) => r.totalDocs),
+  ]);
 
-async function getCount(item: CountConfig) {
-  try {
-    const payload = await getPayload({ config });
-    const result = await payload.count({
-      collection: item.collection,
-      where: item.where,
-    });
-
-    return result.totalDocs;
-  } catch {
-    return 0;
-  }
+  return {
+    revenueGel: Number(revenue.rows[0]?.total ?? 0),
+    inventoryRemaining: Number(inventory.rows[0]?.remaining ?? 0),
+    ticketsSold,
+    pending,
+    scanned,
+    emailsPending,
+    emailsFailed,
+    ticketTypes,
+    products,
+  };
 }
 
+const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
 export default async function DashboardView() {
-  const counts = await Promise.all(stats.map(getCount));
+  const s = await loadStats();
+
+  const kpis: Kpi[] = [
+    {
+      label: "Total revenue",
+      value: `${fmt(s.revenueGel)} ₾`,
+      hint: `from ${fmt(s.ticketsSold)} paid tickets`,
+      tone: "emerald",
+      href: "/admin/collections/soldTickets?where[status][equals]=paid",
+      icon: <MoneyIcon />,
+    },
+    {
+      label: "Tickets sold",
+      value: fmt(s.ticketsSold),
+      hint: `${s.pending} payment${s.pending === 1 ? "" : "s"} pending`,
+      tone: "amber",
+      href: "/admin/collections/soldTickets",
+      icon: <TicketIcon />,
+    },
+    {
+      label: "Entries scanned",
+      value: fmt(s.scanned),
+      hint: "validated at the gate",
+      tone: "sky",
+      href: "/admin/scanner",
+      icon: <CheckIcon />,
+    },
+    {
+      label: "Inventory remaining",
+      value: fmt(s.inventoryRemaining),
+      hint: `${s.ticketTypes} ticket types`,
+      tone: "slate",
+      href: "/admin/collections/tickets",
+      icon: <BoxIcon />,
+    },
+    {
+      label: "Email queue",
+      value: fmt(s.emailsPending + s.emailsFailed),
+      hint: `${s.emailsFailed} failed · ${s.emailsPending} pending`,
+      tone: s.emailsFailed > 0 ? "rose" : "violet",
+      href: "/admin/collections/messageJobs",
+      icon: <EnvelopeIcon />,
+    },
+    {
+      label: "Products",
+      value: fmt(s.products),
+      hint: "items in the shop",
+      tone: "violet",
+      href: "/admin/collections/products",
+      icon: <BagIcon />,
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-8 text-slate-900 md:px-8">
-      <div className="mx-auto grid max-w-7xl gap-8">
-        <section className="overflow-hidden rounded-[28px] border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-white text-slate-900 shadow-xl shadow-amber-100/60">
-          <div className="grid gap-8 p-7 md:grid-cols-[1.2fr_0.8fr] md:p-10">
-            <div className="grid content-center gap-5">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-amber-300">
-                Tbilisi Style 21
-              </p>
-              <div className="grid gap-3">
-                <h1 className="max-w-3xl text-4xl font-black tracking-tight md:text-6xl">
-                  Admin Dashboard
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
-                  Content, tickets, merch, orders and entrance control in one place.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/admin/scanner"
-                  className="inline-flex h-11 items-center rounded-xl bg-amber-400 px-5 text-sm font-black text-slate-950 transition hover:bg-amber-300"
-                >
-                  Open Scanner
-                </Link>
-                <Link
-                  href="/admin/collections/pages/create"
-                  className="inline-flex h-11 items-center rounded-xl border border-slate-300 px-5 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
-                >
-                  New Page
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
-                Live Overview
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {stats.slice(0, 4).map((item, index) => (
-                  <Link
-                    key={item.collection}
-                    href={item.href}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-950 transition hover:-translate-y-0.5 hover:shadow-lg"
-                  >
-                    <p className="text-3xl font-black">{counts[index]}</p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">
-                      {item.label}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {stats.map((item, index) => {
-            const tone = toneClasses[item.tone];
-
-            return (
-              <Link
-                key={item.collection}
-                href={item.href}
-                className={`group rounded-2xl border p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl ${tone.card}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className={`text-xs font-black uppercase tracking-[0.18em] ${tone.text}`}>
-                      {item.label}
-                    </p>
-                    <p className="mt-3 text-4xl font-black tracking-tight text-slate-950">
-                      {counts[index]}
-                    </p>
-                  </div>
-                  <span className={`grid h-11 w-11 place-items-center rounded-2xl ${tone.icon}`}>
-                    {item.label.slice(0, 1)}
-                  </span>
-                </div>
-                <p className="mt-4 text-sm font-bold text-slate-500 transition group-hover:text-slate-800">
-                  View collection
-                </p>
-              </Link>
-            );
-          })}
-        </section>
-
-        <section className="grid gap-4">
+    <main className="min-h-screen bg-slate-50 px-5 py-7 text-slate-900 md:px-8">
+      <div className="mx-auto grid max-w-7xl gap-7">
+        {/* Page header */}
+        <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-600">
-              Quick Links
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-600">
+              Tbilisi Style 21
             </p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">
-              Frequent Actions
-            </h2>
+            <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-900">
+              Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Tickets, merch, orders and entrance control — live overview.
+            </p>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/scanner"
+              className="inline-flex h-10 items-center rounded-xl bg-amber-400 px-4 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
+            >
+              Open Scanner
+            </Link>
+            <Link
+              href="/admin/collections/pages/create"
+              className="inline-flex h-10 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
+            >
+              New Page
+            </Link>
+          </div>
+        </header>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {quickLinks.map((item) => {
-              const tone = toneClasses[item.tone];
+        {/* KPI cards */}
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {kpis.map((k) => (
+            <Link
+              key={k.label}
+              href={k.href}
+              className={`group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone[k.tone].ring}`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {k.label}
+                  </p>
+                  <p className={`mt-3 text-3xl font-black tracking-tight ${tone[k.tone].value}`}>
+                    {k.value}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">{k.hint}</p>
+                </div>
+                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone[k.tone].tile}`}>
+                  {k.icon}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </section>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl"
-                >
-                  <span className={`inline-grid h-10 w-10 place-items-center rounded-xl ${tone.icon}`}>
-                    {item.title.slice(0, 1)}
-                  </span>
-                  <h3 className="mt-4 text-lg font-black text-slate-950">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 min-h-12 text-sm leading-6 text-slate-500">
-                    {item.description}
-                  </p>
-                  <p className={`mt-4 text-sm font-black ${tone.text}`}>
-                    Open
-                    <span className="inline-block transition group-hover:translate-x-1">
-                      {" "}
-                      →
-                    </span>
-                  </p>
-                </Link>
-              );
-            })}
+        {/* Chart placeholder — filled in next step */}
+        <section className="grid gap-4 lg:grid-cols-3">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center lg:col-span-2">
+            <p className="text-sm font-semibold text-slate-700">Revenue chart</p>
+            <p className="mt-1 text-sm text-slate-500">Arrives in the next step (ApexCharts).</p>
+          </div>
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <p className="text-sm font-semibold text-slate-700">Sales by type</p>
+            <p className="mt-1 text-sm text-slate-500">Coming next.</p>
           </div>
         </section>
       </div>
     </main>
+  );
+}
+
+// --- Icons ---
+function MoneyIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+function TicketIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" />
+    </svg>
+  );
+}
+function CheckIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  );
+}
+function BoxIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  );
+}
+function EnvelopeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+}
+function BagIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
   );
 }
