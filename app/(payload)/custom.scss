@@ -1,0 +1,207 @@
+/* Tbilisi Style 21 — Payload admin brand theme (black + festival yellow). */
+
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --ts-yellow: #fde047;
+  --ts-yellow-bright: #ffffff;
+  --ts-ink: #0a0a0a;
+}
+
+/* Primary action buttons → festival yellow with ink text */
+.btn--style-primary {
+  --bg-color: var(--ts-yellow);
+  --color: var(--ts-ink);
+  --hover-bg: var(--ts-yellow-bright);
+  --hover-color: var(--ts-ink);
+}
+.btn--style-primary {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Yellow focus accent on inputs / selects / textareas */
+.field-type input:focus,
+.field-type textarea:focus,
+.field-type .rs__control--is-focused,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+  border-color: var(--ts-yellow) !important;
+  box-shadow: 0 0 0 2px rgba(253, 224, 71, 0.35) !important;
+}
+
+/* Link hover accent */
+a:not(.btn):hover {
+  color: #facc15;
+}
+
+/* Active nav item — yellow left accent (defensive selectors) */
+nav a[aria-current="page"],
+.nav a.active,
+.nav__link--active {
+  color: var(--ts-yellow) !important;
+  box-shadow: inset 3px 0 0 0 var(--ts-yellow);
+}
+
+/* Branded login / first-user screen background */
+.template-minimal,
+.template-default__wrap {
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(253, 224, 71, 0.10), transparent 42%),
+    radial-gradient(circle at 85% 85%, rgba(253, 224, 71, 0.06), transparent 46%);
+}
+
+/* Softer corners on key surfaces */
+.btn,
+.field-type input,
+.field-type textarea,
+.popup__content,
+.card {
+  border-radius: 10px;
+}
+
+/* ───────────────────────── Sidebar (admin nav) ───────────────────────── */
+
+.nav {
+  background: var(--theme-elevation-0);
+  border-right: 1px solid var(--theme-elevation-100);
+}
+
+/* Brand logo/icon in the header — never clip */
+.nav__header,
+.nav__header-content,
+.nav-toggler,
+.app-header__content,
+.app-header__wrapper {
+  overflow: visible;
+}
+
+.nav__wrap {
+  gap: 2px;
+  padding-inline: 8px;
+}
+
+/* Nav links as rounded pill rows */
+.nav__link {
+  font-size: 14.5px;
+  line-height: 1.35;
+  border-radius: 10px;
+  padding-block: 9px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  margin-block: 1px;
+  color: var(--theme-elevation-700);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav a.nav__link:hover,
+.nav a.nav__link:focus-visible {
+  text-decoration: none;
+  background-color: var(--theme-elevation-50);
+  color: var(--theme-elevation-1000);
+}
+
+/* Active item — festival yellow highlight (Payload renders the indicator
+   only on the active link, so :has targets it precisely). */
+.nav__link:has(.nav__link-indicator) {
+  background-color: rgba(253, 224, 71, 0.18);
+  color: var(--theme-elevation-1000);
+  font-weight: 700;
+  padding-left: 12px;
+  box-shadow: inset 3px 0 0 0 #facc15;
+}
+
+.nav__link-indicator {
+  background-color: #facc15 !important;
+}
+
+/* Group labels / collapsible headers — refined, uppercase, muted */
+.nav__label,
+.nav-group__toggle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--theme-elevation-400);
+  padding-inline: 12px;
+  margin-top: 14px;
+}
+
+.nav-group__toggle:hover,
+.nav-group__toggle:focus-visible {
+  color: var(--theme-elevation-700);
+}
+
+/* Logout row */
+.nav__log-out {
+  border-radius: 10px;
+}
+.nav__log-out:hover {
+  background-color: var(--theme-elevation-50);
+}
+
+/* ──────────────── List "Create new" button — same everywhere ──────────── */
+/* Default is a grey pill; brand it yellow so every collection's add button
+   matches the primary action style (the empty-state button uses the same
+   yellow primary style). */
+.list-header__create-new-button .pill,
+.list-header__create-new-button .pill.pill--style-white,
+.list-header__create-new-button .pill.pill--style-light {
+  background: var(--ts-yellow) !important;
+  color: var(--ts-ink) !important;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 10px;
+}
+.list-header__create-new-button .pill * {
+  color: var(--ts-ink) !important;
+}
+.list-header__create-new-button:hover .pill {
+  background: var(--ts-yellow-bright) !important;
+}
+
+/* ──────────── Bulk selection toolbar (Edit / Delete) — make it clear ───── */
+.list-selection {
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border: 1px solid rgba(253, 224, 71, 0.55);
+  border-radius: 10px;
+  background: rgba(253, 224, 71, 0.14);
+  color: var(--theme-elevation-900);
+  font-weight: 600;
+}
+
+.list-selection__actions {
+  gap: 8px;
+}
+
+/* Render the bulk Edit / Delete actions as obvious buttons */
+.list-selection__actions button,
+.list-selection__actions .btn {
+  border: 1px solid var(--theme-elevation-300);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-weight: 700;
+  background: var(--theme-elevation-0);
+  color: var(--theme-elevation-900);
+  text-decoration: none;
+}
+.list-selection__actions button:hover,
+.list-selection__actions .btn:hover {
+  background: var(--theme-elevation-100);
+  border-color: var(--theme-elevation-400);
+}
+
+/* Destructive (Delete) action reads red */
+.list-selection__actions button[aria-label*="elete"],
+.list-selection__actions button[title*="elete"],
+.list-selection__actions .btn[aria-label*="elete"] {
+  border-color: var(--color-error-400);
+  color: var(--color-error-600);
+}
+.list-selection__actions button[aria-label*="elete"]:hover {
+  background: var(--color-error-50);
+}

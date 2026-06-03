@@ -1,5 +1,4 @@
-import { ObjectId, type Document } from "mongodb";
-import { getDb } from "./mongodb";
+import { getPayloadClient } from "./payload";
 
 export type TicketStatus = "draft" | "active" | "sold_out";
 
@@ -28,26 +27,21 @@ export type TicketInput = {
   status: TicketStatus;
 };
 
-const collectionName = "tickets";
 const statuses: TicketStatus[] = ["draft", "active", "sold_out"];
 
-function ticketsCollection() {
-  return getDb().then((db) => db.collection(collectionName));
-}
-
-function serializeTicket(ticket: Document): Ticket {
+function serializeTicket(ticket: Record<string, unknown>): Ticket {
   return {
-    id: ticket._id.toString(),
-    title: ticket.title,
-    description: ticket.description,
-    priceGel: ticket.priceGel,
-    eventDate: ticket.eventDate,
-    location: ticket.location,
-    quantity: ticket.quantity,
-    saleUrl: ticket.saleUrl,
-    status: ticket.status,
-    createdAt: ticket.createdAt,
-    updatedAt: ticket.updatedAt,
+    id: String(ticket.id),
+    title: (ticket.title as string) ?? "",
+    description: (ticket.description as string) ?? "",
+    priceGel: Number(ticket.priceGel ?? 0),
+    eventDate: (ticket.eventDate as string) ?? "",
+    location: (ticket.location as string) ?? "",
+    quantity: Number(ticket.quantity ?? 0),
+    saleUrl: (ticket.saleUrl as string) ?? "",
+    status: (ticket.status as TicketStatus) ?? "draft",
+    createdAt: (ticket.createdAt as string) ?? "",
+    updatedAt: (ticket.updatedAt as string) ?? "",
   };
 }
 
@@ -86,50 +80,45 @@ export function validateTicketInput(input: Record<string, unknown>): TicketInput
 }
 
 export async function listTickets({ publicOnly = false } = {}) {
-  const collection = await ticketsCollection();
-  const query = publicOnly ? { status: { $in: ["active", "sold_out"] } } : {};
-  const tickets = await collection
-    .find(query)
-    .sort({ createdAt: -1 })
-    .toArray();
+  const payload = await getPayloadClient();
+  const result = await payload.find({
+    collection: "tickets",
+    where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
+    sort: "-createdAt",
+    limit: 0,
+    pagination: false,
+    depth: 0,
+  });
 
-  return tickets.map(serializeTicket);
+  return result.docs.map((d) => serializeTicket(d as unknown as Record<string, unknown>));
+}
+
+export async function getTicket(id: string): Promise<Ticket | null> {
+  if (!id) return null;
+  const payload = await getPayloadClient();
+  try {
+    const ticket = await payload.findByID({ collection: "tickets", id, depth: 0 });
+    return ticket ? serializeTicket(ticket as unknown as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function createTicket(input: TicketInput) {
-  const now = new Date().toISOString();
-  const collection = await ticketsCollection();
-  const result = await collection.insertOne({
-    ...input,
-    createdAt: now,
-    updatedAt: now,
+  const payload = await getPayloadClient();
+  const ticket = await payload.create({
+    collection: "tickets",
+    data: input,
   });
-
-  return result.insertedId.toString();
+  return String(ticket.id);
 }
 
 export async function updateTicket(id: string, input: TicketInput) {
-  if (!ObjectId.isValid(id)) {
-    throw new Error("Invalid ticket id.");
-  }
-
-  const collection = await ticketsCollection();
-  await collection.updateOne(
-    { _id: new ObjectId(id) },
-    {
-      $set: {
-        ...input,
-        updatedAt: new Date().toISOString(),
-      },
-    }
-  );
+  const payload = await getPayloadClient();
+  await payload.update({ collection: "tickets", id, data: input });
 }
 
 export async function deleteTicket(id: string) {
-  if (!ObjectId.isValid(id)) {
-    throw new Error("Invalid ticket id.");
-  }
-
-  const collection = await ticketsCollection();
-  await collection.deleteOne({ _id: new ObjectId(id) });
+  const payload = await getPayloadClient();
+  await payload.delete({ collection: "tickets", id });
 }

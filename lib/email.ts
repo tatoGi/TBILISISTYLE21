@@ -77,6 +77,103 @@ function buildHtml(name: string, ticketId: string) {
 </html>`
 }
 
+function buildProductText(
+  name: string,
+  orderId: string,
+  productTitle: string,
+  size: string,
+) {
+  return [
+    `Dear ${name},`,
+    ``,
+    `Your order has been completed successfully.`,
+    ``,
+    `Order #${orderId}`,
+    `Item: ${productTitle} (Size ${size})`,
+    ``,
+    `Present the attached QR code at the festival merch point to collect your item.`,
+    ``,
+    `© ${new Date().getFullYear()} TbilisiStyle21`,
+  ].join("\n");
+}
+
+function buildProductHtml(
+  name: string,
+  orderId: string,
+  productTitle: string,
+  size: string,
+) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h1 style="color: #2c3e50; text-align: center;">Thank You!</h1>
+    <p style="font-size: 16px; color: #333;">Dear <strong>${escapeHtml(name)}</strong>,</p>
+    <p style="font-size: 16px; color: #333;">Your order has been completed successfully.</p>
+    <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 20px 0;">
+      <p style="margin: 0; color: #2c3e50;"><strong>Order #${escapeHtml(orderId)}</strong></p>
+      <p style="margin: 5px 0 0; color: #2c3e50;">${escapeHtml(productTitle)} — Size <strong>${escapeHtml(size)}</strong></p>
+    </div>
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+    <p style="font-size: 14px; color: #7f8c8d; text-align: center;">
+      Present the attached QR code at the festival merch point to collect your item.
+    </p>
+    <p style="font-size: 12px; color: #95a5a6; text-align: center; margin-top: 20px;">
+      © ${new Date().getFullYear()} TbilisiStyle21
+    </p>
+  </div>
+</body>
+</html>`
+}
+
+export async function sendProductOrderEmail(
+  to: string,
+  name: string,
+  qrPngBuffer: Buffer,
+  orderId: string,
+  productTitle: string,
+  size: string,
+) {
+  const subject = `Your Order #${orderId} — ${productTitle}`
+  const html = buildProductHtml(name, orderId, productTitle, size)
+  const text = buildProductText(name, orderId, productTitle, size)
+  const filename = `pickup_${orderId}.png`
+
+  if (RESEND_API_KEY) {
+    const result = await getResend().emails.send({
+      from: `${FROM_NAME} <${FROM_ADDRESS}>`,
+      to,
+      subject,
+      html,
+      text,
+      ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
+      attachments: [{ filename, content: qrPngBuffer }],
+    })
+
+    if (result.error) {
+      throw new Error(`Resend send failed: ${result.error.message}`)
+    }
+    return
+  }
+
+  await getGmailTransporter().sendMail({
+    from: `"${FROM_NAME}" <${process.env.GMAIL_USER}>`,
+    to,
+    ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
+    subject,
+    text,
+    html,
+    attachments: [
+      {
+        filename,
+        content: qrPngBuffer,
+        contentType: 'image/png' as const,
+      },
+    ],
+  })
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')

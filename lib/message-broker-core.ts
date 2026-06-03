@@ -1,5 +1,3 @@
-import type { ObjectId } from "mongodb";
-
 export type TicketEmailPayload = {
   ticketId: string;
   email: string;
@@ -14,7 +12,7 @@ export type TicketEmailPayload = {
 };
 
 export type MessageJob = {
-  _id: ObjectId | string;
+  _id: string;
   type: "ticket-email";
   status: "pending" | "processing" | "sent" | "failed";
   attempts: number;
