@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getPayloadClient, getPgPool } from "@/lib/payload";
+import { RevenueAreaChart, SalesByTypeDonut } from "./charts/DashboardCharts";
 
 export const dynamic = "force-dynamic";
 
@@ -66,10 +67,41 @@ async function loadStats() {
   };
 }
 
+async function loadChartData() {
+  const pool = await getPgPool();
+  const [byDay, byType] = await Promise.all([
+    pool.query(
+      `SELECT to_char(date_trunc('day', paid_at), 'DD Mon') AS day,
+              COALESCE(SUM(amount), 0) AS total
+       FROM sold_tickets
+       WHERE status = 'paid' AND paid_at IS NOT NULL
+         AND paid_at >= now() - interval '30 days'
+       GROUP BY date_trunc('day', paid_at)
+       ORDER BY date_trunc('day', paid_at)`
+    ),
+    pool.query(
+      `SELECT COALESCE(NULLIF(event_name, ''), 'Other') AS label,
+              COALESCE(SUM(amount), 0) AS total
+       FROM sold_tickets
+       WHERE status = 'paid'
+       GROUP BY 1
+       ORDER BY total DESC
+       LIMIT 6`
+    ),
+  ]);
+
+  return {
+    revenueDays: byDay.rows.map((r) => String(r.day)),
+    revenueTotals: byDay.rows.map((r) => Number(r.total)),
+    typeLabels: byType.rows.map((r) => String(r.label)),
+    typeValues: byType.rows.map((r) => Number(r.total)),
+  };
+}
+
 const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
 export default async function DashboardView() {
-  const s = await loadStats();
+  const [s, charts] = await Promise.all([loadStats(), loadChartData()]);
 
   const kpis: Kpi[] = [
     {
@@ -180,19 +212,38 @@ export default async function DashboardView() {
           ))}
         </section>
 
-        {/* Chart placeholder — filled in next step */}
+        {/* Charts */}
         <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center lg:col-span-2">
-            <p className="text-sm font-semibold text-slate-700">Revenue chart</p>
-            <p className="mt-1 text-sm text-slate-500">Arrives in the next step (ApexCharts).</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">Revenue (last 30 days)</h2>
+              <span className="text-xs font-semibold text-slate-400">paid tickets · ₾</span>
+            </div>
+            {charts.revenueTotals.length ? (
+              <RevenueAreaChart days={charts.revenueDays} totals={charts.revenueTotals} />
+            ) : (
+              <EmptyChart label="No paid sales in the last 30 days yet." />
+            )}
           </div>
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-sm font-semibold text-slate-700">Sales by type</p>
-            <p className="mt-1 text-sm text-slate-500">Coming next.</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 className="mb-2 text-base font-bold text-slate-900">Sales by ticket type</h2>
+            {charts.typeValues.length ? (
+              <SalesByTypeDonut labels={charts.typeLabels} values={charts.typeValues} />
+            ) : (
+              <EmptyChart label="No paid sales yet." />
+            )}
           </div>
         </section>
       </div>
     </main>
+  );
+}
+
+function EmptyChart({ label }: { label: string }) {
+  return (
+    <div className="grid h-[320px] place-items-center rounded-xl border border-dashed border-slate-200 text-center">
+      <p className="px-6 text-sm text-slate-500">{label}</p>
+    </div>
   );
 }
 
