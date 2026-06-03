@@ -24,6 +24,7 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { default as default_56e2116334adf823ba4014b9703f6572 } from '../../../app/(payload)/admin/graphics/Icon.tsx'
 import { default as default_2e13608f516189ccb4c89145f01a0331 } from '../../../app/(payload)/admin/graphics/Logo.tsx'
 import { default as default_619b32b7c505dd90b9a5450436c26f7d } from '../../../app/(payload)/admin/NavBrand.tsx'
+import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { default as default_bb7b8728f9fe5719b997c872e2f8e7d8 } from '../../../app/(payload)/admin/DashboardView.tsx'
 import { default as default_0348f428fa654786f94bbbcaad1c4a1a } from '../../../app/(payload)/admin/ScannerView.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -56,6 +57,7 @@ export const importMap = {
   "/app/(payload)/admin/graphics/Icon.tsx#default": default_56e2116334adf823ba4014b9703f6572,
   "/app/(payload)/admin/graphics/Logo.tsx#default": default_2e13608f516189ccb4c89145f01a0331,
   "/app/(payload)/admin/NavBrand.tsx#default": default_619b32b7c505dd90b9a5450436c26f7d,
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/app/(payload)/admin/DashboardView.tsx#default": default_bb7b8728f9fe5719b997c872e2f8e7d8,
   "/app/(payload)/admin/ScannerView.tsx#default": default_0348f428fa654786f94bbbcaad1c4a1a,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

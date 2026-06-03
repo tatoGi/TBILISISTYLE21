@@ -55,3 +55,7 @@ TICKET_FLOW_REVIEW.md
 /scripts/test-email.mjs
 /scripts/check-quipu-order.mjs
 .commitmsg.tmp
+
+# Payload media uploads — stored in Vercel Blob (prod) / local disk (dev), not git
+public/media/
+scripts/.seed-result.txt

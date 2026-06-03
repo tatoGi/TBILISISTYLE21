@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { buildConfig } from "payload";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 
 import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
@@ -89,5 +90,14 @@ export default buildConfig({
         process.env.DATABASE_URL || process.env.POSTGRES_URL || "",
     },
   }),
+  plugins: [
+    // Store media in Vercel Blob when a token is present (production/Vercel).
+    // Without a token (local dev) it falls back to the local disk staticDir.
+    vercelBlobStorage({
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      collections: { media: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN || "",
+    }),
+  ],
   sharp,
 });
