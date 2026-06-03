@@ -5,6 +5,7 @@ import Link from "next/link";
 const links = [
   { href: "/admin/activity", label: "Activity" },
   { href: "/admin/scanner", label: "Scanner" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default function AdminNavLinks() {

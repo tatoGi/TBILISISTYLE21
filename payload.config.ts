@@ -55,6 +55,10 @@ export default buildConfig({
           Component: "/app/(payload)/admin/ActivityView.tsx",
           path: "/activity",
         },
+        settings: {
+          Component: "/app/(payload)/admin/SettingsView.tsx",
+          path: "/settings",
+        },
       },
     },
   },

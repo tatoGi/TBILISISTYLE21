@@ -29,6 +29,7 @@ import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e
 import { default as default_bb7b8728f9fe5719b997c872e2f8e7d8 } from '../../../app/(payload)/admin/DashboardView.tsx'
 import { default as default_0348f428fa654786f94bbbcaad1c4a1a } from '../../../app/(payload)/admin/ScannerView.tsx'
 import { default as default_9e6b8529af517f593ab78f02a784484b } from '../../../app/(payload)/admin/ActivityView.tsx'
+import { default as default_c74aa92f20cf4de51d56f7df5b781cbd } from '../../../app/(payload)/admin/SettingsView.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -64,5 +65,6 @@ export const importMap = {
   "/app/(payload)/admin/DashboardView.tsx#default": default_bb7b8728f9fe5719b997c872e2f8e7d8,
   "/app/(payload)/admin/ScannerView.tsx#default": default_0348f428fa654786f94bbbcaad1c4a1a,
   "/app/(payload)/admin/ActivityView.tsx#default": default_9e6b8529af517f593ab78f02a784484b,
+  "/app/(payload)/admin/SettingsView.tsx#default": default_c74aa92f20cf4de51d56f7df5b781cbd,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
