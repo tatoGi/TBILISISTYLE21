@@ -42,6 +42,7 @@ export default buildConfig({
         Icon: "/app/(payload)/admin/graphics/Icon.tsx",
       },
       beforeNavLinks: ["/app/(payload)/admin/NavBrand.tsx"],
+      afterNavLinks: ["/app/(payload)/admin/AdminNavLinks.tsx"],
       views: {
         dashboard: {
           Component: "/app/(payload)/admin/DashboardView.tsx",
@@ -49,6 +50,10 @@ export default buildConfig({
         scanner: {
           Component: "/app/(payload)/admin/ScannerView.tsx",
           path: "/scanner",
+        },
+        activity: {
+          Component: "/app/(payload)/admin/ActivityView.tsx",
+          path: "/activity",
         },
       },
     },
