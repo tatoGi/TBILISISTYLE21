@@ -25,4 +25,55 @@ body {
   font-family: var(--font-display), Arial, Helvetica, sans-serif;
 }
 
+/* Continuously scrolling product reel (two copies of the track sit side by
+   side; translating by -50% loops seamlessly). */
+@keyframes ts-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ts-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: ts-marquee 40s linear infinite;
+  will-change: transform;
+}
+
+.ts-marquee:hover .ts-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-marquee-track {
+    animation: none;
+  }
+}
+
+/* Attention-grabbing pulse for the floating "Buy Tickets" call to action. */
+@keyframes ts-ticket-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.55),
+      0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(253, 224, 71, 0),
+      0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.ts-ticket-pulse {
+  animation: ts-ticket-pulse 2.2s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ticket-pulse {
+    animation: none;
+  }
+}
+
 

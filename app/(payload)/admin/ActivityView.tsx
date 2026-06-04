@@ -1,5 +1,7 @@
-import { listSoldTickets } from "@/lib/sold-tickets";
+import type { AdminViewServerProps } from "payload";
 import { listProductOrders } from "@/lib/product-orders";
+import { listSoldTickets } from "@/lib/sold-tickets";
+import { AdminShell, Card, CardBody, PageHeader } from "./_ui";
 import { ActivityTable, type ActivityRow } from "./ActivityTable";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +14,6 @@ function toTime(value: unknown): string | null {
 
 async function loadActivity(): Promise<ActivityRow[]> {
   const [tickets, orders] = await Promise.all([
-    // Real buyers only (paid / scanned), skip never-completed attempts.
     listSoldTickets({ status: { in: ["paid", "scanned"] } }),
     listProductOrders({ status: { in: ["paid", "collected"] } }),
   ]);
@@ -46,44 +47,42 @@ async function loadActivity(): Promise<ActivityRow[]> {
   });
 }
 
-export default async function ActivityView() {
+export default async function ActivityView(props: AdminViewServerProps) {
   const rows = await loadActivity();
   const revenue = rows.reduce((sum, r) => sum + (r.amount || 0), 0);
   const tickets = rows.filter((r) => r.kind === "ticket").length;
   const merch = rows.filter((r) => r.kind === "merch").length;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-7 text-slate-900 md:px-8">
-      <div className="mx-auto grid max-w-7xl gap-7">
-        <header>
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-600">
-            Transactions
-          </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-900">
-            Activity — who bought what
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Every completed ticket and merch purchase, newest first.
-          </p>
-        </header>
+    <AdminShell {...props} breadcrumb={[{ label: "Activity" }]}>
+      <div className="ts21-admin-view">
+        <div className="mx-auto grid max-w-7xl gap-7">
+          <PageHeader
+            eyebrow="Transactions"
+            title="Activity"
+            description="Every completed ticket and merch purchase, newest first."
+          />
 
-        <section className="grid gap-4 sm:grid-cols-3">
-          <Summary label="Total revenue" value={`${revenue.toLocaleString("en-US")} ₾`} />
-          <Summary label="Tickets" value={String(tickets)} />
-          <Summary label="Merch orders" value={String(merch)} />
-        </section>
+          <section className="grid gap-4 sm:grid-cols-3">
+            <Summary label="Total revenue" value={`${revenue.toLocaleString("en-US")} GEL`} />
+            <Summary label="Tickets" value={String(tickets)} />
+            <Summary label="Merch orders" value={String(merch)} />
+          </section>
 
-        <ActivityTable rows={rows} />
+          <ActivityTable rows={rows} />
+        </div>
       </div>
-    </main>
+    </AdminShell>
   );
 }
 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-black text-slate-900">{value}</p>
-    </div>
+    <Card>
+      <CardBody>
+        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+        <p className="mt-1 text-2xl font-black text-slate-900">{value}</p>
+      </CardBody>
+    </Card>
   );
 }

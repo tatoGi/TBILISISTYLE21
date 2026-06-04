@@ -9,7 +9,7 @@ export const ProductOrders: CollectionConfig = {
   admin: {
     useAsTitle: "productTitle",
     defaultColumns: ["productTitle", "size", "name", "email", "status", "paidAt"],
-    group: "Orders",
+    group: false,
     description: "Read-only merch orders created by the product payment flow.",
   },
   access: {

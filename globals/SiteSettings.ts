@@ -6,7 +6,7 @@ import type { GlobalConfig } from "payload";
 export const SiteSettings: GlobalConfig = {
   slug: "site",
   label: "Menu",
-  admin: { group: "Content" },
+  admin: { group: false },
   access: { read: () => true },
   fields: [
     {

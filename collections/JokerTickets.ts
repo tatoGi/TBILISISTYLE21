@@ -9,7 +9,7 @@ export const JokerTickets: CollectionConfig = {
   admin: {
     useAsTitle: "email",
     defaultColumns: ["eventName", "name", "surname", "email", "status", "paidAt"],
-    group: "Orders",
+    group: false,
     description: "Read-only mirror of paid Joker ticket purchases.",
   },
   access: {

@@ -9,7 +9,7 @@ export const MessageJobs: CollectionConfig = {
   admin: {
     useAsTitle: "email",
     defaultColumns: ["email", "subject", "type", "status", "attempts", "createdAt"],
-    group: "Orders",
+    group: false,
     description: "Read-only outgoing message queue used by ticket emails.",
   },
   access: {

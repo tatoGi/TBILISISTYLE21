@@ -153,6 +153,10 @@ export interface Page {
    * URL path, e.g. "main-stage" → /main-stage. Lowercase, no spaces.
    */
   slug: string;
+  /**
+   * For pages that live at a fixed React route, e.g. "/dashboard/shop". When set, menus link here instead of /{slug}.
+   */
+  routePath?: string | null;
   showInNav?: boolean | null;
   /**
    * Lower numbers appear first.
@@ -660,6 +664,7 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  routePath?: T;
   showInNav?: T;
   navOrder?: T;
   navLabel?: T;

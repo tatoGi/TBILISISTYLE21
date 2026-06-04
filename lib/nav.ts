@@ -2,12 +2,13 @@ import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
 
 export type NavLink = { label: string; href: string };
 
-type PageRef = { slug?: string; title?: string; navLabel?: string };
+type PageRef = { slug?: string; title?: string; navLabel?: string; routePath?: string };
 
 function toLink(page: PageRef, override?: string): NavLink {
+  const routePath = page.routePath?.trim();
   return {
     label: (override || page.navLabel || page.title || page.slug || "").toString(),
-    href: `/${page.slug}`,
+    href: routePath ? routePath : `/${page.slug}`,
   };
 }
 
@@ -54,7 +55,7 @@ export async function getFeaturedPages(): Promise<NavLink[]> {
       fallbackLocale: "ka",
       sort: "navOrder",
       depth: 0,
-      limit: 100,
+      limit: 6,
     });
     return res.docs.map((p) => toLink(p as PageRef));
   } catch {

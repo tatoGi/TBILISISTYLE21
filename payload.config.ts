@@ -47,17 +47,78 @@ export default buildConfig({
         dashboard: {
           Component: "/app/(payload)/admin/DashboardView.tsx",
         },
+        // NOTE: every custom view below sets `exact: true`. Without it Payload's
+        // path matcher treats `/products` as a prefix of `/products/new`, so the
+        // create/edit routes silently resolve to the list view. Keep it on.
         scanner: {
           Component: "/app/(payload)/admin/ScannerView.tsx",
+          exact: true,
           path: "/scanner",
         },
         activity: {
           Component: "/app/(payload)/admin/ActivityView.tsx",
+          exact: true,
           path: "/activity",
         },
         settings: {
           Component: "/app/(payload)/admin/SettingsView.tsx",
+          exact: true,
           path: "/settings",
+        },
+        pages: {
+          Component: "/app/(payload)/admin/PagesListView.tsx",
+          exact: true,
+          path: "/pages",
+        },
+        news: {
+          Component: "/app/(payload)/admin/NewsListView.tsx",
+          exact: true,
+          path: "/news",
+        },
+        media: {
+          Component: "/app/(payload)/admin/MediaListView.tsx",
+          exact: true,
+          path: "/media",
+        },
+        menu: {
+          Component: "/app/(payload)/admin/MenuView.tsx",
+          exact: true,
+          path: "/menu",
+        },
+        tickets: {
+          Component: "/app/(payload)/admin/TicketsListView.tsx",
+          exact: true,
+          path: "/tickets",
+        },
+        products: {
+          Component: "/app/(payload)/admin/ProductsListView.tsx",
+          exact: true,
+          path: "/products",
+        },
+        soldTickets: {
+          Component: "/app/(payload)/admin/SoldTicketsListView.tsx",
+          exact: true,
+          path: "/sold-tickets",
+        },
+        productOrders: {
+          Component: "/app/(payload)/admin/ProductOrdersListView.tsx",
+          exact: true,
+          path: "/product-orders",
+        },
+        jokerTickets: {
+          Component: "/app/(payload)/admin/JokerTicketsListView.tsx",
+          exact: true,
+          path: "/joker-tickets",
+        },
+        emailJobs: {
+          Component: "/app/(payload)/admin/EmailJobsListView.tsx",
+          exact: true,
+          path: "/emails",
+        },
+        users: {
+          Component: "/app/(payload)/admin/UsersListView.tsx",
+          exact: true,
+          path: "/users",
         },
       },
     },

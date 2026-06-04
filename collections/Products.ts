@@ -6,7 +6,13 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "priceGel", "isVip", "status"],
-    group: "Commerce",
+    group: false,
+    // Replace the native list with the unified Velzon list (redirects to /admin/products).
+    components: {
+      views: {
+        list: { Component: "/app/(payload)/admin/ProductsCollectionList.tsx" },
+      },
+    },
   },
   timestamps: true,
   hooks: {

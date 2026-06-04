@@ -8,7 +8,7 @@ export const Tickets: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "priceGel", "quantity", "status"],
-    group: "Commerce",
+    group: false,
   },
   // Catalog is admin-managed only; public site reads via the native driver.
   timestamps: true,

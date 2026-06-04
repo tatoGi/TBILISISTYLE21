@@ -30,6 +30,10 @@ type PageDef = {
   bottom?: string[]; // shown below the text
   gallery?: string[]; // shown as a gallery below the text
   featured?: boolean; // show on the homepage
+  /** Functional page that lives at a fixed React route — menus link here, no content migrated. */
+  routePath?: string;
+  /** When set, the title comes from messages `nav.<navKey>` instead of a content object. */
+  navKey?: string;
 };
 
 const pageMap: PageDef[] = [
@@ -45,11 +49,20 @@ const pageMap: PageDef[] = [
   { slug: "food-zone", key: "foodZone", fallbackTitle: "Food Zone", top: ["images/foodzone1.jpeg"], bottom: ["images/foodzone2.jpeg"] },
   { slug: "contact-us", key: "contactUs", fallbackTitle: "Contact Us" },
   { slug: "rules-and-terms", key: "rulesAndTerms", fallbackTitle: "Rules & Terms" },
+  // Functional pages: discoverable in Pages + menu, but link to their React route.
+  { slug: "shop", key: "shop", navKey: "shop", fallbackTitle: "Shop", routePath: "/dashboard/shop", featured: true },
+  { slug: "tickets", key: "ticket", navKey: "ticket", fallbackTitle: "Tickets", routePath: "/dashboard/tickets", featured: true },
 ];
 
 function getContent(loc: Locale, key: string): Record<string, unknown> | null {
   const v = localeData[loc]?.[key];
   return v && typeof v === "object" ? (v as Record<string, unknown>) : null;
+}
+
+function navTitle(loc: Locale, navKey: string): string {
+  const nav = localeData[loc]?.nav as Record<string, string> | undefined;
+  const v = nav?.[navKey];
+  return typeof v === "string" && v.trim() ? v.trim() : "";
 }
 
 function titleFor(content: Record<string, unknown> | null, titleField: string, fallback: string): string {
@@ -88,7 +101,6 @@ try {
   const payload = await getPayload({ config });
   const mediaCache = new Map<string, string>();
   let navOrder = 0;
-  const menuIds: string[] = [];
 
   async function ensureMedia(rel: string): Promise<string | null> {
     if (mediaCache.has(rel)) return mediaCache.get(rel)!;
@@ -113,24 +125,41 @@ try {
   for (const def of pageMap) {
     const { slug, key, titleField = "title", fallbackTitle } = def;
     const kaContent = getContent("ka", key);
-    const kaTitle = titleFor(kaContent, titleField, fallbackTitle);
+    const kaTitle = def.navKey
+      ? navTitle("ka", def.navKey) || fallbackTitle
+      : titleFor(kaContent, titleField, fallbackTitle);
 
     // Resolve image ids
     const topIds = (await Promise.all((def.top ?? []).map(ensureMedia))).filter(Boolean) as string[];
     const bottomIds = (await Promise.all((def.bottom ?? []).map(ensureMedia))).filter(Boolean) as string[];
     const galleryIds = (await Promise.all((def.gallery ?? []).map(ensureMedia))).filter(Boolean) as string[];
 
-    // Build layout: top images → text → bottom images → gallery
+    // Build layout. Functional pages (shop/tickets) just need a valid block so
+    // they exist in Pages + menu; their real UI lives at `routePath`. Content
+    // pages get: top images → text → bottom images → gallery.
     const layout: Record<string, unknown>[] = [];
-    for (const id of topIds) layout.push({ blockType: "image", image: id, width: "full" });
-    layout.push({ blockType: "richText", content: lexical(paragraphsFor(kaContent, titleField)) });
-    for (const id of bottomIds) layout.push({ blockType: "image", image: id, width: "full" });
-    if (galleryIds.length) layout.push({ blockType: "gallery", columns: "3", images: galleryIds.map((id) => ({ image: id })) });
+    if (def.routePath) {
+      layout.push({ blockType: "hero", heading: kaTitle });
+    } else {
+      for (const id of topIds) layout.push({ blockType: "image", image: id, width: "full" });
+      layout.push({ blockType: "richText", content: lexical(paragraphsFor(kaContent, titleField)) });
+      for (const id of bottomIds) layout.push({ blockType: "image", image: id, width: "full" });
+      if (galleryIds.length) layout.push({ blockType: "gallery", columns: "3", images: galleryIds.map((id) => ({ image: id })) });
+    }
 
     navOrder += 10;
     const existing = await payload.find({ collection: "pages", where: { slug: { equals: slug } }, locale: "ka", depth: 0, limit: 1 });
     const existingDoc = existing.docs[0] as { id: string } | undefined;
-    const data = { slug, title: kaTitle, _status: "published", showInNav: true, navOrder, layout } as never;
+    const data = {
+      slug,
+      title: kaTitle,
+      _status: "published",
+      showInNav: true,
+      navOrder,
+      featuredOnHome: !!def.featured,
+      ...(def.routePath ? { routePath: def.routePath } : {}),
+      layout,
+    } as never;
 
     const saved = existingDoc
       ? await payload.update({ collection: "pages", id: existingDoc.id, locale: "ka", data })
@@ -139,7 +168,7 @@ try {
     // Re-fetch with depth 0 to get clean block ids + relation ids
     const fresh = (await payload.findByID({ collection: "pages", id: (saved as { id: string }).id, locale: "ka", depth: 0 })) as {
       id: string;
-      layout?: { id?: string; blockType?: string; image?: string; width?: string; columns?: string; images?: unknown }[];
+      layout?: { id?: string; blockType?: string; image?: string; width?: string; columns?: string; images?: unknown; heading?: string }[];
     };
 
     for (const loc of otherLocales) {
@@ -154,13 +183,19 @@ try {
         if (b.blockType === "gallery") {
           return { id: b.id, blockType: "gallery", columns: b.columns, images: b.images };
         }
+        if (b.blockType === "hero") {
+          return { id: b.id, blockType: "hero", heading: def.navKey ? navTitle(loc, def.navKey) || kaTitle : kaTitle };
+        }
         return b;
       });
       await payload.update({
         collection: "pages",
         id: fresh.id,
         locale: loc,
-        data: { title: titleFor(c, titleField, kaTitle), layout: locLayout } as never,
+        data: {
+          title: def.navKey ? navTitle(loc, def.navKey) || kaTitle : titleFor(c, titleField, kaTitle),
+          layout: locLayout,
+        } as never,
       });
     }
 

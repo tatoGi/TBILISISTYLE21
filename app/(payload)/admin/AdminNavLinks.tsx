@@ -1,52 +1,102 @@
 import React from "react";
 import Link from "next/link";
 
-// Extra links injected into the Payload admin sidebar (after the collection nav).
-const links = [
-  { href: "/admin/activity", label: "Activity" },
-  { href: "/admin/scanner", label: "Scanner" },
-  { href: "/admin/settings", label: "Settings" },
+const groups = [
+  {
+    title: "Content",
+    links: [
+      { href: "/admin/pages", label: "Pages", icon: "Pg" },
+      { href: "/admin/news", label: "News", icon: "N" },
+      { href: "/admin/media", label: "Media", icon: "M" },
+      { href: "/admin/menu", label: "Menu", icon: "Mn" },
+    ],
+  },
+  {
+    title: "Catalog",
+    links: [
+      { href: "/admin/tickets", label: "Ticket Types", icon: "T" },
+      { href: "/admin/products", label: "Products", icon: "P" },
+    ],
+  },
+  {
+    title: "Operations",
+    links: [
+      { href: "/admin/sold-tickets", label: "Sold Tickets", icon: "S" },
+      { href: "/admin/product-orders", label: "Product Orders", icon: "O" },
+      { href: "/admin/joker-tickets", label: "Joker Tickets", icon: "J" },
+      { href: "/admin/emails", label: "Email Queue", icon: "E" },
+      { href: "/admin/activity", label: "Activity", icon: "A" },
+      { href: "/admin/scanner", label: "Scanner", icon: "Q" },
+      { href: "/admin/settings", label: "Settings", icon: "C" },
+    ],
+  },
+  {
+    title: "System",
+    links: [{ href: "/admin/users", label: "Users", icon: "U" }],
+  },
 ];
 
 export default function AdminNavLinks() {
   return (
     <div
       style={{
+        borderTop: "1px solid var(--theme-elevation-100)",
         display: "flex",
         flexDirection: "column",
-        gap: 2,
-        padding: "10px 0 6px",
-        marginTop: 6,
-        borderTop: "1px solid var(--theme-elevation-100)",
+        gap: 10,
+        margin: "10px 8px 6px",
+        paddingTop: 14,
       }}
     >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "var(--theme-elevation-400)",
-          padding: "4px 12px",
-        }}
-      >
-        Operations
-      </div>
-      {links.map((l) => (
-        <Link
-          key={l.href}
-          href={l.href}
-          style={{
-            display: "block",
-            padding: "8px 12px",
-            borderRadius: 6,
-            fontWeight: 600,
-            color: "var(--theme-elevation-800)",
-            textDecoration: "none",
-          }}
-        >
-          {l.label}
-        </Link>
+      {groups.map((group) => (
+        <div key={group.title} style={{ display: "grid", gap: 4 }}>
+          <div
+            style={{
+              color: "var(--theme-elevation-400)",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.12em",
+              padding: "4px 10px",
+              textTransform: "uppercase",
+            }}
+          >
+            {group.title}
+          </div>
+          {group.links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{
+                alignItems: "center",
+                borderRadius: 8,
+                color: "var(--theme-elevation-800)",
+                display: "flex",
+                fontWeight: 700,
+                gap: 10,
+                padding: "9px 10px",
+                textDecoration: "none",
+              }}
+            >
+              <span
+                style={{
+                  alignItems: "center",
+                  background: "var(--theme-elevation-100)",
+                  borderRadius: 6,
+                  color: "var(--theme-elevation-600)",
+                  display: "grid",
+                  fontSize: 10,
+                  fontWeight: 900,
+                  height: 22,
+                  justifyContent: "center",
+                  width: 22,
+                }}
+              >
+                {link.icon}
+              </span>
+              {link.label}
+            </Link>
+          ))}
+        </div>
       ))}
     </div>
   );

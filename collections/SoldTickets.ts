@@ -9,7 +9,7 @@ export const SoldTickets: CollectionConfig = {
   admin: {
     useAsTitle: "email",
     defaultColumns: ["eventName", "name", "surname", "email", "status", "paidAt"],
-    group: "Orders",
+    group: false,
     description: "Read-only ticket purchases created by the payment flow.",
   },
   access: {

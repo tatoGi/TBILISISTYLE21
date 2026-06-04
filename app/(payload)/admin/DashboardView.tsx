@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getPayloadClient, getPgPool } from "@/lib/payload";
+import { getPgPool } from "@/lib/payload";
+import { Button, Card, CardBody, CardHeader, PageHeader, Progress } from "./_ui";
 import { RevenueAreaChart, SalesByTypeDonut } from "./charts/DashboardCharts";
 
 export const dynamic = "force-dynamic";
@@ -26,16 +27,13 @@ type Kpi = {
 };
 
 async function loadStats() {
-  const payload = await getPayloadClient();
   const pool = await getPgPool();
-
-  const countSold = (where: Record<string, unknown>) =>
-    payload.count({ collection: "soldTickets", where: where as never }).then((r) => r.totalDocs);
 
   const [
     revenue,
     inventory,
     ticketsSold,
+    productOrdersPaid,
     pending,
     scanned,
     emailsPending,
@@ -43,27 +41,42 @@ async function loadStats() {
     ticketTypes,
     products,
   ] = await Promise.all([
-    pool.query("SELECT COALESCE(SUM(amount), 0) AS total FROM sold_tickets WHERE status = 'paid'"),
-    pool.query("SELECT COALESCE(SUM(quantity), 0) AS remaining FROM tickets"),
-    countSold({ status: { equals: "paid" } }),
-    countSold({ status: { equals: "pending" } }),
-    countSold({ and: [{ status: { equals: "paid" } }, { scannedAt: { exists: true } }] }),
-    payload.count({ collection: "messageJobs", where: { status: { in: ["pending", "processing"] } } }).then((r) => r.totalDocs),
-    payload.count({ collection: "messageJobs", where: { status: { equals: "failed" } } }).then((r) => r.totalDocs),
-    payload.count({ collection: "tickets" }).then((r) => r.totalDocs),
-    payload.count({ collection: "products" }).then((r) => r.totalDocs),
+    pool.query(`
+      SELECT
+        COALESCE((SELECT SUM(amount) FROM sold_tickets WHERE status IN ('paid', 'scanned')), 0)
+        + COALESCE((SELECT SUM(amount) FROM product_orders WHERE status IN ('paid', 'collected')), 0) AS total
+    `),
+    pool.query(`
+      SELECT
+        COALESCE((SELECT SUM(quantity) FROM tickets), 0)
+        + COALESCE((SELECT SUM(quantity) FROM products_sizes), 0) AS remaining
+    `),
+    pool.query("SELECT COUNT(*) AS total FROM sold_tickets WHERE status IN ('paid', 'scanned')"),
+    pool.query("SELECT COUNT(*) AS total FROM product_orders WHERE status IN ('paid', 'collected')"),
+    pool.query(`
+      SELECT
+        COALESCE((SELECT COUNT(*) FROM sold_tickets WHERE status = 'pending'), 0)
+        + COALESCE((SELECT COUNT(*) FROM product_orders WHERE status = 'pending'), 0) AS total
+    `),
+    pool.query("SELECT COUNT(*) AS total FROM sold_tickets WHERE status = 'scanned' OR scanned_at IS NOT NULL"),
+    pool.query("SELECT COUNT(*) AS total FROM message_jobs WHERE status IN ('pending', 'processing')"),
+    pool.query("SELECT COUNT(*) AS total FROM message_jobs WHERE status = 'failed'"),
+    pool.query("SELECT COUNT(*) AS total FROM tickets"),
+    pool.query("SELECT COUNT(*) AS total FROM products"),
   ]);
 
   return {
     revenueGel: Number(revenue.rows[0]?.total ?? 0),
     inventoryRemaining: Number(inventory.rows[0]?.remaining ?? 0),
-    ticketsSold,
-    pending,
-    scanned,
-    emailsPending,
-    emailsFailed,
-    ticketTypes,
-    products,
+    paidOrders: Number(ticketsSold.rows[0]?.total ?? 0) + Number(productOrdersPaid.rows[0]?.total ?? 0),
+    productOrdersPaid: Number(productOrdersPaid.rows[0]?.total ?? 0),
+    ticketsSold: Number(ticketsSold.rows[0]?.total ?? 0),
+    pending: Number(pending.rows[0]?.total ?? 0),
+    scanned: Number(scanned.rows[0]?.total ?? 0),
+    emailsPending: Number(emailsPending.rows[0]?.total ?? 0),
+    emailsFailed: Number(emailsFailed.rows[0]?.total ?? 0),
+    ticketTypes: Number(ticketTypes.rows[0]?.total ?? 0),
+    products: Number(products.rows[0]?.total ?? 0),
   };
 }
 
@@ -71,20 +84,33 @@ async function loadChartData() {
   const pool = await getPgPool();
   const [byDay, byType] = await Promise.all([
     pool.query(
-      `SELECT to_char(date_trunc('day', paid_at), 'DD Mon') AS day,
-              COALESCE(SUM(amount), 0) AS total
-       FROM sold_tickets
-       WHERE status = 'paid' AND paid_at IS NOT NULL
-         AND paid_at >= now() - interval '30 days'
-       GROUP BY date_trunc('day', paid_at)
-       ORDER BY date_trunc('day', paid_at)`
+      `SELECT to_char(day, 'DD Mon') AS day, COALESCE(SUM(amount), 0) AS total
+       FROM (
+         SELECT date_trunc('day', paid_at) AS day, amount
+         FROM sold_tickets
+         WHERE status IN ('paid', 'scanned') AND paid_at IS NOT NULL
+           AND paid_at >= now() - interval '30 days'
+         UNION ALL
+         SELECT date_trunc('day', paid_at) AS day, amount
+         FROM product_orders
+         WHERE status IN ('paid', 'collected') AND paid_at IS NOT NULL
+           AND paid_at >= now() - interval '30 days'
+       ) sales
+       GROUP BY day
+       ORDER BY day`
     ),
     pool.query(
-      `SELECT COALESCE(NULLIF(event_name, ''), 'Other') AS label,
-              COALESCE(SUM(amount), 0) AS total
-       FROM sold_tickets
-       WHERE status = 'paid'
-       GROUP BY 1
+      `SELECT label, COALESCE(SUM(amount), 0) AS total
+       FROM (
+         SELECT COALESCE(NULLIF(event_name, ''), 'Ticket') AS label, amount
+         FROM sold_tickets
+         WHERE status IN ('paid', 'scanned')
+         UNION ALL
+         SELECT COALESCE(NULLIF(product_title, ''), 'Product') AS label, amount
+         FROM product_orders
+         WHERE status IN ('paid', 'collected')
+       ) sales
+       GROUP BY label
        ORDER BY total DESC
        LIMIT 6`
     ),
@@ -106,18 +132,18 @@ export default async function DashboardView() {
   const kpis: Kpi[] = [
     {
       label: "Total revenue",
-      value: `${fmt(s.revenueGel)} ₾`,
-      hint: `from ${fmt(s.ticketsSold)} paid tickets`,
+      value: `${fmt(s.revenueGel)} GEL`,
+      hint: `from ${fmt(s.paidOrders)} paid ticket/product orders`,
       tone: "emerald",
-      href: "/admin/collections/soldTickets?where[status][equals]=paid",
+      href: "/admin/sold-tickets",
       icon: <MoneyIcon />,
     },
     {
       label: "Tickets sold",
       value: fmt(s.ticketsSold),
-      hint: `${s.pending} payment${s.pending === 1 ? "" : "s"} pending`,
+      hint: `${s.productOrdersPaid} paid product orders / ${s.pending} pending`,
       tone: "amber",
-      href: "/admin/collections/soldTickets",
+      href: "/admin/sold-tickets",
       icon: <TicketIcon />,
     },
     {
@@ -133,15 +159,15 @@ export default async function DashboardView() {
       value: fmt(s.inventoryRemaining),
       hint: `${s.ticketTypes} ticket types`,
       tone: "slate",
-      href: "/admin/collections/tickets",
+      href: "/admin/tickets",
       icon: <BoxIcon />,
     },
     {
       label: "Email queue",
       value: fmt(s.emailsPending + s.emailsFailed),
-      hint: `${s.emailsFailed} failed · ${s.emailsPending} pending`,
+      hint: `${s.emailsFailed} failed / ${s.emailsPending} pending`,
       tone: s.emailsFailed > 0 ? "rose" : "violet",
-      href: "/admin/collections/messageJobs",
+      href: "/admin/emails",
       icon: <EnvelopeIcon />,
     },
     {
@@ -149,62 +175,47 @@ export default async function DashboardView() {
       value: fmt(s.products),
       hint: "items in the shop",
       tone: "violet",
-      href: "/admin/collections/products",
+      href: "/admin/products",
       icon: <BagIcon />,
     },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 py-7 text-slate-900 md:px-8">
+    <div className="ts21-admin-view">
       <div className="mx-auto grid max-w-7xl gap-7">
-        {/* Page header */}
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-600">
-              Tbilisi Style 21
-            </p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-900">
-              Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Tickets, merch, orders and entrance control — live overview.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/admin/scanner"
-              className="inline-flex h-10 items-center rounded-xl bg-amber-400 px-4 text-sm font-bold text-slate-950 transition hover:bg-amber-300"
-            >
-              Open Scanner
-            </Link>
-            <Link
-              href="/admin/collections/pages/create"
-              className="inline-flex h-10 items-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
-            >
-              New Page
-            </Link>
-          </div>
-        </header>
+        <PageHeader
+          eyebrow="Tbilisi Style 21"
+          title="Dashboard"
+          description="Tickets, merch, orders and entrance control - live overview."
+          actions={
+            <>
+              <Button href="/admin/scanner" className="bg-[#405189] hover:bg-[#364574]" icon={<QrIcon />}>
+                Open Scanner
+              </Button>
+              <Button href="/admin/collections/pages/create" color="slate" variant="outline" icon={<PlusIcon />}>
+                New Page
+              </Button>
+            </>
+          }
+        />
 
-        {/* KPI cards */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {kpis.map((k) => (
             <Link
               key={k.label}
               href={k.href}
-              className={`group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone[k.tone].ring}`}
+              className={`group rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${tone[k.tone].ring}`}
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    {k.label}
-                  </p>
-                  <p className={`mt-3 text-3xl font-black tracking-tight ${tone[k.tone].value}`}>
-                    {k.value}
-                  </p>
+                  <p className="truncate text-xs font-semibold uppercase tracking-wider text-slate-500">{k.label}</p>
+                  <p className={`mt-3 text-3xl font-black tracking-tight ${tone[k.tone].value}`}>{k.value}</p>
                   <p className="mt-1 text-xs text-slate-500">{k.hint}</p>
+                  {k.label === "Inventory remaining" ? (
+                    <Progress value={Math.min(100, s.inventoryRemaining)} className="mt-4" tone="primary" />
+                  ) : null}
                 </div>
-                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone[k.tone].tile}`}>
+                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-lg ${tone[k.tone].tile}`}>
                   {k.icon}
                 </span>
               </div>
@@ -212,42 +223,45 @@ export default async function DashboardView() {
           ))}
         </section>
 
-        {/* Charts */}
         <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
-            <div className="mb-2 flex items-center justify-between">
+          <Card className="lg:col-span-2">
+            <CardHeader actions={<span className="text-xs font-semibold text-slate-400">paid tickets / GEL</span>}>
               <h2 className="text-base font-bold text-slate-900">Revenue (last 30 days)</h2>
-              <span className="text-xs font-semibold text-slate-400">paid tickets · ₾</span>
-            </div>
-            {charts.revenueTotals.length ? (
-              <RevenueAreaChart days={charts.revenueDays} totals={charts.revenueTotals} />
-            ) : (
-              <EmptyChart label="No paid sales in the last 30 days yet." />
-            )}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-2 text-base font-bold text-slate-900">Sales by ticket type</h2>
-            {charts.typeValues.length ? (
-              <SalesByTypeDonut labels={charts.typeLabels} values={charts.typeValues} />
-            ) : (
-              <EmptyChart label="No paid sales yet." />
-            )}
-          </div>
+            </CardHeader>
+            <CardBody>
+              {charts.revenueTotals.length ? (
+                <RevenueAreaChart days={charts.revenueDays} totals={charts.revenueTotals} />
+              ) : (
+                <EmptyChart label="No paid sales in the last 30 days yet." />
+              )}
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader>
+              <h2 className="text-base font-bold text-slate-900">Sales by ticket type</h2>
+            </CardHeader>
+            <CardBody>
+              {charts.typeValues.length ? (
+                <SalesByTypeDonut labels={charts.typeLabels} values={charts.typeValues} />
+              ) : (
+                <EmptyChart label="No paid sales yet." />
+              )}
+            </CardBody>
+          </Card>
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 
 function EmptyChart({ label }: { label: string }) {
   return (
-    <div className="grid h-[320px] place-items-center rounded-xl border border-dashed border-slate-200 text-center">
+    <div className="grid h-[320px] place-items-center rounded-lg border border-dashed border-slate-200 text-center">
       <p className="px-6 text-sm text-slate-500">{label}</p>
     </div>
   );
 }
 
-// --- Icons ---
 function MoneyIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -256,6 +270,7 @@ function MoneyIcon() {
     </svg>
   );
 }
+
 function TicketIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -263,6 +278,7 @@ function TicketIcon() {
     </svg>
   );
 }
+
 function CheckIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -271,6 +287,7 @@ function CheckIcon() {
     </svg>
   );
 }
+
 function BoxIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -280,6 +297,7 @@ function BoxIcon() {
     </svg>
   );
 }
+
 function EnvelopeIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -288,12 +306,32 @@ function EnvelopeIcon() {
     </svg>
   );
 }
+
 function BagIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  );
+}
+
+function QrIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect width="5" height="5" x="3" y="3" rx="1" />
+      <rect width="5" height="5" x="16" y="3" rx="1" />
+      <rect width="5" height="5" x="3" y="16" rx="1" />
+      <path d="M16 16h2v2h-2zM20 16h1v5h-5v-1M11 3h2M11 8h2M11 16h2M16 11h5M3 11h5M11 21h2" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 5v14M5 12h14" />
     </svg>
   );
 }

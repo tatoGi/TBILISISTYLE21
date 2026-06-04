@@ -1,41 +1,62 @@
 import React from "react";
+import Link from "next/link";
 
-// Brand wordmark pinned to the top of the admin sidebar (above nav links).
 export default function NavBrand() {
   return (
-    <div
+    <Link
+      href="/admin"
       style={{
+        alignItems: "center",
+        color: "inherit",
         display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        padding: "4px 12px 14px",
-        marginBottom: 6,
+        gap: 10,
+        margin: "4px 10px 14px",
+        padding: "12px 10px 16px",
         borderBottom: "1px solid var(--theme-elevation-100)",
+        textDecoration: "none",
       }}
     >
-      <div
+      <span
         style={{
-          fontSize: 18,
+          alignItems: "center",
+          background: "#405189",
+          borderRadius: 8,
+          color: "#fff",
+          display: "grid",
+          fontSize: 14,
           fontWeight: 900,
-          letterSpacing: "0.01em",
-          textTransform: "uppercase",
-          lineHeight: 1.05,
-          color: "var(--theme-elevation-1000)",
+          height: 34,
+          justifyContent: "center",
+          width: 34,
         }}
       >
-        Tbilisi Style <span style={{ color: "#eab308" }}>21</span>
-      </div>
-      <div
-        style={{
-          fontSize: 9.5,
-          fontWeight: 700,
-          letterSpacing: "0.26em",
-          textTransform: "uppercase",
-          color: "var(--theme-elevation-400)",
-        }}
-      >
-        Admin Panel
-      </div>
-    </div>
+        TS
+      </span>
+      <span style={{ display: "grid", gap: 1, minWidth: 0 }}>
+        <span
+          style={{
+            color: "var(--theme-elevation-1000)",
+            fontSize: 16,
+            fontWeight: 900,
+            letterSpacing: "0.01em",
+            lineHeight: 1,
+            textTransform: "uppercase",
+          }}
+        >
+          Tbilisi Style 21
+        </span>
+        <span
+          style={{
+            color: "var(--theme-elevation-400)",
+            fontSize: 9.5,
+            fontWeight: 800,
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+          }}
+        >
+          Admin Panel
+        </span>
+      </span>
+    </Link>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
@@ -45,24 +46,38 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
 
         <Link
           href="/dashboard/festival"
-          className="flex shrink-0 items-center"
+          className="flex shrink-0 items-center gap-2 sm:gap-3"
           aria-label="Tbilisi Style 21"
         >
-          <span className="max-w-[44vw] text-[clamp(0.95rem,4.5vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:max-w-none sm:text-4xl sm:tracking-wider">
+          <Image
+            src="/images/logo2.jpeg"
+            alt="Tbilisi Style 21"
+            width={44}
+            height={44}
+            priority
+            className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/30 sm:h-11 sm:w-11"
+          />
+          <span className="max-w-[40vw] text-[clamp(0.95rem,4.5vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:max-w-none sm:text-4xl sm:tracking-wider">
             Tbilisi Style 21
           </span>
         </Link>
 
-        <div className="ml-auto flex items-center gap-3">
-          <Link
-            href="/dashboard/tickets"
-            className="rounded-full border border-yellow-300/60 bg-yellow-300 px-4 py-2 text-xs font-extrabold uppercase tracking-normal text-black shadow-[0_0_24px_rgba(253,224,71,0.28)] transition-all duration-200 hover:bg-white hover:border-white"
-          >
-            {t("common.buyTickets")}
-          </Link>
+        {/* Language switcher — centered on desktop */}
+        <div className="pointer-events-none absolute inset-x-0 hidden justify-center sm:flex">
+          <div className="pointer-events-auto">
+            <LanguageSwitcher />
+          </div>
+        </div>
+
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {/* On mobile (no centered slot, no hover) keep the switcher inline */}
+          <div className="sm:hidden">
+            <LanguageSwitcher />
+          </div>
 
           <button
             onClick={() => setNavOpen(!navOpen)}
+            onMouseEnter={() => setNavOpen(true)}
             className="relative z-50 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/25 backdrop-blur-md"
           >
             <span
@@ -100,6 +115,7 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
         style={{
           transform: navOpen ? "translateX(0)" : "translateX(100%)",
         }}
+        onMouseLeave={() => setNavOpen(false)}
       >
         <div className="h-full flex flex-col px-8 pt-28 pb-8 overflow-y-auto relative">
 
@@ -110,13 +126,6 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
             <span className="w-6 h-[2px] bg-white rotate-45 absolute" />
             <span className="w-6 h-[2px] bg-white -rotate-45 absolute" />
           </button>
-
-          <div className="mb-8">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/45">
-              {t("common.language")}
-            </p>
-            <LanguageSwitcher />
-          </div>
 
           <nav className="flex flex-col flex-1 justify-center gap-0">
             {links.map((item, i) => (

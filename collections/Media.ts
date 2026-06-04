@@ -6,7 +6,7 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   admin: {
-    group: "Content",
+    group: false,
   },
   upload: {
     // Local disk in dev. On Vercel/serverless, swap to a storage adapter

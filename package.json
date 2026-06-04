@@ -20,6 +20,7 @@
     "@payloadcms/richtext-lexical": "^3.85.0",
     "@payloadcms/storage-vercel-blob": "^3.85.0",
     "@react-pdf/renderer": "^4.5.1",
+    "@tanstack/react-table": "^8.21.3",
     "apexcharts": "^5.13.0",
     "graphql": "^16.14.0",
     "html5-qrcode": "^2.3.8",
@@ -36,6 +37,7 @@
     "react-dom": "^19.2.6",
     "resend": "^6.12.4",
     "sharp": "^0.34.5",
+    "simplebar-react": "^3.3.2",
     "uuid": "^14.0.0"
   },
   "devDependencies": {

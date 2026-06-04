@@ -205,3 +205,292 @@ nav a[aria-current="page"],
 .list-selection__actions button[aria-label*="elete"]:hover {
   background: var(--color-error-50);
 }
+
+/* Velzon visual pass. The template CSS is not imported; these overrides recreate its admin feel. */
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --velzon-primary: #405189;
+  --velzon-primary-dark: #364574;
+  --velzon-bg: #f3f6f9;
+  --velzon-border: #e9ebec;
+  --velzon-muted: #878a99;
+}
+
+.template-default,
+.template-default__wrap,
+.template-default__wrap > main {
+  background: var(--velzon-bg);
+}
+
+.btn--style-primary {
+  --bg-color: var(--velzon-primary);
+  --color: #fff;
+  --hover-bg: var(--velzon-primary-dark);
+  --hover-color: #fff;
+}
+
+.field-type input:focus,
+.field-type textarea:focus,
+.field-type .rs__control--is-focused,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+  border-color: var(--velzon-primary) !important;
+  box-shadow: 0 0 0 2px rgba(64, 81, 137, 0.12) !important;
+}
+
+a:not(.btn):hover {
+  color: var(--velzon-primary);
+}
+
+.nav {
+  background: #fff;
+  border-right: 1px solid var(--velzon-border);
+  box-shadow: 0 2px 4px rgba(15, 34, 58, 0.04);
+}
+
+.app-header,
+.app-header__content,
+.app-header__wrapper {
+  background: #fff;
+  border-bottom-color: var(--velzon-border);
+  box-shadow: 0 1px 2px rgba(15, 34, 58, 0.04);
+}
+
+.nav__wrap {
+  gap: 3px;
+  padding-inline: 8px;
+}
+
+.nav__link {
+  border-radius: 8px;
+}
+
+.nav a.nav__link:hover,
+.nav a.nav__link:focus-visible {
+  background-color: #f3f6f9;
+  color: var(--velzon-primary);
+  text-decoration: none;
+}
+
+nav a[aria-current="page"],
+.nav a.active,
+.nav__link--active,
+.nav__link:has(.nav__link-indicator) {
+  background-color: #eef1fb;
+  color: var(--velzon-primary) !important;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 0 var(--velzon-primary);
+}
+
+.nav__link-indicator {
+  background-color: var(--velzon-primary) !important;
+}
+
+.list-header__create-new-button .pill,
+.list-header__create-new-button .pill.pill--style-white,
+.list-header__create-new-button .pill.pill--style-light {
+  background: var(--velzon-primary) !important;
+  color: #fff !important;
+  border-radius: 8px;
+}
+
+.list-header__create-new-button .pill *,
+.list-header__create-new-button:hover .pill * {
+  color: #fff !important;
+}
+
+.list-header__create-new-button:hover .pill {
+  background: var(--velzon-primary-dark) !important;
+}
+
+.list-selection {
+  border-color: rgba(64, 81, 137, 0.26);
+  background: #eef1fb;
+  border-radius: 8px;
+}
+
+.collection-list,
+.list-controls,
+.table,
+.render-fields,
+.doc-header,
+.document-fields {
+  border-color: var(--velzon-border);
+}
+
+.table,
+.collection-list__wrap,
+.render-fields,
+.doc-controls,
+.form-submit {
+  border-radius: 8px;
+}
+
+.table table thead,
+.table thead {
+  background: #f3f6f9;
+  color: var(--velzon-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table table tbody tr:hover,
+.table tbody tr:hover {
+  background: #f3f6f9;
+}
+
+.field-label,
+.label {
+  color: #495057;
+  font-weight: 700;
+}
+
+.field-type input,
+.field-type textarea,
+.field-type select,
+.rs__control {
+  background: #fff !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(15, 34, 58, 0.04);
+  color: #212529 !important;
+  min-height: 40px;
+}
+
+.field-type input::placeholder,
+.field-type textarea::placeholder {
+  color: #adb5bd;
+}
+
+.ts21-scanner-frame > * {
+  border-radius: 8px;
+}
+
+.simplebar-scrollbar::before {
+  background: #adb5bd !important;
+}
+
+/* Velzon base UI equivalents for Payload-native screens. */
+.alert,
+.banner {
+  border-radius: 8px;
+  border: 1px solid var(--velzon-border);
+  box-shadow: 0 1px 2px rgba(15, 34, 58, 0.04);
+}
+
+.dropdown,
+.dropdown-menu,
+.popup__content {
+  border: 1px solid var(--velzon-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 5px 10px rgba(30, 32, 37, 0.12) !important;
+}
+
+.dropdown__item,
+.popup__content a,
+.popup__content button {
+  border-radius: 6px;
+}
+
+.dropdown__item:hover,
+.popup__content a:hover,
+.popup__content button:hover {
+  background: #f3f6f9 !important;
+  color: var(--velzon-primary) !important;
+}
+
+.tabs,
+.tabs__links,
+.pill-selector {
+  border-radius: 8px;
+}
+
+.tabs__link,
+.pill-selector button,
+.pill-selector .pill {
+  border-radius: 6px !important;
+  font-weight: 700;
+}
+
+.tabs__link--active,
+.pill-selector .pill--selected,
+.pill-selector button[aria-pressed="true"] {
+  background: var(--velzon-primary) !important;
+  color: #fff !important;
+}
+
+.form-check-input,
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--velzon-primary);
+}
+
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+  box-shadow: 0 0 0 2px rgba(64, 81, 137, 0.16) !important;
+}
+
+.progress,
+progress {
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar,
+progress::-webkit-progress-value {
+  background: var(--velzon-primary);
+}
+
+.badge,
+.pill {
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.card,
+.collection-list__wrap,
+.render-fields,
+.doc-controls {
+  box-shadow: 0 1px 2px rgba(15, 34, 58, 0.04);
+}
+
+.btn--style-secondary,
+.btn--style-pill {
+  border-radius: 8px;
+}
+
+.ts21-admin-view {
+  background: #f3f6f9;
+  box-sizing: border-box;
+  color: #0f172a;
+  min-height: calc(100vh - 72px);
+  margin-inline: auto;
+  max-width: 1480px;
+  padding: 28px 32px;
+  width: 100%;
+}
+
+.ts21-admin-view > div {
+  margin-inline: auto;
+}
+
+.template-default__wrap > main,
+.template-default__wrap [role="main"] {
+  min-width: 0;
+}
+
+.template-default__wrap:has(.ts21-admin-view) {
+  background: #f3f6f9;
+}
+
+@media (max-width: 768px) {
+  .ts21-admin-view {
+    padding: 20px 16px;
+  }
+}

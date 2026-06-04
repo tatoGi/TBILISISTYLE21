@@ -6,7 +6,13 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "slug", "showInNav", "navOrder", "_status"],
-    group: "Content",
+    group: false,
+    // Replace the native list with the unified Velzon list (redirects to /admin/pages).
+    components: {
+      views: {
+        list: { Component: "/app/(payload)/admin/PagesCollectionList.tsx" },
+      },
+    },
   },
   // Admin list and queries default to menu order.
   defaultSort: "navOrder",
@@ -33,6 +39,16 @@ export const Pages: CollectionConfig = {
         description:
           "URL path, e.g. \"main-stage\" → /main-stage. Lowercase, no spaces.",
         position: "sidebar",
+      },
+    },
+    {
+      name: "routePath",
+      type: "text",
+      label: "Custom route (optional)",
+      admin: {
+        position: "sidebar",
+        description:
+          "For pages that live at a fixed React route, e.g. \"/dashboard/shop\". When set, menus link here instead of /{slug}.",
       },
     },
     {
