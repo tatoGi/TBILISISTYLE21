@@ -98,6 +98,42 @@ export default function AdminNavLinks() {
           ))}
         </div>
       ))}
+
+      {/* Always-visible logout. `prefetch={false}` so hovering doesn't prefetch
+          the logout route (which would end the session). */}
+      <Link
+        href="/admin/logout"
+        prefetch={false}
+        style={{
+          alignItems: "center",
+          borderRadius: 8,
+          color: "var(--theme-error-500, #e11d48)",
+          display: "flex",
+          fontWeight: 800,
+          gap: 10,
+          marginTop: 6,
+          padding: "9px 10px",
+          textDecoration: "none",
+        }}
+      >
+        <span
+          style={{
+            alignItems: "center",
+            background: "var(--theme-error-100, rgba(225,29,72,0.12))",
+            borderRadius: 6,
+            color: "var(--theme-error-500, #e11d48)",
+            display: "grid",
+            fontSize: 10,
+            fontWeight: 900,
+            height: 22,
+            justifyContent: "center",
+            width: 22,
+          }}
+        >
+          ⎋
+        </span>
+        Log out
+      </Link>
     </div>
   );
 }
