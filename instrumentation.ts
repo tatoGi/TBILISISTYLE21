@@ -2,10 +2,12 @@
  * Runs once when a Next.js server instance boots (Node runtime only).
  * Deploy-independent and best-effort: it must never block/break startup.
  *
- * Two jobs:
- *  1. Ensure a Payload admin user exists (opt-in via ADMIN_BOOTSTRAP=true), so
+ * Three jobs:
+ *  1. Ensure the production schema is in sync with the config (some columns,
+ *     like pages.route_path, were added after the init migration).
+ *  2. Ensure a Payload admin user exists (opt-in via ADMIN_BOOTSTRAP=true), so
  *     you always have known /admin credentials.
- *  2. Seed the demo t-shirts so the storefront + homepage reel are populated.
+ *  3. Seed the demo t-shirts so the storefront + homepage reel are populated.
  */
 export async function register() {
   // DB access only makes sense on the Node.js runtime, never the Edge runtime.
@@ -15,8 +17,32 @@ export async function register() {
   const { default: config } = await import("@payload-config");
   const payload = await getPayload({ config });
 
+  await ensureSchema(payload);
   await ensureAdminUser(payload);
   await seedDemoTshirts(payload);
+}
+
+/**
+ * Safety net for schema drift on environments that only run migrations (e.g.
+ * Vercel/Neon). Local dev auto-pushes the schema, so it can silently get ahead
+ * of what the committed migrations create. Each statement is idempotent
+ * (IF NOT EXISTS) and best-effort: it must never block startup.
+ */
+async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload").getPayload>>) {
+  const pool = (payload.db as unknown as { pool?: { query: (sql: string) => Promise<unknown> } }).pool;
+  if (!pool) return;
+
+  const statements = [
+    `ALTER TABLE "pages" ADD COLUMN IF NOT EXISTS "route_path" varchar;`,
+  ];
+
+  for (const statement of statements) {
+    try {
+      await pool.query(statement);
+    } catch (err) {
+      console.error("[schema] ensure step skipped:", statement, err);
+    }
+  }
 }
 
 /**
