@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import type { AdminViewServerProps } from "payload";
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { SetStepNav, type StepNavItem } from "@payloadcms/ui";
@@ -30,6 +31,13 @@ export function AdminShell({
   params,
   searchParams,
 }: AdminShellProps) {
+  // With autoLogin disabled in production, unauthenticated requests reach these
+  // custom views with no user (and sometimes no initPageResult). Rendering the
+  // template without a user throws a 500, so send them to the login screen.
+  if (!initPageResult?.req?.user) {
+    redirect("/admin/login");
+  }
+
   const { locale, permissions, req, visibleEntities } = initPageResult;
 
   return (
