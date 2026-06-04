@@ -1,21 +1,10 @@
-import FestivalMenu from "../components/FestivalMenu";
-import Footer from "../components/Footer";
-import TicketCta from "../components/TicketCta";
-import { getNavPages } from "@/lib/nav";
-
-export default async function FestivalLayout({
+// The shared site chrome (menu + footer + ticket CTA) now lives in the root
+// (frontend) layout via SiteChrome, so it wraps dashboard routes AND CMS
+// `[slug]` pages alike. This layout is just a passthrough.
+export default function FestivalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pages = await getNavPages();
-
-  return (
-    <div className="relative flex min-h-screen flex-col bg-black text-white">
-      <FestivalMenu pages={pages} />
-      <div className="flex-1">{children}</div>
-      <Footer />
-      <TicketCta />
-    </div>
-  );
+  return <>{children}</>;
 }

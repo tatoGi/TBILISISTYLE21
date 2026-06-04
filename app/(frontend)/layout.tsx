@@ -3,6 +3,8 @@ import { Noto_Sans_Georgian } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { defaultLocale, isLocale, localeCookieName } from "@/i18n/config";
+import { getNavPages } from "@/lib/nav";
+import SiteChrome from "./components/SiteChrome";
 import "./globals.css";
 
 const notoSansGeorgian = Noto_Sans_Georgian({
@@ -29,6 +31,7 @@ export default async function RootLayout({
   const store = await cookies();
   const requestedLocale = store.get(localeCookieName)?.value;
   const locale = isLocale(requestedLocale) ? requestedLocale : defaultLocale;
+  const pages = await getNavPages();
 
   return (
     <html
@@ -37,7 +40,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>
-          {children}
+          <SiteChrome pages={pages}>{children}</SiteChrome>
         </NextIntlClientProvider>
       </body>
     </html>
