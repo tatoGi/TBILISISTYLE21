@@ -33,9 +33,17 @@ export default buildConfig({
       titleSuffix: " · TS21 Admin",
       icons: [{ rel: "icon", type: "image/jpeg", url: "/images/logo2.jpeg" }],
     },
-    autoLogin: {
-      email: process.env.PAYLOAD_ADMIN_EMAIL || "tato.laperashvili95@gmail.com",
-    },
+    // SECURITY: autoLogin authenticates every visitor as this user WITHOUT a
+    // password (Payload's JWT strategy auto-logs-in when no `prefillOnly` is
+    // set). It must NEVER run in production. Enable it only for local dev.
+    autoLogin:
+      process.env.NODE_ENV === "production"
+        ? false
+        : {
+            email:
+              process.env.PAYLOAD_ADMIN_EMAIL ||
+              "tato.laperashvili95@gmail.com",
+          },
     components: {
       graphics: {
         Logo: "/app/(payload)/admin/graphics/Logo.tsx",
