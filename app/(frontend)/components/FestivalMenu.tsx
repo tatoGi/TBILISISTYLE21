@@ -51,11 +51,11 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
 
   return (
     <>
-      <div className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-4 px-5 py-5 ${isFestivalPage ? 'bg-transparent' : 'bg-black/95 backdrop-blur-md'}`}>
+      <div className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between gap-3 px-4 py-4 sm:gap-4 sm:px-5 sm:py-5 ${isFestivalPage ? 'bg-transparent' : 'bg-black/95 backdrop-blur-md'}`}>
 
         <Link
           href="/dashboard/festival"
-          className="flex shrink-0 items-center gap-2 sm:gap-3"
+          className="flex min-w-0 shrink items-center gap-2 sm:gap-3"
           aria-label="Tbilisi Style 21"
         >
           <Image
@@ -66,28 +66,26 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
             priority
             className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/30 sm:h-11 sm:w-11"
           />
-          <span className="max-w-[40vw] text-[clamp(0.95rem,4.5vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:max-w-none sm:text-4xl sm:tracking-wider">
+          <span className="truncate text-[clamp(0.9rem,4.8vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:text-4xl sm:tracking-wider">
             Tbilisi Style 21
           </span>
         </Link>
 
-        {/* Language switcher — centered on desktop */}
+        {/* Language switcher — centered on desktop only */}
         <div className="pointer-events-none absolute inset-x-0 hidden justify-center sm:flex">
           <div className="pointer-events-auto">
             <LanguageSwitcher />
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          {/* On mobile (no centered slot, no hover) keep the switcher inline */}
-          <div className="sm:hidden">
-            <LanguageSwitcher />
-          </div>
-
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* On mobile the language switcher lives inside the drawer (below) to
+              keep the top bar uncluttered. */}
           <button
             onClick={() => setNavOpen(!navOpen)}
             onMouseEnter={() => setNavOpen(true)}
-            className="relative z-50 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/25 backdrop-blur-md"
+            aria-label="Menu"
+            className="relative z-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/25 backdrop-blur-md sm:h-9 sm:w-9"
           >
             <span
               className="absolute h-[2px] w-5 bg-white transition-transform duration-200"
@@ -126,17 +124,24 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
         }}
         onMouseLeave={() => setNavOpen(false)}
       >
-        <div className="h-full flex flex-col px-8 pt-28 pb-8 overflow-y-auto relative">
+        <div className="relative flex h-full flex-col overflow-y-auto px-6 pb-8 pt-24 sm:px-8 sm:pt-28">
 
           <button
             onClick={() => setNavOpen(false)}
-            className="absolute top-6 right-6 w-8 h-8"
+            aria-label="Close menu"
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center sm:right-6 sm:top-6"
           >
-            <span className="w-6 h-[2px] bg-white rotate-45 absolute" />
-            <span className="w-6 h-[2px] bg-white -rotate-45 absolute" />
+            <span className="absolute h-[2px] w-6 rotate-45 bg-white" />
+            <span className="absolute h-[2px] w-6 -rotate-45 bg-white" />
           </button>
 
-          <nav className="flex flex-col flex-1 justify-center gap-0">
+          {/* Language switcher — shown here on mobile (desktop uses the centered
+              one in the top bar). */}
+          <div className="mb-6 flex justify-center sm:hidden">
+            <LanguageSwitcher />
+          </div>
+
+          <nav className="flex flex-1 flex-col justify-center gap-0">
             {links.map((item, i) => (
               <Link
                 key={`${item.href}-${i}`}
