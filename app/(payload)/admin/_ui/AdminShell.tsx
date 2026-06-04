@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { AdminViewServerProps } from "payload";
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import { SetStepNav, type StepNavItem } from "@payloadcms/ui";
@@ -31,11 +31,46 @@ export function AdminShell({
   params,
   searchParams,
 }: AdminShellProps) {
-  // With autoLogin disabled in production, unauthenticated requests reach these
-  // custom views with no user (and sometimes no initPageResult). Rendering the
-  // template without a user throws a 500, so send them to the login screen.
+  // With autoLogin disabled, unauthenticated requests reach these custom views
+  // with no user (and sometimes no initPageResult). Rendering Payload's
+  // DefaultTemplate without a user throws ("page could not load"), and an
+  // in-render redirect() gets swallowed by the admin shell — so render a small
+  // self-contained login prompt instead.
   if (!initPageResult?.req?.user) {
-    redirect("/admin/login");
+    return (
+      <div
+        style={{
+          alignItems: "center",
+          display: "flex",
+          justifyContent: "center",
+          minHeight: "100vh",
+          padding: 24,
+        }}
+      >
+        <div style={{ maxWidth: 360, textAlign: "center" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>
+            You are signed out
+          </h1>
+          <p style={{ marginBottom: 20, opacity: 0.7 }}>
+            Please log in to access the admin panel.
+          </p>
+          <Link
+            href="/admin/login"
+            style={{
+              background: "var(--theme-elevation-1000, #111)",
+              borderRadius: 8,
+              color: "var(--theme-elevation-0, #fff)",
+              display: "inline-block",
+              fontWeight: 700,
+              padding: "10px 20px",
+              textDecoration: "none",
+            }}
+          >
+            Go to login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const { locale, permissions, req, visibleEntities } = initPageResult;
