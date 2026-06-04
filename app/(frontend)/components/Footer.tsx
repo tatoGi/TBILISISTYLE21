@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -13,24 +12,7 @@ export default function Footer() {
 
   return (
     <footer className="relative z-10 border-t border-white/10 bg-black/95 px-6 py-12 text-white backdrop-blur-md">
-      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-3 md:items-start">
-        {/* Brand */}
-        <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
-          <Link href="/dashboard/festival" className="flex items-center gap-3" aria-label="Tbilisi Style 21">
-            <Image
-              src="/images/logo2.jpeg"
-              alt="Tbilisi Style 21"
-              width={48}
-              height={48}
-              className="h-12 w-12 rounded-full object-cover ring-2 ring-white/30"
-            />
-            <span className="text-xl font-extrabold uppercase tracking-wider">Tbilisi Style 21</span>
-          </Link>
-          <p className="max-w-xs text-xs uppercase leading-6 tracking-[0.18em] text-white/45">
-            {t("common.slogan")}
-          </p>
-        </div>
-
+      <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-start">
         {/* Contact */}
         <div className="flex flex-col items-center gap-3 text-center md:items-start md:text-left">
           <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.28em] text-yellow-300/80">
