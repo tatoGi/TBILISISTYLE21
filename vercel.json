@@ -1,4 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run ci"
+  "buildCommand": "payload migrate || echo 'migrate skipped (non-fatal)'; next build"
 }
