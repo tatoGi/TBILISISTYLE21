@@ -35,15 +35,18 @@ export default buildConfig({
     },
     // SECURITY: autoLogin authenticates every visitor as this user WITHOUT a
     // password (Payload's JWT strategy auto-logs-in when no `prefillOnly` is
-    // set). It must NEVER run in production. Enable it only for local dev.
+    // set), which also makes logout impossible (every request re-authenticates).
+    // It is therefore OFF by default and NEVER enabled in production. To use it
+    // locally, set PAYLOAD_AUTOLOGIN=true in your dev environment.
     autoLogin:
-      process.env.NODE_ENV === "production"
-        ? false
-        : {
+      process.env.NODE_ENV !== "production" &&
+      process.env.PAYLOAD_AUTOLOGIN === "true"
+        ? {
             email:
               process.env.PAYLOAD_ADMIN_EMAIL ||
               "tato.laperashvili95@gmail.com",
-          },
+          }
+        : false,
     components: {
       graphics: {
         Logo: "/app/(payload)/admin/graphics/Logo.tsx",
@@ -179,3 +182,4 @@ export default buildConfig({
   ],
   sharp,
 });
+  
