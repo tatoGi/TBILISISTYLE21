@@ -29,11 +29,26 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center z-10">
-        <Link href="/dashboard/festival">
-          <p className="font-heading text-[16px] md:text-[12px] lg:text-[20px] font-extrabold uppercase tracking-tight whitespace-nowrap text-white cursor-pointer transition-colors duration-300 hover:text-yellow-400">
-            {t("enter")}
-          </p>
+      <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
+        <Link
+          href="/dashboard/festival"
+          className="ts-ticket-pulse group inline-flex items-center gap-3 rounded-full bg-yellow-300 px-8 py-4 font-heading text-base md:text-lg lg:text-xl font-extrabold uppercase tracking-wide whitespace-nowrap text-black transition-all duration-300 hover:scale-105 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60 sm:px-10 sm:py-5"
+        >
+          <span>{t("enter")}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+          >
+            <path d="M5 12h14" />
+            <path d="m13 6 6 6-6 6" />
+          </svg>
         </Link>
       </div>
 
