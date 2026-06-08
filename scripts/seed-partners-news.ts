@@ -18,6 +18,13 @@ import path from "path";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
+// Show which DB we're about to write to. `DATABASE_URL` wins over `POSTGRES_URL`
+// (see payload.config.ts), and `.env.local` sets DATABASE_URL to the local DB —
+// so to target production you must override DATABASE_URL, not POSTGRES_URL.
+const targetConn = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+const targetHost = targetConn.replace(/^.*@/, "").replace(/\/.*$/, "") || "(unknown)";
+console.error(`[seed] target DB host: ${targetHost}`);
+
 const payload = await getPayload({ config });
 
 /** Upload one /public image as a media doc and return its id. */

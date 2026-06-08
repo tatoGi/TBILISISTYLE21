@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_Georgian, Unbounded } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
+import { Analytics } from "@vercel/analytics/next";
 import { defaultLocale, isLocale, localeCookieName } from "@/i18n/config";
 import { getNavPages } from "@/lib/nav";
 import SiteChrome from "./components/SiteChrome";
@@ -50,6 +51,7 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <SiteChrome pages={pages}>{children}</SiteChrome>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

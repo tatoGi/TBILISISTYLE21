@@ -21,6 +21,7 @@
     "@payloadcms/storage-vercel-blob": "^3.85.0",
     "@react-pdf/renderer": "^4.5.1",
     "@tanstack/react-table": "^8.21.3",
+    "@vercel/analytics": "^2.0.1",
     "apexcharts": "^5.13.0",
     "graphql": "^16.14.0",
     "html5-qrcode": "^2.3.8",
