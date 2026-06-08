@@ -34,6 +34,10 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
 
   const statements = [
     `ALTER TABLE "pages" ADD COLUMN IF NOT EXISTS "route_path" varchar;`,
+    // Drafts are enabled, so Payload also reads/writes the versions table when
+    // editing a page. Without the mirrored column the editor query fails and the
+    // admin redirects to the list with ?notFound=<id>.
+    `ALTER TABLE "_pages_v" ADD COLUMN IF NOT EXISTS "version_route_path" varchar;`,
   ];
 
   for (const statement of statements) {

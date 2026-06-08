@@ -6,8 +6,11 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`ALTER TABLE "pages" ADD COLUMN IF NOT EXISTS "route_path" varchar;`)
+  // Drafts are enabled on Pages, so the field is mirrored in the versions table.
+  await db.execute(sql`ALTER TABLE "_pages_v" ADD COLUMN IF NOT EXISTS "version_route_path" varchar;`)
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`ALTER TABLE "pages" DROP COLUMN IF EXISTS "route_path";`)
+  await db.execute(sql`ALTER TABLE "_pages_v" DROP COLUMN IF EXISTS "version_route_path";`)
 }
