@@ -42,6 +42,16 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: "featuredOnHome",
+      type: "checkbox",
+      label: "Feature on homepage",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description: "Show this post in the festival landing news section.",
+      },
+    },
+    {
       name: "coverImage",
       type: "upload",
       relationTo: "media",

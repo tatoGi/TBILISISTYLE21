@@ -21,17 +21,17 @@ export default async function Home() {
       <div className="absolute inset-0 bg-black/30" />
 
       <div className="absolute top-0 left-0 right-0 z-10 pt-8 md:pt-12 lg:pt-16 text-center">
-        <h1 className="text-[8vw] md:text-[3vw] lg:text-[2rem] font-black uppercase tracking-tight whitespace-nowrap text-white">
+        <h1 className="font-heading text-[8vw] md:text-[3vw] lg:text-[2rem] font-extrabold uppercase tracking-tight whitespace-nowrap text-white">
           {t("title")}
         </h1>
-        <p className="text-[3.5vw] md:text-[2vw] lg:text-[1.5rem] font-bold uppercase tracking-wide whitespace-nowrap text-white mt-1 md:mt-2">
+        <p className="font-heading text-[3.5vw] md:text-[2vw] lg:text-[1.5rem] font-bold uppercase tracking-wide whitespace-nowrap text-white mt-1 md:mt-2">
           {t("subtitle")}
         </p>
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <Link href="/dashboard/festival">
-          <p className="text-[16px] md:text-[12px] lg:text-[20px] font-black uppercase tracking-tight whitespace-nowrap text-white cursor-pointer transition-colors duration-300 hover:text-yellow-400">
+          <p className="font-heading text-[16px] md:text-[12px] lg:text-[20px] font-extrabold uppercase tracking-tight whitespace-nowrap text-white cursor-pointer transition-colors duration-300 hover:text-yellow-400">
             {t("enter")}
           </p>
         </Link>

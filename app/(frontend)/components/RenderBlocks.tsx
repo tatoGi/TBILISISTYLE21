@@ -71,7 +71,7 @@ function Hero({ block }: { block: Block }) {
       ) : null}
       <div className="absolute inset-0 bg-black/55" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center text-white">
-        <h1 className="text-4xl font-black uppercase tracking-wider md:text-6xl">
+        <h1 className="text-4xl font-extrabold uppercase tracking-wider md:text-6xl">
           {block.heading as string}
         </h1>
         {block.subheading ? (
@@ -82,7 +82,7 @@ function Hero({ block }: { block: Block }) {
         {block.ctaLabel && block.ctaHref ? (
           <Link
             href={block.ctaHref as string}
-            className="mt-8 inline-block bg-yellow-300 px-7 py-3 text-xs font-black uppercase tracking-wider text-black transition hover:bg-white"
+            className="mt-8 inline-block bg-yellow-300 px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-black transition hover:bg-white"
           >
             {block.ctaLabel as string}
           </Link>
@@ -171,7 +171,7 @@ function CTA({ block }: { block: Block }) {
     <section className="mx-auto w-full max-w-3xl px-6 py-10 text-center">
       <Link
         href={block.href as string}
-        className="inline-block bg-yellow-300 px-8 py-4 text-sm font-black uppercase tracking-wider text-black transition hover:bg-white"
+        className="inline-block bg-yellow-300 px-8 py-4 text-sm font-extrabold uppercase tracking-wider text-black transition hover:bg-white"
       >
         {block.label as string}
       </Link>

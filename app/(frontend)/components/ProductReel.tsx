@@ -31,16 +31,16 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         {product.isVip ? (
-          <span className="absolute left-2.5 top-2.5 bg-yellow-300 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">
+          <span className="absolute left-2.5 top-2.5 bg-yellow-300 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black">
             VIP
           </span>
         ) : null}
         {soldOut ? (
-          <span className="absolute right-2.5 top-2.5 bg-black/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+          <span className="absolute right-2.5 top-2.5 bg-black/80 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
             Sold out
           </span>
         ) : null}
-        <span className="absolute bottom-2.5 right-2.5 rounded-full bg-yellow-300 px-3 py-1 text-sm font-black text-black">
+        <span className="absolute bottom-2.5 right-2.5 rounded-full bg-yellow-300 px-3 py-1 text-sm font-extrabold text-black">
           {product.priceGel} ₾
         </span>
       </div>
@@ -50,7 +50,7 @@ function ProductCard({ product }: { product: Product }) {
             {product.category}
           </p>
         ) : null}
-        <h3 className="truncate text-sm font-black uppercase leading-tight text-white">
+        <h3 className="truncate text-sm font-extrabold uppercase leading-tight text-white">
           {product.title}
         </h3>
       </div>
@@ -78,7 +78,7 @@ export default function ProductReel({ products }: { products: Product[] }) {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-300">
             Tbilisi Style 21
           </p>
-          <h2 className="text-3xl font-black uppercase text-white md:text-5xl">
+          <h2 className="text-3xl font-extrabold uppercase text-white md:text-5xl">
             {t("nav.shop")}
           </h2>
         </div>

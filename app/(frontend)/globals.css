@@ -10,6 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-display);
   --font-mono: var(--font-display);
+  /* Festival display face for headings (Latin/Cyrillic); Georgian falls back to Noto. */
+  --font-heading: var(--font-unbounded), var(--font-display), Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +25,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-display), Arial, Helvetica, sans-serif;
+}
+
+/* Headings use the festival display face. Georgian glyphs are absent from
+   Unbounded, so the stack falls back to Noto Sans Georgian automatically. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 /* Continuously scrolling product reel (two copies of the track sit side by

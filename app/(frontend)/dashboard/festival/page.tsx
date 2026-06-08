@@ -1,16 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import AboutImg from "@/public/images/secondImg_1920x1080.jpeg";
-import { getFeaturedPages } from "@/lib/nav";
+import { getTranslations } from "next-intl/server";
+import { getFeaturedPages, getFeaturedPartners, getFeaturedNews } from "@/lib/nav";
 import { listProducts } from "@/lib/products";
 import ProductReel from "../../components/ProductReel";
+import PartnersStrip from "../../components/PartnersStrip";
+import NewsTeaser from "../../components/NewsTeaser";
 
 export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
-  const [featured, products] = await Promise.all([
+  const t = await getTranslations("nav");
+  const tHome = await getTranslations("home");
+  const [featured, products, partners, featuredNews] = await Promise.all([
     getFeaturedPages(),
     listProducts({ publicOnly: true }),
+    getFeaturedPartners(),
+    getFeaturedNews(6),
   ]);
 
   // Split into two balanced columns (left / right), matching the original layout.
@@ -81,6 +88,10 @@ export default async function AboutPage() {
           )}
         </div>
       </section>
+
+      <NewsTeaser posts={featuredNews} heading={t("news")} viewAllLabel={tHome("allNews")} />
+
+      <PartnersStrip partners={partners} heading={t("partners")} />
 
       <ProductReel products={products} />
     </main>

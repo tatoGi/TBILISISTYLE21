@@ -57,7 +57,7 @@ export default async function NewsPostPage({ params }: PostProps) {
   return (
     <main className="min-h-screen bg-black pb-16 pt-24 text-white">
       <article className="mx-auto w-full max-w-3xl px-6">
-        <h1 className="text-3xl font-black uppercase leading-tight md:text-5xl">
+        <h1 className="text-3xl font-extrabold uppercase leading-tight md:text-5xl">
           {post.title as string}
         </h1>
       </article>

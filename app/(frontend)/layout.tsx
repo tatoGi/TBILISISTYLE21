@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_Georgian } from "next/font/google";
+import { Noto_Sans_Georgian, Unbounded } from "next/font/google";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { defaultLocale, isLocale, localeCookieName } from "@/i18n/config";
@@ -11,6 +11,14 @@ const notoSansGeorgian = Noto_Sans_Georgian({
   variable: "--font-display",
   subsets: ["georgian", "latin", "cyrillic-ext"],
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+// Display/heading face for the festival look. Latin + Cyrillic only — Georgian
+// glyphs fall back to Noto Sans Georgian via the --font-heading stack in CSS.
+const unbounded = Unbounded({
+  variable: "--font-unbounded",
+  subsets: ["latin", "cyrillic"],
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +44,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${notoSansGeorgian.variable} h-full antialiased`}
+      className={`${notoSansGeorgian.variable} ${unbounded.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>

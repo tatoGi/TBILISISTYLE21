@@ -7,6 +7,7 @@ const groups = [
     links: [
       { href: "/admin/pages", label: "Pages", icon: "Pg" },
       { href: "/admin/news", label: "News", icon: "N" },
+      { href: "/admin/partners", label: "Partners", icon: "Pr" },
       { href: "/admin/media", label: "Media", icon: "M" },
       { href: "/admin/menu", label: "Menu", icon: "Mn" },
     ],

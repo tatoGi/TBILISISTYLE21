@@ -44,7 +44,7 @@ export default async function NewsPage() {
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-300">
           Tbilisi Style 21
         </p>
-        <h1 className="text-4xl font-black uppercase md:text-6xl">News</h1>
+        <h1 className="text-4xl font-extrabold uppercase md:text-6xl">News</h1>
       </div>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,7 +74,7 @@ export default async function NewsPage() {
                       {formatDate(post.publishedAt as string)}
                     </p>
                   ) : null}
-                  <h2 className="text-lg font-black uppercase leading-tight">
+                  <h2 className="text-lg font-extrabold uppercase leading-tight">
                     {post.title as string}
                   </h2>
                   {post.excerpt ? (

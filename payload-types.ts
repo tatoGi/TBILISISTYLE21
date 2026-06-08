@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    partners: Partner;
     tickets: Ticket;
     products: Product;
     soldTickets: SoldTicket;
@@ -86,6 +87,7 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
     tickets: TicketsSelect<false> | TicketsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     soldTickets: SoldTicketsSelect<false> | SoldTicketsSelect<true>;
@@ -292,6 +294,10 @@ export interface Post {
    */
   slug: string;
   publishedAt?: string | null;
+  /**
+   * Show this post in the festival landing news section.
+   */
+  featuredOnHome?: boolean | null;
   coverImage?: (string | null) | Media;
   /**
    * Short summary shown in the news list.
@@ -362,6 +368,30 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: string;
+  name: string;
+  /**
+   * One or two sentences shown on the partners page.
+   */
+  description?: string | null;
+  logo: string | Media;
+  /**
+   * Full URL, e.g. https://example.com
+   */
+  website?: string | null;
+  featuredOnHome?: boolean | null;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -584,6 +614,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'partners';
+        value: string | Partner;
+      } | null)
+    | ({
         relationTo: 'tickets';
         value: string | Ticket;
       } | null)
@@ -736,6 +770,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   publishedAt?: T;
+  featuredOnHome?: T;
   coverImage?: T;
   excerpt?: T;
   layout?:
@@ -794,6 +829,20 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  logo?: T;
+  website?: T;
+  featuredOnHome?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -10,6 +10,7 @@ import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
 import { Pages } from "./collections/Pages";
 import { Posts } from "./collections/Posts";
+import { Partners } from "./collections/Partners";
 import { Tickets } from "./collections/Tickets";
 import { Products } from "./collections/Products";
 import { SoldTickets } from "./collections/SoldTickets";
@@ -86,6 +87,11 @@ export default buildConfig({
           exact: true,
           path: "/news",
         },
+        partners: {
+          Component: "/app/(payload)/admin/PartnersListView.tsx",
+          exact: true,
+          path: "/partners",
+        },
         media: {
           Component: "/app/(payload)/admin/MediaListView.tsx",
           exact: true,
@@ -138,6 +144,7 @@ export default buildConfig({
   collections: [
     Pages,
     Posts,
+    Partners,
     Tickets,
     Products,
     SoldTickets,

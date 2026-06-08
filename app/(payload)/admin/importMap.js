@@ -22,6 +22,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_b81005550ccd64febc1088b9b018319a } from '../../../app/(payload)/admin/PagesCollectionList.tsx'
+import { default as default_613eaf6155bf9ac0b997394c3fee12b6 } from '../../../app/(payload)/admin/PartnersCollectionList.tsx'
 import { default as default_3d0c8ca4b8c3b7a0cf1e64ef6e010249 } from '../../../app/(payload)/admin/ProductsCollectionList.tsx'
 import { default as default_56e2116334adf823ba4014b9703f6572 } from '../../../app/(payload)/admin/graphics/Icon.tsx'
 import { default as default_2e13608f516189ccb4c89145f01a0331 } from '../../../app/(payload)/admin/graphics/Logo.tsx'
@@ -34,6 +35,7 @@ import { default as default_9e6b8529af517f593ab78f02a784484b } from '../../../ap
 import { default as default_c74aa92f20cf4de51d56f7df5b781cbd } from '../../../app/(payload)/admin/SettingsView.tsx'
 import { default as default_df2dbda239303d56439ae8f6851ced8a } from '../../../app/(payload)/admin/PagesListView.tsx'
 import { default as default_a19efc832f88caf74eb23bc74481d7f5 } from '../../../app/(payload)/admin/NewsListView.tsx'
+import { default as default_2d90e7f7a72952f8889c4f2662255ae9 } from '../../../app/(payload)/admin/PartnersListView.tsx'
 import { default as default_c994e266c3688745ccefe1611799fa36 } from '../../../app/(payload)/admin/MediaListView.tsx'
 import { default as default_3c0aef6c2d930abf6740b67bccd6e3ff } from '../../../app/(payload)/admin/MenuView.tsx'
 import { default as default_a808a0bddb87f4172c5b505cc96aa115 } from '../../../app/(payload)/admin/TicketsListView.tsx'
@@ -71,6 +73,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/app/(payload)/admin/PagesCollectionList.tsx#default": default_b81005550ccd64febc1088b9b018319a,
+  "/app/(payload)/admin/PartnersCollectionList.tsx#default": default_613eaf6155bf9ac0b997394c3fee12b6,
   "/app/(payload)/admin/ProductsCollectionList.tsx#default": default_3d0c8ca4b8c3b7a0cf1e64ef6e010249,
   "/app/(payload)/admin/graphics/Icon.tsx#default": default_56e2116334adf823ba4014b9703f6572,
   "/app/(payload)/admin/graphics/Logo.tsx#default": default_2e13608f516189ccb4c89145f01a0331,
@@ -83,6 +86,7 @@ export const importMap = {
   "/app/(payload)/admin/SettingsView.tsx#default": default_c74aa92f20cf4de51d56f7df5b781cbd,
   "/app/(payload)/admin/PagesListView.tsx#default": default_df2dbda239303d56439ae8f6851ced8a,
   "/app/(payload)/admin/NewsListView.tsx#default": default_a19efc832f88caf74eb23bc74481d7f5,
+  "/app/(payload)/admin/PartnersListView.tsx#default": default_2d90e7f7a72952f8889c4f2662255ae9,
   "/app/(payload)/admin/MediaListView.tsx#default": default_c994e266c3688745ccefe1611799fa36,
   "/app/(payload)/admin/MenuView.tsx#default": default_3c0aef6c2d930abf6740b67bccd6e3ff,
   "/app/(payload)/admin/TicketsListView.tsx#default": default_a808a0bddb87f4172c5b505cc96aa115,
