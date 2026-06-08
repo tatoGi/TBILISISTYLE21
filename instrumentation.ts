@@ -38,6 +38,45 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     // editing a page. Without the mirrored column the editor query fails and the
     // admin redirects to the list with ?notFound=<id>.
     `ALTER TABLE "_pages_v" ADD COLUMN IF NOT EXISTS "version_route_path" varchar;`,
+
+    // Partners collection (added after the prod schema was first created). The
+    // committed migration covers fresh DBs, but prod was bootstrapped via push /
+    // data-migration, so `payload migrate` can't replay it here — recreate the
+    // table idempotently instead.
+    `CREATE TABLE IF NOT EXISTS "partners" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "name" varchar NOT NULL,
+      "description" varchar,
+      "logo_id" uuid NOT NULL,
+      "website" varchar,
+      "featured_on_home" boolean DEFAULT false,
+      "order" numeric DEFAULT 100,
+      "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+      "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+    );`,
+    `ALTER TABLE "partners" ADD COLUMN IF NOT EXISTS "description" varchar;`,
+    `CREATE INDEX IF NOT EXISTS "partners_logo_idx" ON "partners" ("logo_id");`,
+    `CREATE INDEX IF NOT EXISTS "partners_updated_at_idx" ON "partners" ("updated_at");`,
+    `CREATE INDEX IF NOT EXISTS "partners_created_at_idx" ON "partners" ("created_at");`,
+    // FK to media — ADD CONSTRAINT has no IF NOT EXISTS, so guard with a DO block
+    // to stay quiet (and idempotent) on every subsequent boot.
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'partners_logo_id_media_id_fk') THEN
+        ALTER TABLE "partners" ADD CONSTRAINT "partners_logo_id_media_id_fk" FOREIGN KEY ("logo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+      END IF;
+    END $$;`,
+    // Admin document-locking relation for the new collection.
+    `ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "partners_id" uuid;`,
+    `CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_partners_id_idx" ON "payload_locked_documents_rels" ("partners_id");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'payload_locked_documents_rels_partners_fk') THEN
+        ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_partners_fk" FOREIGN KEY ("partners_id") REFERENCES "public"."partners"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
+
+    // "Feature on homepage" flag on News/Posts (+ mirrored versions column).
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "featured_on_home" boolean DEFAULT false;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_featured_on_home" boolean DEFAULT false;`,
   ];
 
   for (const statement of statements) {
