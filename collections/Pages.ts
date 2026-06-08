@@ -1,11 +1,12 @@
 import type { CollectionConfig } from "payload";
 import { contentBlocks } from "../blocks/contentBlocks";
+import { localeTabs } from "../fields/localeTabs";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
   admin: {
-    useAsTitle: "title",
-    defaultColumns: ["title", "slug", "showInNav", "navOrder", "_status"],
+    useAsTitle: "title_ka",
+    defaultColumns: ["title_ka", "slug", "showInNav", "navOrder", "_status"],
     group: false,
     // Replace the native list with the unified Velzon list (redirects to /admin/pages).
     components: {
@@ -23,12 +24,11 @@ export const Pages: CollectionConfig = {
     drafts: true,
   },
   fields: [
-    {
-      name: "title",
-      type: "text",
-      localized: true,
-      required: true,
-    },
+    // Page title + menu label for all four languages, edited together in tabs.
+    localeTabs([
+      { name: "title", type: "text", required: true, label: "Title" },
+      { name: "navLabel", type: "text", label: "Menu label (optional)" },
+    ]),
     {
       name: "slug",
       type: "text",
@@ -70,17 +70,6 @@ export const Pages: CollectionConfig = {
       },
     },
     {
-      name: "navLabel",
-      type: "text",
-      label: "Menu label (optional)",
-      localized: true,
-      admin: {
-        position: "sidebar",
-        description: "Overrides the page title in the menu.",
-        condition: (data) => Boolean(data?.showInNav),
-      },
-    },
-    {
       name: "featuredOnHome",
       type: "checkbox",
       label: "Feature on homepage",
@@ -99,8 +88,10 @@ export const Pages: CollectionConfig = {
       label: "SEO",
       admin: { initCollapsed: true },
       fields: [
-        { name: "metaTitle", type: "text", localized: true },
-        { name: "metaDescription", type: "textarea", localized: true },
+        localeTabs([
+          { name: "metaTitle", type: "text", label: "Meta title" },
+          { name: "metaDescription", type: "textarea", label: "Meta description" },
+        ]),
       ],
     },
   ],

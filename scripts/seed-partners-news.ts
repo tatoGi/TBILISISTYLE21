@@ -31,7 +31,7 @@ const payload = await getPayload({ config });
 async function uploadMedia(relPath: string, alt: string): Promise<string> {
   const doc = await payload.create({
     collection: "media",
-    data: { alt },
+    data: { alt_ka: alt },
     filePath: path.resolve(process.cwd(), "public", relPath),
   });
   return doc.id as string;
@@ -146,14 +146,14 @@ for (const n of NEWS) {
   await payload.create({
     collection: "posts",
     data: {
-      title: n.title,
+      title_ka: n.title,
       slug: n.slug,
-      excerpt: n.excerpt,
+      excerpt_ka: n.excerpt,
       coverImage,
       featuredOnHome: true,
       publishedAt: new Date().toISOString(),
       _status: "published",
-      layout: [{ blockType: "richText", content: richText(n.body) }],
+      layout: [{ blockType: "richText", content_ka: richText(n.body) }],
     },
   });
   newsCreated += 1;

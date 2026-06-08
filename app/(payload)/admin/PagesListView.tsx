@@ -56,7 +56,7 @@ export default async function PagesListView(props: AdminViewServerProps) {
         navOrder: String(record.navOrder ?? 100),
         slug: asText(record.slug),
         status,
-        title: asText(record.title),
+        title: asText(record.title_ka) || asText(record.title),
         updatedAt: formatDate(record.updatedAt),
       },
       flags,

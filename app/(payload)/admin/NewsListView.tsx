@@ -50,7 +50,7 @@ export default async function NewsListView(props: AdminViewServerProps) {
         publishedAt: formatDate(record.publishedAt),
         slug: asText(record.slug),
         status,
-        title: asText(record.title),
+        title: asText(record.title_ka) || asText(record.title),
         updatedAt: formatDate(record.updatedAt),
       },
       status: {

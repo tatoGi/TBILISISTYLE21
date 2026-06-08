@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { localeTabs } from "../fields/localeTabs";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -20,10 +21,7 @@ export const Media: CollectionConfig = {
     mimeTypes: ["image/*", "video/*"],
   },
   fields: [
-    {
-      name: "alt",
-      type: "text",
-      localized: true,
-    },
+    // Alt text for all four languages, edited together in tabs.
+    localeTabs([{ name: "alt", type: "text", label: "Alt text" }]),
   ],
 };

@@ -179,13 +179,19 @@ export default buildConfig({
     },
   }),
   plugins: [
-    // Store media in Vercel Blob when a token is present (production/Vercel).
-    // Without a token (local dev) it falls back to the local disk staticDir.
-    vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-      collections: { media: true },
-      token: process.env.BLOB_READ_WRITE_TOKEN || "",
-    }),
+    // Vercel Blob only on Vercel (VERCEL=1). Locally always use disk (public/media)
+    // even if BLOB_READ_WRITE_TOKEN is in .env.local — wrong token = upload 500.
+    ...(() => {
+      const onVercel = process.env.VERCEL === "1";
+      const blobToken = onVercel ? process.env.BLOB_READ_WRITE_TOKEN : undefined;
+      return [
+        vercelBlobStorage({
+          enabled: Boolean(blobToken),
+          collections: { media: true },
+          token: blobToken || "",
+        }),
+      ];
+    })(),
   ],
   sharp,
 });

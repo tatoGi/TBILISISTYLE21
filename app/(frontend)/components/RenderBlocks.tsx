@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
+import { CONTENT_FALLBACK_LOCALE, pickField } from "@/lib/i18n-content";
 
 type MediaLike =
   | {
@@ -20,8 +21,13 @@ function mediaUrl(media: MediaLike): string | null {
   return null;
 }
 
-function mediaAlt(media: MediaLike): string {
-  if (media && typeof media === "object" && media.alt) return media.alt;
+function mediaAlt(media: MediaLike, locale: string): string {
+  if (media && typeof media === "object") {
+    const picked = pickField<string>(media as Record<string, unknown>, "alt", locale);
+    if (picked) return picked;
+    // Back-compat for any media that still carries the old single `alt` field.
+    if (media.alt) return media.alt;
+  }
   return "";
 }
 
@@ -29,7 +35,13 @@ function mediaAlt(media: MediaLike): string {
 // switch on blockType and read the relevant fields.
 type Block = Record<string, unknown> & { blockType?: string; id?: string };
 
-export function RenderBlocks({ blocks }: { blocks?: Block[] | null }) {
+export function RenderBlocks({
+  blocks,
+  locale = CONTENT_FALLBACK_LOCALE,
+}: {
+  blocks?: Block[] | null;
+  locale?: string;
+}) {
   if (!blocks?.length) return null;
 
   return (
@@ -38,15 +50,15 @@ export function RenderBlocks({ blocks }: { blocks?: Block[] | null }) {
         const key = (block.id as string) || `${block.blockType}-${i}`;
         switch (block.blockType) {
           case "hero":
-            return <Hero key={key} block={block} />;
+            return <Hero key={key} block={block} locale={locale} />;
           case "richText":
-            return <TextBlock key={key} block={block} />;
+            return <TextBlock key={key} block={block} locale={locale} />;
           case "image":
-            return <ImageBlock key={key} block={block} />;
+            return <ImageBlock key={key} block={block} locale={locale} />;
           case "gallery":
-            return <Gallery key={key} block={block} />;
+            return <Gallery key={key} block={block} locale={locale} />;
           case "cta":
-            return <CTA key={key} block={block} />;
+            return <CTA key={key} block={block} locale={locale} />;
           default:
             return null;
         }
@@ -55,14 +67,14 @@ export function RenderBlocks({ blocks }: { blocks?: Block[] | null }) {
   );
 }
 
-function Hero({ block }: { block: Block }) {
+function Hero({ block, locale }: { block: Block; locale: string }) {
   const url = mediaUrl(block.image as MediaLike);
   return (
     <section className="relative flex min-h-[60vh] w-full items-center justify-center overflow-hidden">
       {url ? (
         <Image
           src={url}
-          alt={mediaAlt(block.image as MediaLike)}
+          alt={mediaAlt(block.image as MediaLike, locale)}
           fill
           priority
           className="object-cover"
@@ -72,19 +84,19 @@ function Hero({ block }: { block: Block }) {
       <div className="absolute inset-0 bg-black/55" />
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center text-white">
         <h1 className="text-4xl font-extrabold uppercase tracking-wider md:text-6xl">
-          {block.heading as string}
+          {pickField<string>(block, "heading", locale)}
         </h1>
-        {block.subheading ? (
+        {pickField<string>(block, "subheading", locale) ? (
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/80">
-            {block.subheading as string}
+            {pickField<string>(block, "subheading", locale)}
           </p>
         ) : null}
-        {block.ctaLabel && block.ctaHref ? (
+        {pickField<string>(block, "ctaLabel", locale) && block.ctaHref ? (
           <Link
             href={block.ctaHref as string}
             className="mt-8 inline-block bg-yellow-300 px-7 py-3 text-xs font-extrabold uppercase tracking-wider text-black transition hover:bg-white"
           >
-            {block.ctaLabel as string}
+            {pickField<string>(block, "ctaLabel", locale)}
           </Link>
         ) : null}
       </div>
@@ -92,8 +104,8 @@ function Hero({ block }: { block: Block }) {
   );
 }
 
-function TextBlock({ block }: { block: Block }) {
-  const content = block.content as SerializedEditorState | undefined;
+function TextBlock({ block, locale }: { block: Block; locale: string }) {
+  const content = pickField<SerializedEditorState>(block, "content", locale);
   if (!content) return null;
   return (
     <section className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -104,7 +116,7 @@ function TextBlock({ block }: { block: Block }) {
   );
 }
 
-function ImageBlock({ block }: { block: Block }) {
+function ImageBlock({ block, locale }: { block: Block; locale: string }) {
   const url = mediaUrl(block.image as MediaLike);
   if (!url) return null;
   const contained = block.width === "contained";
@@ -115,22 +127,22 @@ function ImageBlock({ block }: { block: Block }) {
       <div className="relative h-[300px] w-full overflow-hidden rounded-xl sm:h-[460px] md:h-[560px]">
         <Image
           src={url}
-          alt={mediaAlt(block.image as MediaLike)}
+          alt={mediaAlt(block.image as MediaLike, locale)}
           fill
           className="object-cover"
           sizes="100vw"
         />
       </div>
-      {block.caption ? (
+      {pickField<string>(block, "caption", locale) ? (
         <p className="mt-2 text-center text-sm text-white/50">
-          {block.caption as string}
+          {pickField<string>(block, "caption", locale)}
         </p>
       ) : null}
     </section>
   );
 }
 
-function Gallery({ block }: { block: Block }) {
+function Gallery({ block, locale }: { block: Block; locale: string }) {
   const images = (block.images as Array<Record<string, unknown>>) || [];
   if (!images.length) return null;
   const cols = (block.columns as string) || "3";
@@ -153,7 +165,7 @@ function Gallery({ block }: { block: Block }) {
             >
               <Image
                 src={url}
-                alt={mediaAlt(item.image as MediaLike)}
+                alt={mediaAlt(item.image as MediaLike, locale)}
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 100vw, 33vw"
@@ -166,14 +178,14 @@ function Gallery({ block }: { block: Block }) {
   );
 }
 
-function CTA({ block }: { block: Block }) {
+function CTA({ block, locale }: { block: Block; locale: string }) {
   return (
     <section className="mx-auto w-full max-w-3xl px-6 py-10 text-center">
       <Link
         href={block.href as string}
         className="inline-block bg-yellow-300 px-8 py-4 text-sm font-extrabold uppercase tracking-wider text-black transition hover:bg-white"
       >
-        {block.label as string}
+        {pickField<string>(block, "label", locale)}
       </Link>
     </section>
   );

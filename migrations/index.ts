@@ -5,6 +5,9 @@ import * as migration_20260604_190000_add_pages_route_path from './20260604_1900
 import * as migration_20260608_071250_add_partners from './20260608_071250_add_partners';
 import * as migration_20260608_072911_add_partner_description from './20260608_072911_add_partner_description';
 import * as migration_20260608_075536_add_post_featured from './20260608_075536_add_post_featured';
+import * as migration_20260608_160000_posts_locale_columns from './20260608_160000_posts_locale_columns';
+import * as migration_20260608_170000_pages_media_menu_locale_columns from './20260608_170000_pages_media_menu_locale_columns';
+import * as migration_20260608_180000_block_locale_columns from './20260608_180000_block_locale_columns';
 
 export const migrations = [
   {
@@ -41,5 +44,20 @@ export const migrations = [
     up: migration_20260608_075536_add_post_featured.up,
     down: migration_20260608_075536_add_post_featured.down,
     name: '20260608_075536_add_post_featured'
+  },
+  {
+    up: migration_20260608_160000_posts_locale_columns.up,
+    down: migration_20260608_160000_posts_locale_columns.down,
+    name: '20260608_160000_posts_locale_columns'
+  },
+  {
+    up: migration_20260608_170000_pages_media_menu_locale_columns.up,
+    down: migration_20260608_170000_pages_media_menu_locale_columns.down,
+    name: '20260608_170000_pages_media_menu_locale_columns'
+  },
+  {
+    up: migration_20260608_180000_block_locale_columns.up,
+    down: migration_20260608_180000_block_locale_columns.down,
+    name: '20260608_180000_block_locale_columns'
   },
 ];

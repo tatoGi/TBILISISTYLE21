@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
+import { pickField } from "@/lib/i18n-content";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,9 @@ export default async function NewsPage() {
         {posts.length ? (
           posts.map((post) => {
             const url = mediaUrl(post.coverImage);
+            const doc = post as unknown as Record<string, unknown>;
+            const title = pickField<string>(doc, "title", locale) || "";
+            const excerpt = pickField<string>(doc, "excerpt", locale)?.trim() || "";
             return (
               <Link
                 key={post.id}
@@ -61,7 +65,7 @@ export default async function NewsPage() {
                   {url ? (
                     <Image
                       src={url}
-                      alt={(post.title as string) || ""}
+                      alt={title}
                       fill
                       className="object-cover transition duration-300 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, 33vw"
@@ -75,11 +79,11 @@ export default async function NewsPage() {
                     </p>
                   ) : null}
                   <h2 className="text-lg font-extrabold uppercase leading-tight">
-                    {post.title as string}
+                    {title}
                   </h2>
-                  {post.excerpt ? (
+                  {excerpt ? (
                     <p className="line-clamp-3 text-sm leading-6 text-white/65">
-                      {post.excerpt as string}
+                      {excerpt}
                     </p>
                   ) : null}
                 </div>

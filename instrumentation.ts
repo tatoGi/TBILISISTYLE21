@@ -18,8 +18,126 @@ export async function register() {
   const payload = await getPayload({ config });
 
   await ensureSchema(payload);
+  await backfillLocaleColumns(payload);
   await ensureAdminUser(payload);
   await seedDemoTshirts(payload);
+}
+
+/**
+ * One-time copy of existing translations from the old `*_locales` tables into
+ * the new flat per-locale columns (see fields/localeTabs.ts). Idempotent: each
+ * row is only filled while its target columns are still NULL, so admin edits
+ * always win. Best-effort - if a source locale table was already dropped (e.g.
+ * local dev push), the statement just errors and is skipped.
+ */
+const LOCALES = ["ka", "en", "ru", "ua"];
+
+// Payload derives DB column names with the `to-snake-case` package. For a
+// camelCase field suffixed with a locale it lowercases the whole base (e.g.
+// navLabel_ka -> "navlabel_ka", metaTitle_ka -> "metatitle_ka"), but the OLD
+// (un-suffixed) localized field used normal snake_case (navLabel -> "nav_label").
+// So a localized field is identified by its camelCase `base`, from which we
+// derive both the new per-locale column and the old `*_locales` source column.
+const camelToSnake = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+const targetCol = (base: string, loc: string, versioned = false) =>
+  `${versioned ? "version_" : ""}${base.toLowerCase()}_${loc}`;
+
+/** ADD COLUMN IF NOT EXISTS for each `base`'s per-locale column. */
+function localeColumns(
+  table: string,
+  bases: string[],
+  opts: { type?: string; versioned?: boolean } = {},
+): string[] {
+  const { type = "varchar", versioned = false } = opts;
+  return bases.flatMap((base) =>
+    LOCALES.map(
+      (loc) =>
+        `ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${targetCol(base, loc, versioned)}" ${type};`,
+    ),
+  );
+}
+
+// Content block tables exist for both collections (pages/posts) and their drafts
+// versions; block subfield columns are not version_-prefixed. Bases are the
+// camelCase field names from blocks/contentBlocks.ts.
+const BLOCK_PREFIXES = ["pages_blocks", "_pages_v_blocks", "posts_blocks", "_posts_v_blocks"];
+const BLOCK_VARCHAR_COLS: Record<string, string[]> = {
+  hero: ["heading", "subheading", "ctaLabel"],
+  image: ["caption"],
+  gallery_images: ["caption"],
+  cta: ["label"],
+};
+const BLOCK_JSONB_COLS: Record<string, string[]> = { rich_text: ["content"] };
+
+function blockLocaleColumns(): string[] {
+  const out: string[] = [];
+  for (const prefix of BLOCK_PREFIXES) {
+    for (const [blockType, cols] of Object.entries(BLOCK_VARCHAR_COLS)) {
+      out.push(...localeColumns(`${prefix}_${blockType}`, cols, { type: "varchar" }));
+    }
+    for (const [blockType, cols] of Object.entries(BLOCK_JSONB_COLS)) {
+      out.push(...localeColumns(`${prefix}_${blockType}`, cols, { type: "jsonb" }));
+    }
+  }
+  return out;
+}
+
+/** Backfill spec: copy each `base` from `source` (a *_locales table) into the
+ * matching per-locale column on `target`. `bases` are camelCase field names. */
+type BackfillSpec = { target: string; source: string; bases: string[] };
+
+const BACKFILLS: BackfillSpec[] = [
+  { target: "posts", source: "posts_locales", bases: ["title", "excerpt"] },
+  {
+    target: "pages",
+    source: "pages_locales",
+    bases: ["title", "navLabel", "metaTitle", "metaDescription"],
+  },
+  { target: "media", source: "media_locales", bases: ["alt"] },
+  { target: "site_menu", source: "site_menu_locales", bases: ["label"] },
+  ...blockBackfills(),
+];
+
+/** Backfill specs for every content-block table (pages/posts + versions). */
+function blockBackfills(): BackfillSpec[] {
+  const blockBases: Record<string, string[]> = {
+    hero: ["heading", "subheading", "ctaLabel"],
+    rich_text: ["content"],
+    image: ["caption"],
+    gallery_images: ["caption"],
+    cta: ["label"],
+  };
+  const out: BackfillSpec[] = [];
+  for (const prefix of BLOCK_PREFIXES) {
+    for (const [blockType, bases] of Object.entries(blockBases)) {
+      const table = `${prefix}_${blockType}`;
+      out.push({ target: table, source: `${table}_locales`, bases });
+    }
+  }
+  return out;
+}
+
+async function backfillLocaleColumns(payload: Awaited<ReturnType<typeof import("payload").getPayload>>) {
+  const pool = (payload.db as unknown as { pool?: { query: (sql: string) => Promise<unknown> } }).pool;
+  if (!pool) return;
+
+  for (const { target, source, bases } of BACKFILLS) {
+    for (const loc of LOCALES) {
+      const setClause = bases
+        .map((b) => `"${targetCol(b, loc)}" = l."${camelToSnake(b)}"`)
+        .join(", ");
+      // Only fill rows whose target columns are all still empty, so admin edits win.
+      const guard = bases.map((b) => `p."${targetCol(b, loc)}" IS NULL`).join(" AND ");
+      const statement = `UPDATE "${target}" p SET ${setClause}
+        FROM "${source}" l
+        WHERE l."_parent_id" = p."id" AND l."_locale" = '${loc}' AND (${guard});`;
+      try {
+        await pool.query(statement);
+      } catch (err) {
+        console.error(`[backfill] ${target} <- ${source} (${loc}) skipped:`, err);
+      }
+    }
+  }
 }
 
 /**
@@ -77,6 +195,38 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     // "Feature on homepage" flag on News/Posts (+ mirrored versions column).
     `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "featured_on_home" boolean DEFAULT false;`,
     `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_featured_on_home" boolean DEFAULT false;`,
+
+    // Posts title/excerpt converted from Payload localization to flat per-locale
+    // columns (edited as language tabs). Mirrored on the _posts_v versions table.
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "title_ka" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "title_en" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "title_ru" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "title_ua" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "excerpt_ka" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "excerpt_en" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "excerpt_ru" varchar;`,
+    `ALTER TABLE "posts" ADD COLUMN IF NOT EXISTS "excerpt_ua" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_title_ka" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_title_en" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_title_ru" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_title_ua" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_excerpt_ka" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_excerpt_en" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_excerpt_ru" varchar;`,
+    `ALTER TABLE "_posts_v" ADD COLUMN IF NOT EXISTS "version_excerpt_ua" varchar;`,
+
+    // Phase 2: Pages title/navLabel/metaTitle/metaDescription, Media alt and the
+    // SiteSettings menu label converted to flat per-locale columns (language tabs).
+    ...localeColumns("pages", ["title", "navLabel", "metaTitle", "metaDescription"]),
+    ...localeColumns("_pages_v", ["title", "navLabel", "metaTitle", "metaDescription"], {
+      versioned: true,
+    }),
+    ...localeColumns("media", ["alt"]),
+    ...localeColumns("site_menu", ["label"]),
+
+    // Phase 3: localized fields inside content blocks (hero/richText/image/
+    // gallery/cta) converted to flat per-locale columns on each block table.
+    ...blockLocaleColumns(),
   ];
 
   for (const statement of statements) {

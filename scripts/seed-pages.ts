@@ -115,7 +115,7 @@ try {
     if (found.docs[0]) {
       id = String(found.docs[0].id);
     } else {
-      const created = await payload.create({ collection: "media", filePath: abs, data: { alt: filename } as never });
+      const created = await payload.create({ collection: "media", filePath: abs, data: { alt_ka: filename } as never });
       id = String(created.id);
     }
     mediaCache.set(rel, id);
@@ -137,66 +137,52 @@ try {
     // Build layout. Functional pages (shop/tickets) just need a valid block so
     // they exist in Pages + menu; their real UI lives at `routePath`. Content
     // pages get: top images → text → bottom images → gallery.
+    // Content is now stored as flat per-locale fields (title_ka, heading_en, …)
+    // instead of Payload localization, so build every language into one doc.
     const layout: Record<string, unknown>[] = [];
     if (def.routePath) {
-      layout.push({ blockType: "hero", heading: kaTitle });
+      const hero: Record<string, unknown> = { blockType: "hero", heading_ka: kaTitle };
+      for (const loc of otherLocales) {
+        hero[`heading_${loc}`] = def.navKey ? navTitle(loc, def.navKey) || kaTitle : kaTitle;
+      }
+      layout.push(hero);
     } else {
       for (const id of topIds) layout.push({ blockType: "image", image: id, width: "full" });
-      layout.push({ blockType: "richText", content: lexical(paragraphsFor(kaContent, titleField)) });
+      const rich: Record<string, unknown> = {
+        blockType: "richText",
+        content_ka: lexical(paragraphsFor(kaContent, titleField)),
+      };
+      for (const loc of otherLocales) {
+        rich[`content_${loc}`] = lexical(paragraphsFor(getContent(loc, key), titleField));
+      }
+      layout.push(rich);
       for (const id of bottomIds) layout.push({ blockType: "image", image: id, width: "full" });
       if (galleryIds.length) layout.push({ blockType: "gallery", columns: "3", images: galleryIds.map((id) => ({ image: id })) });
     }
 
     navOrder += 10;
-    const existing = await payload.find({ collection: "pages", where: { slug: { equals: slug } }, locale: "ka", depth: 0, limit: 1 });
+    const existing = await payload.find({ collection: "pages", where: { slug: { equals: slug } }, depth: 0, limit: 1 });
     const existingDoc = existing.docs[0] as { id: string } | undefined;
-    const data = {
+    const data: Record<string, unknown> = {
       slug,
-      title: kaTitle,
+      title_ka: kaTitle,
       _status: "published",
       showInNav: true,
       navOrder,
       featuredOnHome: !!def.featured,
       ...(def.routePath ? { routePath: def.routePath } : {}),
       layout,
-    } as never;
-
-    const saved = existingDoc
-      ? await payload.update({ collection: "pages", id: existingDoc.id, locale: "ka", data })
-      : await payload.create({ collection: "pages", locale: "ka", data });
-
-    // Re-fetch with depth 0 to get clean block ids + relation ids
-    const fresh = (await payload.findByID({ collection: "pages", id: (saved as { id: string }).id, locale: "ka", depth: 0 })) as {
-      id: string;
-      layout?: { id?: string; blockType?: string; image?: string; width?: string; columns?: string; images?: unknown; heading?: string }[];
     };
-
     for (const loc of otherLocales) {
-      const c = getContent(loc, key);
-      const locLayout = (fresh.layout ?? []).map((b) => {
-        if (b.blockType === "richText") {
-          return { id: b.id, blockType: "richText", content: lexical(paragraphsFor(c, titleField)) };
-        }
-        if (b.blockType === "image") {
-          return { id: b.id, blockType: "image", image: b.image, width: b.width };
-        }
-        if (b.blockType === "gallery") {
-          return { id: b.id, blockType: "gallery", columns: b.columns, images: b.images };
-        }
-        if (b.blockType === "hero") {
-          return { id: b.id, blockType: "hero", heading: def.navKey ? navTitle(loc, def.navKey) || kaTitle : kaTitle };
-        }
-        return b;
-      });
-      await payload.update({
-        collection: "pages",
-        id: fresh.id,
-        locale: loc,
-        data: {
-          title: def.navKey ? navTitle(loc, def.navKey) || kaTitle : titleFor(c, titleField, kaTitle),
-          layout: locLayout,
-        } as never,
-      });
+      data[`title_${loc}`] = def.navKey
+        ? navTitle(loc, def.navKey) || kaTitle
+        : titleFor(getContent(loc, key), titleField, kaTitle);
+    }
+
+    if (existingDoc) {
+      await payload.update({ collection: "pages", id: existingDoc.id, data: data as never });
+    } else {
+      await payload.create({ collection: "pages", data: data as never });
     }
 
     const imgCount = topIds.length + bottomIds.length + galleryIds.length;

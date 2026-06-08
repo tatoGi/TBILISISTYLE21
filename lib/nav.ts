@@ -1,14 +1,17 @@
 import { getTranslations } from "next-intl/server";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
+import { pickField } from "@/lib/i18n-content";
 
 export type NavLink = { label: string; href: string };
 
-type PageRef = { slug?: string; title?: string; navLabel?: string; routePath?: string };
+type PageRef = Record<string, unknown> & { slug?: string; routePath?: string };
 
-function toLink(page: PageRef, override?: string): NavLink {
-  const routePath = page.routePath?.trim();
+function toLink(page: PageRef, locale: string, override?: string): NavLink {
+  const routePath = (page.routePath as string)?.trim();
+  const navLabel = pickField<string>(page, "navLabel", locale);
+  const title = pickField<string>(page, "title", locale);
   return {
-    label: (override || page.navLabel || page.title || page.slug || "").toString(),
+    label: (override || navLabel || title || page.slug || "").toString(),
     href: routePath ? routePath : `/${page.slug}`,
   };
 }
@@ -43,10 +46,10 @@ export async function getNavPages(): Promise<NavLink[]> {
     const locale = await getCurrentLocale();
 
     const site = await payload.findGlobal({ slug: "site", locale, fallbackLocale: "ka", depth: 1 });
-    const menu = (site?.menu ?? []) as { page?: unknown; label?: string }[];
+    const menu = (site?.menu ?? []) as Record<string, unknown>[];
     const fromGlobal = menu
       .filter((i) => i.page && typeof i.page === "object")
-      .map((i) => toLink(i.page as PageRef, i.label));
+      .map((i) => toLink(i.page as PageRef, locale, pickField<string>(i, "label", locale)));
     if (fromGlobal.length) return withFixedLinks(fromGlobal, fixed);
 
     const res = await payload.find({
@@ -58,7 +61,7 @@ export async function getNavPages(): Promise<NavLink[]> {
       depth: 0,
       limit: 100,
     });
-    return withFixedLinks(res.docs.map((p) => toLink(p as PageRef)), fixed);
+    return withFixedLinks(res.docs.map((p) => toLink(p as unknown as PageRef, locale)), fixed);
   } catch {
     return fixed;
   }
@@ -78,7 +81,7 @@ export async function getFeaturedPages(): Promise<NavLink[]> {
       depth: 0,
       limit: 6,
     });
-    return res.docs.map((p) => toLink(p as PageRef));
+    return res.docs.map((p) => toLink(p as unknown as PageRef, locale));
   } catch {
     return [];
   }
@@ -145,14 +148,17 @@ export async function getFeaturedNews(limit = 6): Promise<NewsCard[]> {
       depth: 1,
       limit,
     });
-    return res.docs.map((p) => ({
-      id: p.id as string,
-      title: (p.title as string) || "",
-      slug: (p.slug as string) || "",
-      excerpt: (p.excerpt as string)?.trim() || null,
-      coverUrl: mediaUrlOf(p.coverImage),
-      publishedAt: (p.publishedAt as string) || null,
-    }));
+    return res.docs.map((p) => {
+      const doc = p as unknown as Record<string, unknown>;
+      return {
+        id: p.id as string,
+        title: pickField<string>(doc, "title", locale) || "",
+        slug: (p.slug as string) || "",
+        excerpt: pickField<string>(doc, "excerpt", locale)?.trim() || null,
+        coverUrl: mediaUrlOf(p.coverImage),
+        publishedAt: (p.publishedAt as string) || null,
+      };
+    });
   } catch {
     return [];
   }

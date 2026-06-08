@@ -150,7 +150,14 @@ export interface UserAuthOperations {
  */
 export interface Page {
   id: string;
-  title: string;
+  title_ka: string;
+  navLabel_ka?: string | null;
+  title_en?: string | null;
+  navLabel_en?: string | null;
+  title_ru?: string | null;
+  navLabel_ru?: string | null;
+  title_ua?: string | null;
+  navLabel_ua?: string | null;
   /**
    * URL path, e.g. "main-stage" → /main-stage. Lowercase, no spaces.
    */
@@ -164,25 +171,30 @@ export interface Page {
    * Lower numbers appear first.
    */
   navOrder?: number | null;
-  /**
-   * Overrides the page title in the menu.
-   */
-  navLabel?: string | null;
   featuredOnHome?: boolean | null;
   layout?:
     | (
         | {
-            heading: string;
-            subheading?: string | null;
+            heading_ka: string;
+            subheading_ka?: string | null;
+            ctaLabel_ka?: string | null;
+            heading_en?: string | null;
+            subheading_en?: string | null;
+            ctaLabel_en?: string | null;
+            heading_ru?: string | null;
+            subheading_ru?: string | null;
+            ctaLabel_ru?: string | null;
+            heading_ua?: string | null;
+            subheading_ua?: string | null;
+            ctaLabel_ua?: string | null;
             image?: (string | null) | Media;
-            ctaLabel?: string | null;
             ctaHref?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
           }
         | {
-            content: {
+            content_ka: {
               root: {
                 type: string;
                 children: {
@@ -197,13 +209,61 @@ export interface Page {
               };
               [k: string]: unknown;
             };
+            content_en?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            content_ru?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            content_ua?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'richText';
           }
         | {
             image: string | Media;
-            caption?: string | null;
+            caption_ka?: string | null;
+            caption_en?: string | null;
+            caption_ru?: string | null;
+            caption_ua?: string | null;
             width?: ('full' | 'contained') | null;
             id?: string | null;
             blockName?: string | null;
@@ -213,7 +273,10 @@ export interface Page {
             images?:
               | {
                   image: string | Media;
-                  caption?: string | null;
+                  caption_ka?: string | null;
+                  caption_en?: string | null;
+                  caption_ru?: string | null;
+                  caption_ua?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -223,7 +286,10 @@ export interface Page {
             blockType: 'gallery';
           }
         | {
-            label: string;
+            label_ka: string;
+            label_en?: string | null;
+            label_ru?: string | null;
+            label_ua?: string | null;
             href: string;
             id?: string | null;
             blockName?: string | null;
@@ -231,8 +297,14 @@ export interface Page {
           }
       )[]
     | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
+  metaTitle_ka?: string | null;
+  metaDescription_ka?: string | null;
+  metaTitle_en?: string | null;
+  metaDescription_en?: string | null;
+  metaTitle_ru?: string | null;
+  metaDescription_ru?: string | null;
+  metaTitle_ua?: string | null;
+  metaDescription_ua?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -243,7 +315,10 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  alt?: string | null;
+  alt_ka?: string | null;
+  alt_en?: string | null;
+  alt_ru?: string | null;
+  alt_ua?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -288,7 +363,14 @@ export interface Media {
  */
 export interface Post {
   id: string;
-  title: string;
+  title_ka: string;
+  excerpt_ka?: string | null;
+  title_en?: string | null;
+  excerpt_en?: string | null;
+  title_ru?: string | null;
+  excerpt_ru?: string | null;
+  title_ua?: string | null;
+  excerpt_ua?: string | null;
   /**
    * URL path → /news/<slug>. Lowercase, no spaces.
    */
@@ -299,24 +381,29 @@ export interface Post {
    */
   featuredOnHome?: boolean | null;
   coverImage?: (string | null) | Media;
-  /**
-   * Short summary shown in the news list.
-   */
-  excerpt?: string | null;
   layout?:
     | (
         | {
-            heading: string;
-            subheading?: string | null;
+            heading_ka: string;
+            subheading_ka?: string | null;
+            ctaLabel_ka?: string | null;
+            heading_en?: string | null;
+            subheading_en?: string | null;
+            ctaLabel_en?: string | null;
+            heading_ru?: string | null;
+            subheading_ru?: string | null;
+            ctaLabel_ru?: string | null;
+            heading_ua?: string | null;
+            subheading_ua?: string | null;
+            ctaLabel_ua?: string | null;
             image?: (string | null) | Media;
-            ctaLabel?: string | null;
             ctaHref?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
           }
         | {
-            content: {
+            content_ka: {
               root: {
                 type: string;
                 children: {
@@ -331,13 +418,61 @@ export interface Post {
               };
               [k: string]: unknown;
             };
+            content_en?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            content_ru?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            content_ua?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'richText';
           }
         | {
             image: string | Media;
-            caption?: string | null;
+            caption_ka?: string | null;
+            caption_en?: string | null;
+            caption_ru?: string | null;
+            caption_ua?: string | null;
             width?: ('full' | 'contained') | null;
             id?: string | null;
             blockName?: string | null;
@@ -347,7 +482,10 @@ export interface Post {
             images?:
               | {
                   image: string | Media;
-                  caption?: string | null;
+                  caption_ka?: string | null;
+                  caption_en?: string | null;
+                  caption_ru?: string | null;
+                  caption_ua?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -357,7 +495,10 @@ export interface Post {
             blockType: 'gallery';
           }
         | {
-            label: string;
+            label_ka: string;
+            label_en?: string | null;
+            label_ru?: string | null;
+            label_ua?: string | null;
             href: string;
             id?: string | null;
             blockName?: string | null;
@@ -399,17 +540,29 @@ export interface Partner {
  */
 export interface Ticket {
   id: string;
+  /**
+   * The ticket type shown to customers.
+   */
   title: string;
+  /**
+   * Optional details shown on the ticket card.
+   */
   description?: string | null;
   priceGel: number;
+  quantity: number;
   /**
-   * e.g. 2027-08-27
+   * Format: YYYY-MM-DD.
    */
   eventDate?: string | null;
   location?: string | null;
-  quantity: number;
-  saleUrl?: string | null;
+  /**
+   * Only Active / Sold out tickets appear on the public site.
+   */
   status: 'draft' | 'active' | 'sold_out';
+  /**
+   * Optional link to an external ticketing page.
+   */
+  saleUrl?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -696,12 +849,18 @@ export interface PayloadMigration {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
-  title?: T;
+  title_ka?: T;
+  navLabel_ka?: T;
+  title_en?: T;
+  navLabel_en?: T;
+  title_ru?: T;
+  navLabel_ru?: T;
+  title_ua?: T;
+  navLabel_ua?: T;
   slug?: T;
   routePath?: T;
   showInNav?: T;
   navOrder?: T;
-  navLabel?: T;
   featuredOnHome?: T;
   layout?:
     | T
@@ -709,10 +868,19 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
-              heading?: T;
-              subheading?: T;
+              heading_ka?: T;
+              subheading_ka?: T;
+              ctaLabel_ka?: T;
+              heading_en?: T;
+              subheading_en?: T;
+              ctaLabel_en?: T;
+              heading_ru?: T;
+              subheading_ru?: T;
+              ctaLabel_ru?: T;
+              heading_ua?: T;
+              subheading_ua?: T;
+              ctaLabel_ua?: T;
               image?: T;
-              ctaLabel?: T;
               ctaHref?: T;
               id?: T;
               blockName?: T;
@@ -720,7 +888,10 @@ export interface PagesSelect<T extends boolean = true> {
         richText?:
           | T
           | {
-              content?: T;
+              content_ka?: T;
+              content_en?: T;
+              content_ru?: T;
+              content_ua?: T;
               id?: T;
               blockName?: T;
             };
@@ -728,7 +899,10 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               image?: T;
-              caption?: T;
+              caption_ka?: T;
+              caption_en?: T;
+              caption_ru?: T;
+              caption_ua?: T;
               width?: T;
               id?: T;
               blockName?: T;
@@ -740,7 +914,10 @@ export interface PagesSelect<T extends boolean = true> {
                 | T
                 | {
                     image?: T;
-                    caption?: T;
+                    caption_ka?: T;
+                    caption_en?: T;
+                    caption_ru?: T;
+                    caption_ua?: T;
                     id?: T;
                   };
               columns?: T;
@@ -750,14 +927,23 @@ export interface PagesSelect<T extends boolean = true> {
         cta?:
           | T
           | {
-              label?: T;
+              label_ka?: T;
+              label_en?: T;
+              label_ru?: T;
+              label_ua?: T;
               href?: T;
               id?: T;
               blockName?: T;
             };
       };
-  metaTitle?: T;
-  metaDescription?: T;
+  metaTitle_ka?: T;
+  metaDescription_ka?: T;
+  metaTitle_en?: T;
+  metaDescription_en?: T;
+  metaTitle_ru?: T;
+  metaDescription_ru?: T;
+  metaTitle_ua?: T;
+  metaDescription_ua?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -767,22 +953,37 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  title?: T;
+  title_ka?: T;
+  excerpt_ka?: T;
+  title_en?: T;
+  excerpt_en?: T;
+  title_ru?: T;
+  excerpt_ru?: T;
+  title_ua?: T;
+  excerpt_ua?: T;
   slug?: T;
   publishedAt?: T;
   featuredOnHome?: T;
   coverImage?: T;
-  excerpt?: T;
   layout?:
     | T
     | {
         hero?:
           | T
           | {
-              heading?: T;
-              subheading?: T;
+              heading_ka?: T;
+              subheading_ka?: T;
+              ctaLabel_ka?: T;
+              heading_en?: T;
+              subheading_en?: T;
+              ctaLabel_en?: T;
+              heading_ru?: T;
+              subheading_ru?: T;
+              ctaLabel_ru?: T;
+              heading_ua?: T;
+              subheading_ua?: T;
+              ctaLabel_ua?: T;
               image?: T;
-              ctaLabel?: T;
               ctaHref?: T;
               id?: T;
               blockName?: T;
@@ -790,7 +991,10 @@ export interface PostsSelect<T extends boolean = true> {
         richText?:
           | T
           | {
-              content?: T;
+              content_ka?: T;
+              content_en?: T;
+              content_ru?: T;
+              content_ua?: T;
               id?: T;
               blockName?: T;
             };
@@ -798,7 +1002,10 @@ export interface PostsSelect<T extends boolean = true> {
           | T
           | {
               image?: T;
-              caption?: T;
+              caption_ka?: T;
+              caption_en?: T;
+              caption_ru?: T;
+              caption_ua?: T;
               width?: T;
               id?: T;
               blockName?: T;
@@ -810,7 +1017,10 @@ export interface PostsSelect<T extends boolean = true> {
                 | T
                 | {
                     image?: T;
-                    caption?: T;
+                    caption_ka?: T;
+                    caption_en?: T;
+                    caption_ru?: T;
+                    caption_ua?: T;
                     id?: T;
                   };
               columns?: T;
@@ -820,7 +1030,10 @@ export interface PostsSelect<T extends boolean = true> {
         cta?:
           | T
           | {
-              label?: T;
+              label_ka?: T;
+              label_en?: T;
+              label_ru?: T;
+              label_ua?: T;
               href?: T;
               id?: T;
               blockName?: T;
@@ -852,11 +1065,11 @@ export interface TicketsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   priceGel?: T;
+  quantity?: T;
   eventDate?: T;
   location?: T;
-  quantity?: T;
-  saleUrl?: T;
   status?: T;
+  saleUrl?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -977,7 +1190,10 @@ export interface MessageJobsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
+  alt_ka?: T;
+  alt_en?: T;
+  alt_ru?: T;
+  alt_ua?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1096,10 +1312,10 @@ export interface Site {
   menu?:
     | {
         page: string | Page;
-        /**
-         * Optional — overrides the page title in the menu.
-         */
-        label?: string | null;
+        label_ka?: string | null;
+        label_en?: string | null;
+        label_ru?: string | null;
+        label_ua?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1115,7 +1331,10 @@ export interface SiteSelect<T extends boolean = true> {
     | T
     | {
         page?: T;
-        label?: T;
+        label_ka?: T;
+        label_en?: T;
+        label_ru?: T;
+        label_ua?: T;
         id?: T;
       };
   updatedAt?: T;

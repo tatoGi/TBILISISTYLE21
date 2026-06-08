@@ -54,7 +54,7 @@ export default async function MediaListView(props: AdminViewServerProps) {
     return {
       id: String(record.id),
       cells: {
-        alt: asText(record.alt),
+        alt: asText(record.alt_ka) || asText(record.alt),
         filename: asText(record.filename) || asText(record.url),
         mimeType: mimeType || "file",
         size: formatBytes(record.filesize),

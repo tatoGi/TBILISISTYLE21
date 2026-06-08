@@ -1,13 +1,16 @@
 import type { Block } from "payload";
+import { localeTabs } from "../fields/localeTabs";
 
 export const HeroBlock: Block = {
   slug: "hero",
   labels: { singular: "Hero", plural: "Heroes" },
   fields: [
-    { name: "heading", type: "text", localized: true, required: true },
-    { name: "subheading", type: "textarea", localized: true },
+    localeTabs([
+      { name: "heading", type: "text", required: true, label: "Heading" },
+      { name: "subheading", type: "textarea", label: "Subheading" },
+      { name: "ctaLabel", type: "text", label: "Button label" },
+    ]),
     { name: "image", type: "upload", relationTo: "media" },
-    { name: "ctaLabel", type: "text", localized: true },
     { name: "ctaHref", type: "text" },
   ],
 };
@@ -16,7 +19,7 @@ export const RichTextBlock: Block = {
   slug: "richText",
   labels: { singular: "Text", plural: "Text blocks" },
   fields: [
-    { name: "content", type: "richText", localized: true, required: true },
+    localeTabs([{ name: "content", type: "richText", required: true, label: "Content" }]),
   ],
 };
 
@@ -25,7 +28,7 @@ export const ImageBlock: Block = {
   labels: { singular: "Image", plural: "Images" },
   fields: [
     { name: "image", type: "upload", relationTo: "media", required: true },
-    { name: "caption", type: "text", localized: true },
+    localeTabs([{ name: "caption", type: "text", label: "Caption" }]),
     {
       name: "width",
       type: "select",
@@ -48,7 +51,7 @@ export const GalleryBlock: Block = {
       minRows: 1,
       fields: [
         { name: "image", type: "upload", relationTo: "media", required: true },
-        { name: "caption", type: "text", localized: true },
+        localeTabs([{ name: "caption", type: "text", label: "Caption" }]),
       ],
     },
     {
@@ -68,7 +71,7 @@ export const CTABlock: Block = {
   slug: "cta",
   labels: { singular: "Call to action", plural: "Calls to action" },
   fields: [
-    { name: "label", type: "text", localized: true, required: true },
+    localeTabs([{ name: "label", type: "text", required: true, label: "Button label" }]),
     { name: "href", type: "text", required: true },
   ],
 };

@@ -1,4 +1,5 @@
 import type { GlobalConfig } from "payload";
+import { localeTabs } from "../fields/localeTabs";
 
 // "Menu" screen — drag-sortable list of pages that drives the site navigation.
 // (Homepage featured pages are controlled by the "Feature on homepage"
@@ -16,12 +17,8 @@ export const SiteSettings: GlobalConfig = {
       labels: { singular: "Menu item", plural: "Menu items" },
       fields: [
         { name: "page", type: "relationship", relationTo: "pages", required: true },
-        {
-          name: "label",
-          type: "text",
-          localized: true,
-          admin: { description: "Optional — overrides the page title in the menu." },
-        },
+        // Optional per-language label override, edited together in tabs.
+        localeTabs([{ name: "label", type: "text", label: "Menu label (optional)" }]),
       ],
     },
   ],

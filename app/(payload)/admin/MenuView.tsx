@@ -32,9 +32,9 @@ export default async function MenuView(props: AdminViewServerProps) {
     return {
       id: String(record.id || page.id || index),
       cells: {
-        label: asText(record.label) || asText(page.title),
+        label: asText(record.label_ka) || asText(record.label) || asText(page.title_ka) || asText(page.title),
         order: String(index + 1),
-        page: asText(page.title),
+        page: asText(page.title_ka) || asText(page.title),
         slug: asText(page.slug),
       },
     };

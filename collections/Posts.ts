@@ -1,12 +1,13 @@
 import type { CollectionConfig } from "payload";
 import { contentBlocks } from "../blocks/contentBlocks";
+import { localeTabs } from "../fields/localeTabs";
 
 export const Posts: CollectionConfig = {
   slug: "posts",
   labels: { singular: "Post", plural: "News" },
   admin: {
-    useAsTitle: "title",
-    defaultColumns: ["title", "slug", "publishedAt", "_status"],
+    useAsTitle: "title_ka",
+    defaultColumns: ["title_ka", "slug", "publishedAt", "_status"],
     group: false,
   },
   access: {
@@ -16,12 +17,11 @@ export const Posts: CollectionConfig = {
     drafts: true,
   },
   fields: [
-    {
-      name: "title",
-      type: "text",
-      localized: true,
-      required: true,
-    },
+    // Title + excerpt for all four languages, edited together in tabs.
+    localeTabs([
+      { name: "title", type: "text", required: true, label: "Title" },
+      { name: "excerpt", type: "textarea", label: "Excerpt" },
+    ]),
     {
       name: "slug",
       type: "text",
@@ -55,12 +55,6 @@ export const Posts: CollectionConfig = {
       name: "coverImage",
       type: "upload",
       relationTo: "media",
-    },
-    {
-      name: "excerpt",
-      type: "textarea",
-      localized: true,
-      admin: { description: "Short summary shown in the news list." },
     },
     {
       name: "layout",
