@@ -8,10 +8,12 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-display);
+  --font-sans: var(--font-display), Arial, sans-serif;
   --font-mono: var(--font-display);
-  /* Festival display face for headings (Latin/Cyrillic); Georgian falls back to Noto. */
-  --font-heading: var(--font-unbounded), var(--font-display), Arial, sans-serif;
+  /* Bebas (Latin) → Oswald (Cyrillic) → Noto (Georgian + body fallback) */
+  --font-heading: var(--font-bebas), var(--font-oswald), var(--font-display), Arial,
+    sans-serif;
+  --font-bitcount: "Bitcount Single", var(--font-display), system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,12 +27,31 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-display), Arial, Helvetica, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Headings use the festival display face. Georgian glyphs are absent from
-   Unbounded, so the stack falls back to Noto Sans Georgian automatically. */
-h1, h2, h3, h4, h5, h6 {
+.font-heading {
   font-family: var(--font-heading);
+}
+
+/* Headings & festival display type */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.03em;
+  text-wrap: balance;
+}
+
+/* Branded uppercase UI (nav, CTAs, section titles) */
+.uppercase:is(.font-semibold, .font-bold, .font-extrabold, .font-black) {
+  font-family: var(--font-heading);
+  letter-spacing: 0.08em;
 }
 
 /* Continuously scrolling product reel (two copies of the track sit side by
@@ -84,4 +105,98 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* ───────────── Festival landing — hero & motion ───────────── */
 
+@keyframes ts-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ts-fade-up {
+  animation: ts-fade-up 0.75s ease-out both;
+}
+
+@keyframes ts-hero-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.ts-hero-kenburns {
+  animation: ts-hero-kenburns 18s ease-out forwards;
+}
+
+@keyframes ts-scroll-hint {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scaleY(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.ts-scroll-hint {
+  animation: ts-scroll-hint 2s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes ts-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ts-ticker-track {
+  animation: ts-ticker 28s linear infinite;
+}
+
+/* Festival slogan ticker — Bitcount Single (Google Fonts) */
+.ts-festival-ticker {
+  font-family: var(--font-bitcount);
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-variation-settings: "slnt" 0, "CRSV" 0.5, "ELSH" 0, "ELXP" 0;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-fade-up,
+  .ts-hero-kenburns,
+  .ts-scroll-hint,
+  .ts-ticker-track {
+    animation: none;
+  }
+}
+
+/* ───────────── Content pages — readable prose ───────────── */
+
+.ts-content-prose {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.ts-content-prose p + p {
+  margin-top: 1.25rem;
+}
+
+.ts-content-prose.whitespace-pre-line {
+  white-space: pre-line;
+}

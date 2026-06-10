@@ -33,7 +33,7 @@ export default function LanguageSwitcher() {
 
   return (
     <div
-      className="flex items-center gap-1 rounded-full border border-white/20 bg-black/35 p-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] backdrop-blur-md"
+      className="flex items-center gap-1 rounded-full border border-white/50 bg-black/80 p-1 shadow-[0_4px_24px_rgba(0,0,0,0.45)] backdrop-blur-md"
       aria-label="Language selector"
     >
       {locales.map((locale) => {
@@ -47,10 +47,10 @@ export default function LanguageSwitcher() {
             disabled={isPending}
             aria-pressed={isActive}
             className={[
-              "h-8 min-w-10 rounded-full px-3 text-[11px] font-bold uppercase tracking-normal transition-all duration-200",
+              "font-sans h-9 min-w-11 rounded-full px-3.5 text-xs font-semibold tracking-wide transition-all duration-200",
               isActive
-                ? "bg-yellow-300 text-black shadow-[0_0_18px_rgba(253,224,71,0.35)]"
-                : "text-white/75 hover:bg-white/12 hover:text-white",
+                ? "bg-yellow-300 text-black shadow-[0_0_16px_rgba(253,224,71,0.45)]"
+                : "text-white hover:bg-white/15",
             ].join(" ")}
           >
             {localeLabels[locale]}

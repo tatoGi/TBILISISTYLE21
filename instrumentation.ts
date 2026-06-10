@@ -134,7 +134,12 @@ async function backfillLocaleColumns(payload: Awaited<ReturnType<typeof import("
       try {
         await pool.query(statement);
       } catch (err) {
-        console.error(`[backfill] ${target} <- ${source} (${loc}) skipped:`, err);
+        // 42P01 = source or target table gone (e.g. local dev already dropped *_locales).
+        // Expected after schema push — not a startup failure.
+        const code = (err as { code?: string }).code;
+        if (code !== "42P01") {
+          console.error(`[backfill] ${target} <- ${source} (${loc}) skipped:`, err);
+        }
       }
     }
   }
@@ -223,6 +228,8 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     }),
     ...localeColumns("media", ["alt"]),
     ...localeColumns("site_menu", ["label"]),
+    // Site global — festival landing hero (badge / title / tagline).
+    ...localeColumns("site", ["heroBadge", "heroTitle", "heroTagline"]),
 
     // Phase 3: localized fields inside content blocks (hero/richText/image/
     // gallery/cta) converted to flat per-locale columns on each block table.

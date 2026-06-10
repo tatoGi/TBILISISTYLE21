@@ -1,9 +1,14 @@
 {
   "contactUs": {
     "title": "დაგვიკავშირდით",
+    "intro": "ბილეთები, პარტნიორობა თუ ნებისმიერი კითხვა — ჩვენ აქ ვართ",
     "phone": "ტელეფონი",
     "email": "ელფოსტა",
-    "payments": "გადახდები"
+    "callCta": "დარეკვა",
+    "emailCta": "მოგვწერეთ",
+    "payments": "გადახდები",
+    "paymentsNote": "უსაფრთხო ბარათით გადახდა",
+    "backToFestival": "ფესტივალზე დაბრუნება"
   },
   "lineUp": {
     "festivalTitle": "TBILISI STYLE ფესტივალი",
@@ -56,6 +61,18 @@
     "subtitle": "ელექტრონული მუსიკის ფესტივალი",
     "enter": "შედი ენერგიაში",
     "allNews": "ნახე ყველა სიახლე"
+  },
+  "festivalLanding": {
+    "heroTagline": "თბილისი · ელექტრონული ენერგია · ღამის გამოცდილება",
+    "statStages": "4 სცენა",
+    "statDays": "3 დღე",
+    "statCity": "თბილისი",
+    "statGenre": "ელექტრონული",
+    "scrollHint": "გადახვევა",
+    "exploreSubtitle": "აღმოაჩინე",
+    "exploreTitle": "სცენები & ზონები",
+    "exploreCta": "გადადი",
+    "emptyFeatured": "ადმინში მონიშნე გვერდები „Feature on homepage“ — აქ გამოჩნდება."
   },
   "festival": {
     "mainStage": "მთავარი სცენა",

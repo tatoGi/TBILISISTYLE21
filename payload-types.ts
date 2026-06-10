@@ -1304,11 +1304,25 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Festival landing hero text and the public navigation menu.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site".
  */
 export interface Site {
   id: string;
+  heroBadge_ka?: string | null;
+  heroTitle_ka?: string | null;
+  heroTagline_ka?: string | null;
+  heroBadge_en?: string | null;
+  heroTitle_en?: string | null;
+  heroTagline_en?: string | null;
+  heroBadge_ru?: string | null;
+  heroTitle_ru?: string | null;
+  heroTagline_ru?: string | null;
+  heroBadge_ua?: string | null;
+  heroTitle_ua?: string | null;
+  heroTagline_ua?: string | null;
   menu?:
     | {
         page: string | Page;
@@ -1327,6 +1341,18 @@ export interface Site {
  * via the `definition` "site_select".
  */
 export interface SiteSelect<T extends boolean = true> {
+  heroBadge_ka?: T;
+  heroTitle_ka?: T;
+  heroTagline_ka?: T;
+  heroBadge_en?: T;
+  heroTitle_en?: T;
+  heroTagline_en?: T;
+  heroBadge_ru?: T;
+  heroTitle_ru?: T;
+  heroTagline_ru?: T;
+  heroBadge_ua?: T;
+  heroTitle_ua?: T;
+  heroTagline_ua?: T;
   menu?:
     | T
     | {

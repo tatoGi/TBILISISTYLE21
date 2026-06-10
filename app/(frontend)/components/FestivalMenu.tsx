@@ -66,7 +66,7 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
             priority
             className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/30 sm:h-11 sm:w-11"
           />
-          <span className="truncate text-[clamp(0.9rem,4.8vw,2.25rem)] font-extrabold uppercase leading-none tracking-normal text-white sm:text-4xl sm:tracking-wider">
+          <span className="font-heading truncate text-[clamp(0.9rem,4.8vw,2.25rem)] font-extrabold uppercase leading-none tracking-[0.06em] text-white sm:text-4xl">
             Tbilisi Style 21
           </span>
         </Link>
@@ -147,10 +147,8 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
                 key={`${item.href}-${i}`}
                 href={item.href}
                 onClick={() => setNavOpen(false)}
-                className="uppercase font-bold text-white hover:text-yellow-300 hover:pl-2 transition-all duration-200 block"
+                className="font-heading block uppercase font-bold tracking-[0.12em] text-white transition-all duration-200 hover:pl-2 hover:text-yellow-300"
                 style={{
-                  fontFamily: "'Courier New', monospace",
-                  letterSpacing: "0.1em",
                   fontSize: "clamp(0.75rem, 2.2vh, 1.05rem)",
                   padding: "10px 0",
                   borderBottom:

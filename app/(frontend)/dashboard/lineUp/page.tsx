@@ -1,111 +1,56 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-
 import img1 from "@/public/lineups/tbilisistyleday1.jpeg";
 import img2 from "@/public/lineups/tbilisistyleday2.jpeg";
 import img3 from "@/public/lineups/tbilisistyleday3.jpeg";
 import img4 from "@/public/lineups/rave.jpeg";
+import ContentPageLayout from "../../components/content/ContentPageLayout";
 
 export default async function LineUpPage() {
   const t = await getTranslations("lineUp");
 
   return (
-    <main
-      style={{
-        maxWidth: "1100px",
-        margin: "0 auto",
-        padding: "140px 40px 40px",
-      }}
+    <ContentPageLayout
+      title={t("festivalTitle")}
+      subtitle="27–29.08.2027"
+      eyebrow="Tbilisi Style 21"
+      contentWidth="full"
     >
-      <section style={{ marginBottom: "80px" }}>
-        <h1
-          style={{
-            fontSize: "36px",
-            marginBottom: "40px",
-            fontWeight: "bold",
-            textAlign: "center",
-          }}
-        >
-          {t("festivalTitle")}
-          <div
-            style={{
-              fontSize: "14px",
-              color: "#888",
-            }}
-          >
-            27-29.08.2027
-          </div>
-        </h1>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "20px",
-          }}
-        >
-          {[img1, img2, img3].map((img, i) => (
-            <div
-              key={i}
-              style={{
-                position: "relative",
-                width: "100%",
-                height: "420px",
-                overflow: "hidden",
-                borderRadius: "18px",
-              }}
-            >
-              <Image
-                src={img}
-                alt={`lineup ${i}`}
-                fill
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2
-          style={{
-            fontSize: "32px",
-            marginBottom: "40px",
-            fontWeight: "bold",
-            textAlign: "center",
-          }}
-        >
-          {t("raveTitle")}
-          <br />
-          <div
-            style={{
-              fontSize: "14px",
-              color: "#888",
-            }}
-          >
-            {t("raveDate")}
-          </div>
-        </h2>
-
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div
-            style={{
-              position: "relative",
-              width: "300px",
-              height: "420px",
-              borderRadius: "18px",
-              overflow: "hidden",
-            }}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {[img1, img2, img3].map((img, i) => (
+          <figure
+            key={i}
+            className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10"
           >
             <Image
-              src={img4}
-              alt="kvevri rave"
+              src={img}
+              alt={`Lineup day ${i + 1}`}
               fill
-              style={{ objectFit: "cover" }}
+              className="object-cover transition duration-500 hover:scale-105"
+              sizes="(max-width: 640px) 100vw, 33vw"
             />
-          </div>
-        </div>
+          </figure>
+        ))}
+      </div>
+
+      <section className="mt-20 text-center">
+        <h2 className="font-heading text-2xl font-extrabold uppercase tracking-[0.1em] sm:text-3xl">
+          {t("raveTitle")}
+        </h2>
+        <p className="font-heading mt-2 text-sm font-semibold uppercase tracking-[0.2em] text-white/55">
+          {t("raveDate")}
+        </p>
+
+        <figure className="relative mx-auto mt-10 aspect-[3/4] w-full max-w-xs overflow-hidden rounded-2xl border border-white/10">
+          <Image
+            src={img4}
+            alt="Kvevri rave"
+            fill
+            className="object-cover"
+            sizes="320px"
+          />
+        </figure>
       </section>
-    </main>
+    </ContentPageLayout>
   );
 }

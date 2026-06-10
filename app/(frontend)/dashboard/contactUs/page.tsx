@@ -1,89 +1,95 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-
-import img1 from "@/public/paymentLogo/Visa_Brandmark_White_RGB_2021.png";
-import img2 from "@/public/paymentLogo/ms_hrz_opt_rev_75_3x.png";
+import AboutImg from "@/public/images/secondImg_1920x1080.jpeg";
+import visaLogo from "@/public/paymentLogo/Visa_Brandmark_White_RGB_2021.png";
+import mastercardLogo from "@/public/paymentLogo/ms_hrz_opt_rev_75_3x.png";
+import ContentPageLayout from "../../components/content/ContentPageLayout";
+import {
+  SITE_EMAIL,
+  SITE_PHONE_DISPLAY,
+  SITE_PHONE_HREF,
+} from "@/lib/site-contact";
 
 export default async function ContactPage() {
   const t = await getTranslations("contactUs");
+  const tCommon = await getTranslations("common");
 
   return (
-    <main
-      style={{
-        maxWidth: "900px",
-        margin: "0 auto",
-        padding: "140px 40px 80px",
-      }}
+    <ContentPageLayout
+      title={t("title")}
+      subtitle={t("intro")}
+      eyebrow="Tbilisi Style 21"
+      heroImage={AboutImg}
+      contentWidth="wide"
     >
-      <h1
-        style={{
-          fontSize: "36px",
-          fontWeight: "bold",
-          textAlign: "center",
-          marginBottom: "40px",
-        }}
-      >
-        {t("title")}
-      </h1>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <a
+          href={`tel:${SITE_PHONE_HREF}`}
+          className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:border-yellow-300/40 hover:bg-yellow-300/[0.06] sm:p-8"
+        >
+          <span className="font-heading text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-300/80">
+            {t("phone")}
+          </span>
+          <span className="font-heading text-2xl font-extrabold uppercase tracking-wide text-white transition group-hover:text-yellow-300 sm:text-3xl">
+            {SITE_PHONE_DISPLAY}
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45 transition group-hover:text-white/70">
+            {t("callCta")} →
+          </span>
+        </a>
 
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "16px",
-          lineHeight: "1.8",
-          marginBottom: "60px",
-        }}
-      >
-        {t("phone")}: +995 558 35 83 62
-        <br />
-        {t("email")}: Tbilisistyle21@gmail.com
+        <a
+          href={`mailto:${SITE_EMAIL}`}
+          className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:border-yellow-300/40 hover:bg-yellow-300/[0.06] sm:p-8"
+        >
+          <span className="font-heading text-[10px] font-bold uppercase tracking-[0.28em] text-yellow-300/80">
+            {t("email")}
+          </span>
+          <span className="break-all font-heading text-lg font-extrabold uppercase tracking-wide text-white transition group-hover:text-yellow-300 sm:text-xl">
+            {SITE_EMAIL}
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-white/45 transition group-hover:text-white/70">
+            {t("emailCta")} →
+          </span>
+        </a>
       </div>
 
-      <h2
-        style={{
-          fontSize: "32px",
-          fontWeight: "bold",
-          textAlign: "center",
-          marginBottom: "40px",
-        }}
-      >
-        {t("payments")}
-      </h2>
+      <section className="mt-12 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-6 sm:p-8">
+        <h2 className="font-heading text-center text-xl font-extrabold uppercase tracking-[0.12em] text-white sm:text-2xl">
+          {t("payments")}
+        </h2>
+        <p className="mt-3 text-center text-sm text-white/55">{t("paymentsNote")}</p>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "60px",
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
-        <div
-          style={{
-            position: "relative",
-            width: "140px",
-            height: "90px",
-          }}
-        >
-          <Image src={img1} alt="Visa" fill style={{ objectFit: "contain" }} />
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-10 sm:gap-14">
+          <div className="relative h-12 w-28 sm:h-14 sm:w-32">
+            <Image src={visaLogo} alt="Visa" fill className="object-contain" />
+          </div>
+          <div className="relative h-12 w-36 sm:h-14 sm:w-40">
+            <Image
+              src={mastercardLogo}
+              alt="Mastercard"
+              fill
+              className="object-contain"
+            />
+          </div>
         </div>
+      </section>
 
-        <div
-          style={{
-            position: "relative",
-            width: "180px",
-            height: "90px",
-          }}
+      <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <Link
+          href="/dashboard/tickets"
+          className="ts-ticket-pulse font-heading inline-flex items-center gap-2 rounded-full bg-yellow-300 px-8 py-3.5 text-sm font-extrabold uppercase tracking-[0.1em] text-black transition hover:bg-white"
         >
-          <Image
-            src={img2}
-            alt="Mastercard"
-            fill
-            style={{ objectFit: "contain" }}
-          />
-        </div>
+          {tCommon("buyTicket")}
+        </Link>
+        <Link
+          href="/dashboard/festival"
+          className="font-heading inline-flex items-center gap-2 rounded-full border border-white/25 px-8 py-3.5 text-sm font-extrabold uppercase tracking-[0.1em] text-white transition hover:border-yellow-300 hover:text-yellow-300"
+        >
+          {t("backToFestival")} →
+        </Link>
       </div>
-    </main>
+    </ContentPageLayout>
   );
 }
