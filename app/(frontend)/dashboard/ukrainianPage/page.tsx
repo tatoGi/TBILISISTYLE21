@@ -49,9 +49,8 @@ export default function UkrainianDayPage() {
                 key={item.labelKey}
                 href="#"
                 onClick={() => setNavOpen(false)}
+                className="font-heading block uppercase font-bold tracking-[0.12em] text-white transition-all duration-200 hover:pl-2 hover:text-yellow-300"
                 style={{
-                  fontFamily: "'Courier New', monospace",
-                  letterSpacing: "0.1em",
                   fontSize: "clamp(0.75rem, 2.2vh, 1.05rem)",
                   paddingTop: "clamp(5px, 1.2vh, 10px)",
                   paddingBottom: "clamp(5px, 1.2vh, 10px)",
@@ -60,7 +59,6 @@ export default function UkrainianDayPage() {
                       ? "1px solid rgba(255,255,255,0.07)"
                       : "none",
                 }}
-                className="block uppercase font-bold text-white hover:text-yellow-300 hover:pl-2 transition-all duration-200"
               >
                 {t(`nav.${item.labelKey}`)}
               </a>
@@ -70,13 +68,7 @@ export default function UkrainianDayPage() {
           <div className="w-full h-[1px] bg-white/20 mt-4 mb-4" />
 
           <p
-            style={{
-              fontFamily: "'Courier New', monospace",
-              letterSpacing: "0.08em",
-              lineHeight: "1.8",
-              fontSize: "clamp(0.6rem, 1.4vh, 0.8rem)",
-            }}
-            className="text-white/50 uppercase font-semibold"
+            className="font-heading text-white/50 text-xs font-semibold uppercase leading-relaxed tracking-[0.1em] sm:text-sm"
           >
             {t("common.slogan")}
           </p>

@@ -8,6 +8,7 @@ import * as migration_20260608_075536_add_post_featured from './20260608_075536_
 import * as migration_20260608_160000_posts_locale_columns from './20260608_160000_posts_locale_columns';
 import * as migration_20260608_170000_pages_media_menu_locale_columns from './20260608_170000_pages_media_menu_locale_columns';
 import * as migration_20260608_180000_block_locale_columns from './20260608_180000_block_locale_columns';
+import * as migration_20260608_190000_site_festival_hero_columns from './20260608_190000_site_festival_hero_columns';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20260608_180000_block_locale_columns.up,
     down: migration_20260608_180000_block_locale_columns.down,
     name: '20260608_180000_block_locale_columns'
+  },
+  {
+    up: migration_20260608_190000_site_festival_hero_columns.up,
+    down: migration_20260608_190000_site_festival_hero_columns.down,
+    name: '20260608_190000_site_festival_hero_columns'
   },
 ];

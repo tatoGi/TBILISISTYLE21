@@ -1,9 +1,14 @@
 {
   "contactUs": {
     "title": "Contact Us",
+    "intro": "Tickets, partnerships or any question — we are here for you",
     "phone": "Phone",
     "email": "Email",
-    "payments": "Payments"
+    "callCta": "Call now",
+    "emailCta": "Send email",
+    "payments": "Payments",
+    "paymentsNote": "Secure card payments accepted",
+    "backToFestival": "Back to festival"
   },
   "lineUp": {
     "festivalTitle": "TBILISI STYLE FESTIVAL",
@@ -56,6 +61,18 @@
     "subtitle": "ELECTRONIC MUSIC FESTIVAL",
     "enter": "ENTER THE ENERGY",
     "allNews": "View all news"
+  },
+  "festivalLanding": {
+    "heroTagline": "Tbilisi · Electronic energy · Night experience",
+    "statStages": "4 stages",
+    "statDays": "3 days",
+    "statCity": "Tbilisi",
+    "statGenre": "Electronic",
+    "scrollHint": "Scroll",
+    "exploreSubtitle": "Discover",
+    "exploreTitle": "Stages & zones",
+    "exploreCta": "Go",
+    "emptyFeatured": "Mark pages as “Feature on homepage” in the admin to show them here."
   },
   "festival": {
     "mainStage": "Main Stage",

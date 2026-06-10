@@ -49,6 +49,7 @@ export default buildConfig({
           }
         : false,
     components: {
+      providers: ["/app/(payload)/admin/AdminLoadingProvider.tsx"],
       graphics: {
         Logo: "/app/(payload)/admin/graphics/Logo.tsx",
         Icon: "/app/(payload)/admin/graphics/Icon.tsx",

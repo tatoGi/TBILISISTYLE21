@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-const EMAIL = "Tbilisistyle21@gmail.com";
-const PHONE_DISPLAY = "+995 558 35 83 62";
-const PHONE_HREF = "+995558358362";
+import {
+  SITE_EMAIL,
+  SITE_PHONE_DISPLAY,
+  SITE_PHONE_HREF,
+} from "@/lib/site-contact";
 
 export default function Footer() {
   const t = useTranslations();
@@ -19,16 +21,16 @@ export default function Footer() {
             {t("contactUs.title")}
           </p>
           <a
-            href={`mailto:${EMAIL}`}
+            href={`mailto:${SITE_EMAIL}`}
             className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-yellow-300"
           >
-            {t("contactUs.email")}: {EMAIL}
+            {t("contactUs.email")}: {SITE_EMAIL}
           </a>
           <a
-            href={`tel:${PHONE_HREF}`}
+            href={`tel:${SITE_PHONE_HREF}`}
             className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-yellow-300"
           >
-            {t("contactUs.phone")}: {PHONE_DISPLAY}
+            {t("contactUs.phone")}: {SITE_PHONE_DISPLAY}
           </a>
           <Link
             href="/dashboard/contactUs"

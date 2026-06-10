@@ -6,10 +6,41 @@ import { localeTabs } from "../fields/localeTabs";
 // checkbox on each Page.)
 export const SiteSettings: GlobalConfig = {
   slug: "site",
-  label: "Menu",
-  admin: { group: false },
+  label: "Site settings",
+  admin: {
+    group: false,
+    description: "Festival landing hero text and the public navigation menu.",
+  },
   access: { read: () => true },
   fields: [
+    {
+      type: "collapsible",
+      label: "Festival landing — /dashboard/festival",
+      admin: {
+        initCollapsed: false,
+        description:
+          "Centre of the hero (over the background figure): badge, main title and tagline. Leave empty to use the default translations.",
+      },
+      fields: [
+        localeTabs([
+          {
+            name: "heroBadge",
+            type: "text",
+            label: "Badge (small line above title)",
+          },
+          {
+            name: "heroTitle",
+            type: "text",
+            label: "Main title",
+          },
+          {
+            name: "heroTagline",
+            type: "text",
+            label: "Tagline (below title)",
+          },
+        ]),
+      ],
+    },
     {
       name: "menu",
       type: "array",

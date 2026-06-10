@@ -494,3 +494,113 @@ progress::-webkit-progress-value {
     padding: 20px 16px;
   }
 }
+
+/* ───────────── Admin loading — API bar, login overlay, route fallback ───── */
+
+/* Payload's built-in route progress bar is only 2px; make it obvious */
+.progress-bar {
+  height: 4px !important;
+  z-index: 10000 !important;
+}
+
+.progress-bar__progress {
+  background: linear-gradient(
+    90deg,
+    var(--velzon-primary) 0%,
+    #5a6dab 50%,
+    var(--velzon-primary) 100%
+  ) !important;
+}
+
+/* Immediate feedback for /payload-api and server-action requests */
+.ts21-api-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  z-index: 10001;
+  overflow: hidden;
+  background: rgba(64, 81, 137, 0.12);
+  pointer-events: none;
+}
+
+.ts21-api-loading-bar__track {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--velzon-primary),
+    #5a6dab,
+    var(--velzon-primary),
+    transparent
+  );
+  animation: ts21-api-loading-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes ts21-api-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.ts21-admin-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 34, 58, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.ts21-admin-loading-overlay__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 36px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--velzon-border);
+  box-shadow: 0 10px 30px rgba(15, 34, 58, 0.14);
+}
+
+.ts21-admin-loading-overlay__spinner,
+.ts21-page-loading__spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e9ebec;
+  border-top-color: var(--velzon-primary);
+  border-radius: 50%;
+  animation: ts21-spin 0.75s linear infinite;
+}
+
+.ts21-admin-loading-overlay__text,
+.ts21-page-loading__text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.ts21-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 50vh;
+  color: #495057;
+}
+
+@keyframes ts21-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

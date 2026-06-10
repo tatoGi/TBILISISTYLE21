@@ -5,6 +5,11 @@ import { AdminShell, Alert, Badge, Button, Card, CardBody, CardHeader, PageHeade
 export const dynamic = "force-dynamic";
 
 const configLinks = [
+  {
+    title: "Site settings",
+    desc: "Festival landing hero (title, badge, tagline) and menu order.",
+    href: "/admin/globals/site",
+  },
   { title: "Site Menu", desc: "Reorder the public navigation menu.", href: "/admin/menu" },
   { title: "Users", desc: "Admin accounts that can sign in here.", href: "/admin/users" },
   { title: "Ticket Types", desc: "Prices, quantities and sale status.", href: "/admin/tickets" },

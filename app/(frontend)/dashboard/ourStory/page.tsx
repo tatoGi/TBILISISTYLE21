@@ -1,31 +1,15 @@
 import { getTranslations } from "next-intl/server";
+import ContentPageLayout from "../../components/content/ContentPageLayout";
+import ContentProse from "../../components/content/ContentProse";
 
 export default async function OurStoryPage() {
   const t = await getTranslations("ourStory");
 
   return (
-    <main
-      style={{
-        maxWidth: "900px",
-        margin: "0 auto",
-        padding: "140px 40px 80px",
-        lineHeight: "1.8",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: "36px",
-          fontWeight: "bold",
-          textAlign: "center",
-          marginBottom: "60px",
-        }}
-      >
-        {t("title")}
-      </h1>
-
-      <div style={{ whiteSpace: "pre-line", fontSize: "16px" }}>
-        {t("body")}
-      </div>
-    </main>
+    <ContentPageLayout title={t("title")} eyebrow="Tbilisi Style 21">
+      <ContentProse>
+        <p className="whitespace-pre-line">{t("body")}</p>
+      </ContentProse>
+    </ContentPageLayout>
   );
 }

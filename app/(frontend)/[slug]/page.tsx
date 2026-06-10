@@ -45,9 +45,24 @@ export default async function CmsPage({ params }: PageProps) {
     notFound();
   }
 
+  const doc = page as unknown as Record<string, unknown>;
+  const pageTitle = pickField<string>(doc, "title", locale) || "";
+
   return (
-    <main className="min-h-screen bg-black pt-24 pb-16 text-white">
-      <RenderBlocks blocks={page.layout as never} locale={locale} />
+    <main className="min-h-screen bg-black text-white">
+      {pageTitle ? (
+        <header className="border-b border-white/10 bg-gradient-to-b from-[#0c0c0c] to-black px-6 pb-10 pt-28 text-center sm:pt-32">
+          <p className="font-heading mb-2 text-[10px] font-bold uppercase tracking-[0.32em] text-yellow-300/80">
+            Tbilisi Style 21
+          </p>
+          <h1 className="font-heading text-[clamp(1.5rem,4.5vw,2.75rem)] font-extrabold uppercase tracking-[0.05em]">
+            {pageTitle}
+          </h1>
+        </header>
+      ) : null}
+      <div className="pb-16 pt-4">
+        <RenderBlocks blocks={page.layout as never} locale={locale} />
+      </div>
     </main>
   );
 }

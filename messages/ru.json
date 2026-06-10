@@ -1,9 +1,14 @@
 {
   "contactUs": {
     "title": "Свяжитесь с нами",
+    "intro": "Билеты, партнёрство или любой вопрос — мы на связи",
     "phone": "Телефон",
     "email": "Email",
-    "payments": "Платежи"
+    "callCta": "Позвонить",
+    "emailCta": "Написать",
+    "payments": "Платежи",
+    "paymentsNote": "Безопасная оплата картой",
+    "backToFestival": "На фестиваль"
   },
   "lineUp": {
     "festivalTitle": "ФЕСТИВАЛЬ TBILISI STYLE",
@@ -56,6 +61,18 @@
     "subtitle": "ФЕСТИВАЛЬ ЭЛЕКТРОННОЙ МУЗЫКИ",
     "enter": "ВОЙДИ В ЭНЕРГИЮ",
     "allNews": "Все новости"
+  },
+  "festivalLanding": {
+    "heroTagline": "Тбилиси · Электронная энергия · Ночной опыт",
+    "statStages": "4 сцены",
+    "statDays": "3 дня",
+    "statCity": "Тбилиси",
+    "statGenre": "Электроника",
+    "scrollHint": "Листай",
+    "exploreSubtitle": "Открой",
+    "exploreTitle": "Сцены и зоны",
+    "exploreCta": "Перейти",
+    "emptyFeatured": "Отметьте страницы «Feature on homepage» в админке, чтобы показать их здесь."
   },
   "festival": {
     "mainStage": "Главная сцена",
