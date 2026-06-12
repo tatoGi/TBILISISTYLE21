@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { localeTabsKeepBase } from "../fields/localeTabs";
 
 export const Partners: CollectionConfig = {
   slug: "partners",
@@ -26,12 +27,16 @@ export const Partners: CollectionConfig = {
       type: "text",
       required: true,
     },
-    {
-      name: "description",
-      type: "textarea",
-      label: "Short description",
-      admin: { description: "One or two sentences shown on the partners page." },
-    },
+    // Short description per language (ka tab writes the base `description`
+    // column; en/ru/ua add translations). Partner name stays un-localized.
+    localeTabsKeepBase([
+      {
+        name: "description",
+        type: "textarea",
+        label: "Short description",
+        admin: { description: "One or two sentences shown on the partners page." },
+      },
+    ]),
     {
       name: "logo",
       type: "upload",

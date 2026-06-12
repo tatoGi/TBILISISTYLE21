@@ -200,3 +200,86 @@ h6 {
 .ts-content-prose.whitespace-pre-line {
   white-space: pre-line;
 }
+
+/* Rich-text element styling (replaces Tailwind `prose`, which forced ALL-CAPS
+   body copy). Headings stay uppercase for the festival look; paragraphs are
+   sentence-case and easy to read. */
+.ts-content-prose h1,
+.ts-content-prose h2,
+.ts-content-prose h3,
+.ts-content-prose h4 {
+  font-family: var(--font-heading, inherit);
+  color: #fff;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+
+.ts-content-prose h2 {
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  margin: 2.25rem 0 1rem;
+}
+
+.ts-content-prose h3 {
+  font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+  margin: 1.75rem 0 0.75rem;
+}
+
+.ts-content-prose h4 {
+  font-size: 1.05rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.ts-content-prose ul,
+.ts-content-prose ol {
+  margin: 1.25rem 0;
+  padding-left: 1.4rem;
+}
+
+.ts-content-prose ul {
+  list-style: disc;
+}
+.ts-content-prose ol {
+  list-style: decimal;
+}
+.ts-content-prose li {
+  margin: 0.4rem 0;
+}
+
+.ts-content-prose a {
+  color: #fde047;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s ease;
+}
+.ts-content-prose a:hover {
+  opacity: 0.75;
+}
+
+.ts-content-prose strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.ts-content-prose blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid rgba(253, 224, 71, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+/* ───────────── Content pages — scroll-reveal ─────────────
+   Fade-up as each section scrolls into view. CSS scroll-driven animation, so
+   no JS. Gated behind @supports so unsupported browsers just show the content
+   (no permanent opacity:0), and disabled for reduced-motion users. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .ts-reveal {
+      animation: ts-fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}

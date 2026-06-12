@@ -69,6 +69,18 @@ const BLOCK_VARCHAR_COLS: Record<string, string[]> = {
 };
 const BLOCK_JSONB_COLS: Record<string, string[]> = { rich_text: ["content"] };
 
+// Additive translation columns for collections whose base column (`title`,
+// `description`) is kept as Georgian and read by code that must not change
+// (ticket/product payment flow, seed scripts). See fields/localeTabsKeepBase.
+const TRANSLATION_LOCALES = ["en", "ru", "ua"];
+function translationColumns(table: string, bases: string[]): string[] {
+  return bases.flatMap((base) =>
+    TRANSLATION_LOCALES.map(
+      (loc) => `ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${base}_${loc}" varchar;`,
+    ),
+  );
+}
+
 function blockLocaleColumns(): string[] {
   const out: string[] = [];
   for (const prefix of BLOCK_PREFIXES) {
@@ -234,6 +246,13 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     // Phase 3: localized fields inside content blocks (hero/richText/image/
     // gallery/cta) converted to flat per-locale columns on each block table.
     ...blockLocaleColumns(),
+
+    // Phase 4: en/ru/ua translation columns for Tickets, Products and Partners.
+    // The base `title`/`description` columns stay as Georgian (read by the
+    // payment flow and seed scripts), so only the suffixed columns are added.
+    ...translationColumns("tickets", ["title", "description"]),
+    ...translationColumns("products", ["title", "description"]),
+    ...translationColumns("partners", ["description"]),
   ];
 
   for (const statement of statements) {

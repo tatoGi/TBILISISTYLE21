@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
+import { pickLocalized } from "@/lib/i18n-content";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +47,11 @@ export default async function PartnersPage() {
           partners.map((partner) => {
             const url = mediaUrl(partner.logo);
             const name = (partner.name as string) || "";
-            const description = (partner.description as string)?.trim();
+            const description = pickLocalized<string>(
+              partner as unknown as Record<string, unknown>,
+              "description",
+              locale,
+            )?.trim();
             const website = (partner.website as string)?.trim();
 
             const inner = (

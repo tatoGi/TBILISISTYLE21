@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RichText } from "@payloadcms/richtext-lexical/react";
@@ -19,6 +20,54 @@ type MediaLike =
 function mediaUrl(media: MediaLike): string | null {
   if (media && typeof media === "object" && media.url) return media.url;
   return null;
+}
+
+function mediaDims(media: MediaLike): { width: number; height: number } | null {
+  if (media && typeof media === "object" && media.width && media.height) {
+    return { width: media.width, height: media.height };
+  }
+  return null;
+}
+
+/**
+ * Renders the whole image at its natural aspect ratio (never cropped). Uses the
+ * media's intrinsic width/height when known; otherwise falls back to a
+ * `contain`-fitted box so nothing is cut off.
+ */
+function BlockImage({
+  media,
+  locale,
+  className = "",
+  sizes,
+}: {
+  media: MediaLike;
+  locale: string;
+  className?: string;
+  sizes?: string;
+}) {
+  const url = mediaUrl(media);
+  if (!url) return null;
+  const dims = mediaDims(media);
+  const alt = mediaAlt(media, locale);
+
+  if (dims) {
+    return (
+      <Image
+        src={url}
+        alt={alt}
+        width={dims.width}
+        height={dims.height}
+        className={`h-auto w-full ${className}`}
+        sizes={sizes}
+      />
+    );
+  }
+
+  return (
+    <div className="relative aspect-[4/3] w-full">
+      <Image src={url} alt={alt} fill className={`object-contain ${className}`} sizes={sizes} />
+    </div>
+  );
 }
 
 function mediaAlt(media: MediaLike, locale: string): string {
@@ -44,26 +93,136 @@ export function RenderBlocks({
 }) {
   if (!blocks?.length) return null;
 
+  const out: ReactNode[] = [];
+  // `bandIndex` counts only the content sections (not the hero) so we can
+  // alternate a subtle background tint and give the page a vertical rhythm.
+  let bandIndex = 0;
+  let splitIndex = 0;
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    const next = blocks[i + 1];
+    const key = (block.id as string) || `${block.blockType}-${i}`;
+
+    // Pair an adjacent image + text into a single side-by-side section,
+    // alternating the image side so the page reads as an editorial layout
+    // instead of a full-width image stacked on top of the text.
+    if (next && isImageTextPair(block, next)) {
+      const image = block.blockType === "image" ? block : next;
+      const text = block.blockType === "richText" ? block : next;
+      out.push(
+        <SplitSection
+          key={key}
+          image={image}
+          text={text}
+          locale={locale}
+          reverse={splitIndex % 2 === 1}
+          tint={bandIndex % 2 === 1}
+        />,
+      );
+      splitIndex += 1;
+      bandIndex += 1;
+      i += 1; // consume the paired block
+      continue;
+    }
+
+    const tint = bandIndex % 2 === 1;
+    switch (block.blockType) {
+      case "hero":
+        out.push(<Hero key={key} block={block} locale={locale} />);
+        break; // hero is full-bleed; it is not a tinted band
+      case "richText":
+        out.push(<TextBlock key={key} block={block} locale={locale} tint={tint} />);
+        bandIndex += 1;
+        break;
+      case "image":
+        out.push(<ImageBlock key={key} block={block} locale={locale} tint={tint} />);
+        bandIndex += 1;
+        break;
+      case "gallery":
+        out.push(<Gallery key={key} block={block} locale={locale} tint={tint} />);
+        bandIndex += 1;
+        break;
+      case "cta":
+        out.push(<CTA key={key} block={block} locale={locale} tint={tint} />);
+        bandIndex += 1;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return <>{out}</>;
+}
+
+function isImageTextPair(a: Block, b: Block): boolean {
+  const types = [a.blockType, b.blockType];
+  return types.includes("image") && types.includes("richText");
+}
+
+/**
+ * Full-bleed content section with a subtle alternating tint and a scroll-reveal
+ * (fade-up) entrance. `inner` controls the centered reading column width.
+ */
+function Band({
+  tint,
+  inner = "max-w-6xl",
+  className = "",
+  children,
+}: {
+  tint?: boolean;
+  inner?: string;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <>
-      {blocks.map((block, i) => {
-        const key = (block.id as string) || `${block.blockType}-${i}`;
-        switch (block.blockType) {
-          case "hero":
-            return <Hero key={key} block={block} locale={locale} />;
-          case "richText":
-            return <TextBlock key={key} block={block} locale={locale} />;
-          case "image":
-            return <ImageBlock key={key} block={block} locale={locale} />;
-          case "gallery":
-            return <Gallery key={key} block={block} locale={locale} />;
-          case "cta":
-            return <CTA key={key} block={block} locale={locale} />;
-          default:
-            return null;
-        }
-      })}
-    </>
+    <section
+      className={`ts-reveal w-full px-6 py-12 md:py-16 ${tint ? "bg-white/[0.025]" : ""}`}
+    >
+      <div className={`mx-auto w-full ${inner} ${className}`}>{children}</div>
+    </section>
+  );
+}
+
+/** Image and text side by side; `reverse` flips the image to the right. */
+function SplitSection({
+  image,
+  text,
+  locale,
+  reverse,
+  tint,
+}: {
+  image: Block;
+  text: Block;
+  locale: string;
+  reverse: boolean;
+  tint?: boolean;
+}) {
+  const content = pickField<SerializedEditorState>(text, "content", locale);
+  const caption = pickField<string>(image, "caption", locale);
+
+  return (
+    <Band tint={tint}>
+      <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
+        <figure className={`m-0 ${reverse ? "md:order-2" : "md:order-1"}`}>
+          <BlockImage
+            media={image.image as MediaLike}
+            locale={locale}
+            className="rounded-2xl"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+          {caption ? (
+            <figcaption className="mt-2 text-center text-sm text-white/50">
+              {caption}
+            </figcaption>
+          ) : null}
+        </figure>
+
+        <div className={`ts-content-prose ${reverse ? "md:order-1" : "md:order-2"}`}>
+          {content ? <RichText data={content} /> : null}
+        </div>
+      </div>
+    </Band>
   );
 }
 
@@ -104,45 +263,40 @@ function Hero({ block, locale }: { block: Block; locale: string }) {
   );
 }
 
-function TextBlock({ block, locale }: { block: Block; locale: string }) {
+function TextBlock({ block, locale, tint }: { block: Block; locale: string; tint?: boolean }) {
   const content = pickField<SerializedEditorState>(block, "content", locale);
   if (!content) return null;
   return (
-    <section className="mx-auto w-full max-w-3xl px-6 py-10">
-      <div className="prose prose-invert max-w-none uppercase leading-relaxed text-white/80">
+    <Band tint={tint} inner="max-w-3xl">
+      <div className="ts-content-prose">
         <RichText data={content} />
       </div>
-    </section>
+    </Band>
   );
 }
 
-function ImageBlock({ block, locale }: { block: Block; locale: string }) {
+function ImageBlock({ block, locale, tint }: { block: Block; locale: string; tint?: boolean }) {
   const url = mediaUrl(block.image as MediaLike);
   if (!url) return null;
   const contained = block.width === "contained";
   return (
-    <section
-      className={`mx-auto w-full px-6 py-8 ${contained ? "max-w-3xl" : "max-w-6xl"}`}
-    >
-      <div className="relative h-[300px] w-full overflow-hidden rounded-xl sm:h-[460px] md:h-[560px]">
-        <Image
-          src={url}
-          alt={mediaAlt(block.image as MediaLike, locale)}
-          fill
-          className="object-cover"
-          sizes="100vw"
-        />
-      </div>
+    <Band tint={tint} inner={contained ? "max-w-3xl" : "max-w-6xl"}>
+      <BlockImage
+        media={block.image as MediaLike}
+        locale={locale}
+        className="rounded-xl"
+        sizes="100vw"
+      />
       {pickField<string>(block, "caption", locale) ? (
         <p className="mt-2 text-center text-sm text-white/50">
           {pickField<string>(block, "caption", locale)}
         </p>
       ) : null}
-    </section>
+    </Band>
   );
 }
 
-function Gallery({ block, locale }: { block: Block; locale: string }) {
+function Gallery({ block, locale, tint }: { block: Block; locale: string; tint?: boolean }) {
   const images = (block.images as Array<Record<string, unknown>>) || [];
   if (!images.length) return null;
   const cols = (block.columns as string) || "3";
@@ -153,7 +307,7 @@ function Gallery({ block, locale }: { block: Block; locale: string }) {
         ? "sm:grid-cols-2 lg:grid-cols-4"
         : "sm:grid-cols-2 lg:grid-cols-3";
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-8">
+    <Band tint={tint}>
       <div className={`grid gap-4 ${colClass}`}>
         {images.map((item, i) => {
           const url = mediaUrl(item.image as MediaLike);
@@ -174,19 +328,19 @@ function Gallery({ block, locale }: { block: Block; locale: string }) {
           );
         })}
       </div>
-    </section>
+    </Band>
   );
 }
 
-function CTA({ block, locale }: { block: Block; locale: string }) {
+function CTA({ block, locale, tint }: { block: Block; locale: string; tint?: boolean }) {
   return (
-    <section className="mx-auto w-full max-w-3xl px-6 py-10 text-center">
+    <Band tint={tint} inner="max-w-3xl" className="text-center">
       <Link
         href={block.href as string}
         className="inline-block bg-yellow-300 px-8 py-4 text-sm font-extrabold uppercase tracking-wider text-black transition hover:bg-white"
       >
         {pickField<string>(block, "label", locale)}
       </Link>
-    </section>
+    </Band>
   );
 }

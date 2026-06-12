@@ -521,6 +521,18 @@ export interface Partner {
    * One or two sentences shown on the partners page.
    */
   description?: string | null;
+  /**
+   * One or two sentences shown on the partners page.
+   */
+  description_en?: string | null;
+  /**
+   * One or two sentences shown on the partners page.
+   */
+  description_ru?: string | null;
+  /**
+   * One or two sentences shown on the partners page.
+   */
+  description_ua?: string | null;
   logo: string | Media;
   /**
    * Full URL, e.g. https://example.com
@@ -548,6 +560,30 @@ export interface Ticket {
    * Optional details shown on the ticket card.
    */
   description?: string | null;
+  /**
+   * The ticket type shown to customers.
+   */
+  title_en?: string | null;
+  /**
+   * Optional details shown on the ticket card.
+   */
+  description_en?: string | null;
+  /**
+   * The ticket type shown to customers.
+   */
+  title_ru?: string | null;
+  /**
+   * Optional details shown on the ticket card.
+   */
+  description_ru?: string | null;
+  /**
+   * The ticket type shown to customers.
+   */
+  title_ua?: string | null;
+  /**
+   * Optional details shown on the ticket card.
+   */
+  description_ua?: string | null;
   priceGel: number;
   quantity: number;
   /**
@@ -574,6 +610,12 @@ export interface Product {
   id: string;
   title: string;
   description?: string | null;
+  title_en?: string | null;
+  description_en?: string | null;
+  title_ru?: string | null;
+  description_ru?: string | null;
+  title_ua?: string | null;
+  description_ua?: string | null;
   priceGel: number;
   /**
    * Upload the product photo.
@@ -1050,6 +1092,9 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PartnersSelect<T extends boolean = true> {
   name?: T;
   description?: T;
+  description_en?: T;
+  description_ru?: T;
+  description_ua?: T;
   logo?: T;
   website?: T;
   featuredOnHome?: T;
@@ -1064,6 +1109,12 @@ export interface PartnersSelect<T extends boolean = true> {
 export interface TicketsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  title_en?: T;
+  description_en?: T;
+  title_ru?: T;
+  description_ru?: T;
+  title_ua?: T;
+  description_ua?: T;
   priceGel?: T;
   quantity?: T;
   eventDate?: T;
@@ -1080,6 +1131,12 @@ export interface TicketsSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  title_en?: T;
+  description_en?: T;
+  title_ru?: T;
+  description_ru?: T;
+  title_ua?: T;
+  description_ua?: T;
   priceGel?: T;
   image?: T;
   imageUrl?: T;

@@ -1,4 +1,5 @@
-import { getPayloadClient } from "./payload";
+import { getCurrentLocale, getPayloadClient } from "./payload";
+import { pickLocalized } from "./i18n-content";
 
 export type ProductStatus = "draft" | "active" | "sold_out";
 
@@ -58,12 +59,12 @@ function normalizeSizes(value: unknown): ProductSize[] {
   return sizes;
 }
 
-function serializeProduct(product: Record<string, unknown>): Product {
+function serializeProduct(product: Record<string, unknown>, locale = "ka"): Product {
   const rawSizes = Array.isArray(product.sizes) ? product.sizes : [];
   return {
     id: String(product.id),
-    title: (product.title as string) ?? "",
-    description: (product.description as string) ?? "",
+    title: pickLocalized<string>(product, "title", locale) ?? "",
+    description: pickLocalized<string>(product, "description", locale) ?? "",
     priceGel: Number(product.priceGel ?? 0),
     imageUrl: (product.imageUrl as string) ?? "",
     category: (product.category as string) ?? "",
@@ -122,8 +123,22 @@ export function validateProductInput(input: Record<string, unknown>): ProductInp
   return product;
 }
 
-export async function listProducts({ publicOnly = false } = {}) {
+/** Active request locale, falling back to `ka` outside a request scope. */
+async function resolveLocale(locale?: string): Promise<string> {
+  if (locale) return locale;
+  try {
+    return await getCurrentLocale();
+  } catch {
+    return "ka";
+  }
+}
+
+export async function listProducts({
+  publicOnly = false,
+  locale,
+}: { publicOnly?: boolean; locale?: string } = {}) {
   const payload = await getPayloadClient();
+  const resolvedLocale = await resolveLocale(locale);
   const result = await payload.find({
     collection: "products",
     where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
@@ -133,15 +148,19 @@ export async function listProducts({ publicOnly = false } = {}) {
     depth: 0,
   });
 
-  return result.docs.map((d) => serializeProduct(d as unknown as Record<string, unknown>));
+  return result.docs.map((d) =>
+    serializeProduct(d as unknown as Record<string, unknown>, resolvedLocale),
+  );
 }
 
-export async function getProduct(id: string): Promise<Product | null> {
+export async function getProduct(id: string, locale?: string): Promise<Product | null> {
   if (!id) return null;
   const payload = await getPayloadClient();
   try {
     const product = await payload.findByID({ collection: "products", id, depth: 0 });
-    return product ? serializeProduct(product as unknown as Record<string, unknown>) : null;
+    if (!product) return null;
+    const resolvedLocale = await resolveLocale(locale);
+    return serializeProduct(product as unknown as Record<string, unknown>, resolvedLocale);
   } catch {
     return null;
   }

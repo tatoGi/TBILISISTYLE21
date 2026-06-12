@@ -58,6 +58,7 @@ export default async function CmsPage({ params }: PageProps) {
           <h1 className="font-heading text-[clamp(1.5rem,4.5vw,2.75rem)] font-extrabold uppercase tracking-[0.05em]">
             {pageTitle}
           </h1>
+          <span className="mx-auto mt-5 block h-[3px] w-16 rounded-full bg-yellow-300" />
         </header>
       ) : null}
       <div className="pb-16 pt-4">

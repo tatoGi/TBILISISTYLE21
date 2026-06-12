@@ -1,4 +1,5 @@
-import { getPayloadClient } from "./payload";
+import { getCurrentLocale, getPayloadClient } from "./payload";
+import { pickLocalized } from "./i18n-content";
 
 export type TicketStatus = "draft" | "active" | "sold_out";
 
@@ -29,11 +30,11 @@ export type TicketInput = {
 
 const statuses: TicketStatus[] = ["draft", "active", "sold_out"];
 
-function serializeTicket(ticket: Record<string, unknown>): Ticket {
+function serializeTicket(ticket: Record<string, unknown>, locale = "ka"): Ticket {
   return {
     id: String(ticket.id),
-    title: (ticket.title as string) ?? "",
-    description: (ticket.description as string) ?? "",
+    title: pickLocalized<string>(ticket, "title", locale) ?? "",
+    description: pickLocalized<string>(ticket, "description", locale) ?? "",
     priceGel: Number(ticket.priceGel ?? 0),
     eventDate: (ticket.eventDate as string) ?? "",
     location: (ticket.location as string) ?? "",
@@ -79,8 +80,22 @@ export function validateTicketInput(input: Record<string, unknown>): TicketInput
   return ticket;
 }
 
-export async function listTickets({ publicOnly = false } = {}) {
+/** Active request locale, falling back to `ka` outside a request scope. */
+async function resolveLocale(locale?: string): Promise<string> {
+  if (locale) return locale;
+  try {
+    return await getCurrentLocale();
+  } catch {
+    return "ka";
+  }
+}
+
+export async function listTickets({
+  publicOnly = false,
+  locale,
+}: { publicOnly?: boolean; locale?: string } = {}) {
   const payload = await getPayloadClient();
+  const resolvedLocale = await resolveLocale(locale);
   const result = await payload.find({
     collection: "tickets",
     where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
@@ -90,15 +105,19 @@ export async function listTickets({ publicOnly = false } = {}) {
     depth: 0,
   });
 
-  return result.docs.map((d) => serializeTicket(d as unknown as Record<string, unknown>));
+  return result.docs.map((d) =>
+    serializeTicket(d as unknown as Record<string, unknown>, resolvedLocale),
+  );
 }
 
-export async function getTicket(id: string): Promise<Ticket | null> {
+export async function getTicket(id: string, locale?: string): Promise<Ticket | null> {
   if (!id) return null;
   const payload = await getPayloadClient();
   try {
     const ticket = await payload.findByID({ collection: "tickets", id, depth: 0 });
-    return ticket ? serializeTicket(ticket as unknown as Record<string, unknown>) : null;
+    if (!ticket) return null;
+    const resolvedLocale = await resolveLocale(locale);
+    return serializeTicket(ticket as unknown as Record<string, unknown>, resolvedLocale);
   } catch {
     return null;
   }

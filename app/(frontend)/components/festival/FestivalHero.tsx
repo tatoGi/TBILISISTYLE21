@@ -9,13 +9,6 @@ type Props = {
   emptyPagesMessage: string;
 };
 
-/** Bow links outward toward the open hands — strongest in the middle of each column. */
-function bellyVw(index: number, count: number) {
-  if (count <= 1) return 4;
-  const factor = Math.sin(((index + 0.5) / count) * Math.PI);
-  return +(2 + factor * 8).toFixed(2);
-}
-
 export default function FestivalHero({
   image,
   badge,
@@ -48,14 +41,13 @@ export default function FestivalHero({
         {pages.length ? (
           <div className="grid w-full max-w-7xl grid-cols-1 gap-8 uppercase text-white md:grid-cols-2 md:gap-16 lg:gap-24">
             <div className="flex flex-col items-center gap-7 md:items-start md:gap-8 lg:gap-9">
-              {left.map((item, i) => (
+              {left.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  style={{ ["--belly" as string]: `${bellyVw(i, left.length)}vw` }}
-                  className="group md:[transform:translateX(calc(var(--belly)*-1))]"
+                  className="group"
                 >
-                  <p className="font-heading text-center text-base font-semibold tracking-[0.22em] text-white/90 transition-all duration-300 group-hover:tracking-[0.3em] group-hover:text-yellow-300 sm:text-lg md:text-left md:text-xl lg:text-[1.35rem]">
+                  <p className="font-heading whitespace-nowrap text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-left md:text-xl lg:text-[1.35rem]">
                     {item.label}
                   </p>
                 </Link>
@@ -63,14 +55,13 @@ export default function FestivalHero({
             </div>
 
             <div className="flex flex-col items-center gap-7 md:items-end md:gap-8 md:text-right lg:gap-9">
-              {right.map((item, i) => (
+              {right.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  style={{ ["--belly" as string]: `${bellyVw(i, right.length)}vw` }}
-                  className="group md:[transform:translateX(var(--belly))]"
+                  className="group"
                 >
-                  <p className="font-heading text-center text-base font-semibold tracking-[0.22em] text-white/90 transition-all duration-300 group-hover:tracking-[0.3em] group-hover:text-yellow-300 sm:text-lg md:text-right md:text-xl lg:text-[1.35rem]">
+                  <p className="font-heading whitespace-nowrap text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-right md:text-xl lg:text-[1.35rem]">
                     {item.label}
                   </p>
                 </Link>

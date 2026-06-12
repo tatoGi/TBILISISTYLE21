@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { localeTabsKeepBase } from "../fields/localeTabs";
 
 // Mirrors the existing native-driver `tickets` collection (lib/tickets.ts).
 // Payload manages the catalog in admin; the payment flow keeps reading/writing
@@ -16,25 +17,29 @@ export const Tickets: CollectionConfig = {
   // positions, row grouping) is safe to change here.
   timestamps: true,
   fields: [
-    {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Ticket name",
-      admin: {
-        placeholder: "e.g. General Admission",
-        description: "The ticket type shown to customers.",
+    // Name + description per language (ka tab writes the base `title`/
+    // `description` columns the payment flow reads; en/ru/ua add translations).
+    localeTabsKeepBase([
+      {
+        name: "title",
+        type: "text",
+        required: true,
+        label: "Ticket name",
+        admin: {
+          placeholder: "e.g. General Admission",
+          description: "The ticket type shown to customers.",
+        },
       },
-    },
-    {
-      name: "description",
-      type: "textarea",
-      label: "Description",
-      admin: {
-        placeholder: "What's included with this ticket…",
-        description: "Optional details shown on the ticket card.",
+      {
+        name: "description",
+        type: "textarea",
+        label: "Description",
+        admin: {
+          placeholder: "What's included with this ticket…",
+          description: "Optional details shown on the ticket card.",
+        },
       },
-    },
+    ]),
     {
       type: "row",
       fields: [

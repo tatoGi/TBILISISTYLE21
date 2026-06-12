@@ -32,3 +32,26 @@ export function pickField<T = unknown>(
   const fallback = doc[`${base}_${CONTENT_FALLBACK_LOCALE}`];
   return (fallback === null ? undefined : fallback) as T | undefined;
 }
+
+/**
+ * Variant of {@link pickField} for fields built with `localeTabsKeepBase`, where
+ * the Georgian value lives in the *un-suffixed* base column (`title`) and only
+ * en/ru/ua are suffixed (`title_en`). Reads `<base>_<locale>` and falls back to
+ * the base column. Example: pickLocalized(ticket, "title", "en")
+ * -> ticket.title_en ?? ticket.title.
+ */
+export function pickLocalized<T = unknown>(
+  doc: Record<string, unknown> | null | undefined,
+  base: string,
+  locale: string,
+): T | undefined {
+  if (!doc) return undefined;
+  if (locale !== CONTENT_FALLBACK_LOCALE) {
+    const value = doc[`${base}_${locale}`];
+    if (value !== undefined && value !== null && value !== "") {
+      return value as T;
+    }
+  }
+  const fallback = doc[base];
+  return (fallback === null ? undefined : fallback) as T | undefined;
+}

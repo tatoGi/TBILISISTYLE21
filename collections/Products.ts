@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { localeTabsKeepBase } from "../fields/localeTabs";
 
 // Mirrors the existing native-driver `products` collection (lib/products.ts).
 export const Products: CollectionConfig = {
@@ -41,8 +42,13 @@ export const Products: CollectionConfig = {
     ],
   },
   fields: [
-    { name: "title", type: "text", required: true },
-    { name: "description", type: "textarea" },
+    // Name + description per language (ka tab writes the base `title`/
+    // `description` columns the storefront/order flow reads; en/ru/ua add
+    // translations).
+    localeTabsKeepBase([
+      { name: "title", type: "text", required: true, label: "Title" },
+      { name: "description", type: "textarea", label: "Description" },
+    ]),
     { name: "priceGel", type: "number", required: true, min: 0, label: "Price (GEL)" },
     {
       name: "image",

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
-import { pickField } from "@/lib/i18n-content";
+import { pickField, pickLocalized } from "@/lib/i18n-content";
 
 export type NavLink = { label: string; href: string };
 
@@ -113,7 +113,12 @@ export async function getFeaturedPartners(): Promise<PartnerCard[]> {
     return res.docs.map((p) => ({
       id: p.id as string,
       name: (p.name as string) || "",
-      description: (p.description as string)?.trim() || null,
+      description:
+        pickLocalized<string>(
+          p as unknown as Record<string, unknown>,
+          "description",
+          locale,
+        )?.trim() || null,
       logoUrl: mediaUrlOf(p.logo),
       website: ((p.website as string)?.trim() || null),
     }));
