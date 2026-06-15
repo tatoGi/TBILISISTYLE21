@@ -253,6 +253,49 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
       END IF;
     END $$;`,
 
+    // MusicTracks collection (festival background music list). Created via local
+    // dev push only — no committed migration covers it, so prod (which only runs
+    // migrations) is missing the table. Recreate it idempotently here. The base
+    // `title` stays Georgian with additive en/ru/ua columns (localeTabsKeepBase).
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'enum_music_tracks_status') THEN
+        CREATE TYPE "public"."enum_music_tracks_status" AS ENUM('draft', 'active');
+      END IF;
+    END $$;`,
+    `CREATE TABLE IF NOT EXISTS "music_tracks" (
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "title" varchar NOT NULL,
+      "title_en" varchar,
+      "title_ru" varchar,
+      "title_ua" varchar,
+      "artist" varchar,
+      "audio_file_id" uuid NOT NULL,
+      "order" numeric DEFAULT 0,
+      "status" "enum_music_tracks_status" DEFAULT 'draft' NOT NULL,
+      "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+      "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+    );`,
+    // Additive locale columns guarded in case the table predates them.
+    `ALTER TABLE "music_tracks" ADD COLUMN IF NOT EXISTS "title_en" varchar;`,
+    `ALTER TABLE "music_tracks" ADD COLUMN IF NOT EXISTS "title_ru" varchar;`,
+    `ALTER TABLE "music_tracks" ADD COLUMN IF NOT EXISTS "title_ua" varchar;`,
+    `CREATE INDEX IF NOT EXISTS "music_tracks_audio_file_idx" ON "music_tracks" ("audio_file_id");`,
+    `CREATE INDEX IF NOT EXISTS "music_tracks_updated_at_idx" ON "music_tracks" ("updated_at");`,
+    `CREATE INDEX IF NOT EXISTS "music_tracks_created_at_idx" ON "music_tracks" ("created_at");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'music_tracks_audio_file_id_media_id_fk') THEN
+        ALTER TABLE "music_tracks" ADD CONSTRAINT "music_tracks_audio_file_id_media_id_fk" FOREIGN KEY ("audio_file_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+      END IF;
+    END $$;`,
+    // Admin document-locking relation for the new collection.
+    `ALTER TABLE "payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "music_tracks_id" uuid;`,
+    `CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_music_tracks_id_idx" ON "payload_locked_documents_rels" ("music_tracks_id");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'payload_locked_documents_rels_music_tracks_fk') THEN
+        ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_music_tracks_fk" FOREIGN KEY ("music_tracks_id") REFERENCES "public"."music_tracks"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
+
     // Phase 3: localized fields inside content blocks (hero/richText/image/
     // gallery/cta) converted to flat per-locale columns on each block table.
     ...blockLocaleColumns(),
