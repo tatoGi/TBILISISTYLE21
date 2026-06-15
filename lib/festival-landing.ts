@@ -36,3 +36,32 @@ export async function getFestivalHeroContent(): Promise<FestivalHeroContent> {
     return fallbacks;
   }
 }
+
+export type FestivalMusic = {
+  url: string;
+  title: string | null;
+  loop: boolean;
+};
+
+/** Background-music track for /dashboard/festival — null when none is set. */
+export async function getFestivalMusic(): Promise<FestivalMusic | null> {
+  try {
+    const payload = await getPayloadClient();
+    const site = (await payload.findGlobal({
+      slug: "site",
+      depth: 1,
+    })) as unknown as Record<string, unknown>;
+
+    const media = site.backgroundMusic;
+    const url =
+      media && typeof media === "object" && "url" in media
+        ? ((media as { url?: string }).url ?? null)
+        : null;
+    if (!url) return null;
+
+    const title = (site.musicTitle as string)?.trim() || null;
+    return { url, title, loop: site.musicLoop !== false };
+  } catch {
+    return null;
+  }
+}

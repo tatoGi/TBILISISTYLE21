@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+const isAdmin = ({ req }: { req: { user?: unknown } }) => Boolean(req.user);
+
 export const ProductOrders: CollectionConfig = {
   slug: "productOrders",
   labels: {
@@ -13,6 +15,7 @@ export const ProductOrders: CollectionConfig = {
     description: "Read-only merch orders created by the product payment flow.",
   },
   access: {
+    read: isAdmin,
     create: () => false,
     update: () => false,
     delete: () => false,
@@ -37,13 +40,14 @@ export const ProductOrders: CollectionConfig = {
         { label: "Failed", value: "failed" },
       ],
     },
-    { name: "qrCode", type: "text", admin: { readOnly: true } },
+    { name: "qrCode", type: "text", access: { read: () => false }, admin: { readOnly: true } },
     { name: "createdAt", type: "date", admin: { readOnly: true } },
     { name: "paidAt", type: "date", admin: { readOnly: true } },
     { name: "collectedAt", type: "date", admin: { readOnly: true } },
     // Payment-flow internals (written by the create-product-order / pg-product-callback routes).
     { name: "pgOrderId", type: "number", admin: { readOnly: true, description: "Payment gateway order id." } },
-    { name: "pgPassword", type: "text", admin: { readOnly: true, hidden: true } },
+    { name: "pgHppUrl", type: "text", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
+    { name: "pgPassword", type: "text", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
     { name: "failedAt", type: "date", admin: { readOnly: true } },
     { name: "failReason", type: "text", admin: { readOnly: true } },
   ],

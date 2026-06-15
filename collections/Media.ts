@@ -18,7 +18,7 @@ export const Media: CollectionConfig = {
       { name: "card", width: 768, height: 1024, position: "centre" },
       { name: "hero", width: 1920, height: 1080, position: "centre" },
     ],
-    mimeTypes: ["image/*", "video/*"],
+    mimeTypes: ["image/*", "video/*", "audio/*"],
   },
   fields: [
     // Alt text for all four languages, edited together in tabs.

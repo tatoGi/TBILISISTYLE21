@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
+import bcrypt from "bcryptjs";
 
 export const adminCookieName = "ts21_admin";
 const tokenTtlSeconds = 60 * 60 * 8;
@@ -12,12 +13,24 @@ type AdminJwtPayload = {
   exp: number;
 };
 
-function getAdminPassword() {
-  return process.env.ADMIN_PASSWORD;
+/**
+ * Returns the bcrypt hash of the admin password.
+ * Set ADMIN_PASSWORD_HASH in your environment to a bcrypt hash, e.g.:
+ *   node -e "import('bcryptjs').then(b=>b.hash('yourpass',12).then(console.log))"
+ */
+function getAdminPasswordHash() {
+  return process.env.ADMIN_PASSWORD_HASH;
 }
 
 function getSecret() {
-  return process.env.AUTH_SECRET || process.env.ADMIN_PASSWORD || "";
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "AUTH_SECRET environment variable is required for JWT signing. " +
+      "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\""
+    );
+  }
+  return secret;
 }
 
 function base64UrlEncode(input: string | Buffer) {
@@ -41,7 +54,7 @@ function safeEqual(a: string, b: string) {
 }
 
 export function isAdminConfigured() {
-  return Boolean(getAdminPassword());
+  return Boolean(getAdminPasswordHash());
 }
 
 export function createAdminToken() {
@@ -70,14 +83,14 @@ export function createAdminToken() {
   return `${unsignedToken}.${sign(unsignedToken, secret)}`;
 }
 
-export function verifyAdminPassword(password: string) {
-  const expected = getAdminPassword();
+export async function verifyAdminPassword(password: string) {
+  const hash = getAdminPasswordHash();
 
-  if (!expected) {
+  if (!hash) {
     return false;
   }
 
-  return password === expected;
+  return bcrypt.compare(password, hash);
 }
 
 export function verifyAdminToken(token: string | undefined) {

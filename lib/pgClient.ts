@@ -32,7 +32,7 @@ function getAgent() {
     cert: Buffer.from(process.env.PG_CERT_BASE64!, "base64"),
     key: Buffer.from(process.env.PG_KEY_BASE64!, "base64"),
     ca: Buffer.from(process.env.PG_CA_BASE64!, "base64"),
-    rejectUnauthorized: false,
+    rejectUnauthorized: true,
   });
 }
 

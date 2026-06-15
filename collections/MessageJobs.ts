@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+const isAdmin = ({ req }: { req: { user?: unknown } }) => Boolean(req.user);
+
 export const MessageJobs: CollectionConfig = {
   slug: "messageJobs",
   labels: {
@@ -13,6 +15,7 @@ export const MessageJobs: CollectionConfig = {
     description: "Read-only outgoing message queue used by ticket emails.",
   },
   access: {
+    read: isAdmin,
     create: () => false,
     update: () => false,
     delete: () => false,
@@ -29,6 +32,6 @@ export const MessageJobs: CollectionConfig = {
     { name: "updatedAt", type: "date", admin: { readOnly: true } },
     { name: "sentAt", type: "date", admin: { readOnly: true } },
     // Full job payload consumed by the email worker (lib/message-broker.ts).
-    { name: "payload", type: "json", admin: { readOnly: true, hidden: true } },
+    { name: "payload", type: "json", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
   ],
 };

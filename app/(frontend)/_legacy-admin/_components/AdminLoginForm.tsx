@@ -26,17 +26,16 @@ export function AdminLoginForm({
       body: JSON.stringify({ password }),
     });
     const data = (await response.json().catch(() => null)) as {
-      token?: string;
+      success?: boolean;
       error?: string;
     } | null;
 
-    if (!response.ok || !data?.token) {
+    if (!response.ok || !data?.success) {
       setError(data?.error || "login");
       setLoading(false);
       return;
     }
 
-    localStorage.setItem("accessToken", data.token);
     router.replace("/admin");
     router.refresh();
   }

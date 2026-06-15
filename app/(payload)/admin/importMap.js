@@ -38,6 +38,7 @@ import { default as default_df2dbda239303d56439ae8f6851ced8a } from '../../../ap
 import { default as default_a19efc832f88caf74eb23bc74481d7f5 } from '../../../app/(payload)/admin/NewsListView.tsx'
 import { default as default_2d90e7f7a72952f8889c4f2662255ae9 } from '../../../app/(payload)/admin/PartnersListView.tsx'
 import { default as default_c994e266c3688745ccefe1611799fa36 } from '../../../app/(payload)/admin/MediaListView.tsx'
+import { default as default_3cab9ceef837eada1f90056603cc498c } from '../../../app/(payload)/admin/MusicTracksListView.tsx'
 import { default as default_3c0aef6c2d930abf6740b67bccd6e3ff } from '../../../app/(payload)/admin/MenuView.tsx'
 import { default as default_a808a0bddb87f4172c5b505cc96aa115 } from '../../../app/(payload)/admin/TicketsListView.tsx'
 import { default as default_d4e9dad195666ca8035d770b1657d682 } from '../../../app/(payload)/admin/ProductsListView.tsx'
@@ -90,6 +91,7 @@ export const importMap = {
   "/app/(payload)/admin/NewsListView.tsx#default": default_a19efc832f88caf74eb23bc74481d7f5,
   "/app/(payload)/admin/PartnersListView.tsx#default": default_2d90e7f7a72952f8889c4f2662255ae9,
   "/app/(payload)/admin/MediaListView.tsx#default": default_c994e266c3688745ccefe1611799fa36,
+  "/app/(payload)/admin/MusicTracksListView.tsx#default": default_3cab9ceef837eada1f90056603cc498c,
   "/app/(payload)/admin/MenuView.tsx#default": default_3c0aef6c2d930abf6740b67bccd6e3ff,
   "/app/(payload)/admin/TicketsListView.tsx#default": default_a808a0bddb87f4172c5b505cc96aa115,
   "/app/(payload)/admin/ProductsListView.tsx#default": default_d4e9dad195666ca8035d770b1657d682,

@@ -242,6 +242,16 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     ...localeColumns("site_menu", ["label"]),
     // Site global — festival landing hero (badge / title / tagline).
     ...localeColumns("site", ["heroBadge", "heroTitle", "heroTagline"]),
+    // Site global — festival landing background music (upload + options).
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "background_music_id" uuid;`,
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "music_title" varchar;`,
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "music_loop" boolean DEFAULT true;`,
+    `CREATE INDEX IF NOT EXISTS "site_background_music_idx" ON "site" ("background_music_id");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_background_music_id_media_id_fk') THEN
+        ALTER TABLE "site" ADD CONSTRAINT "site_background_music_id_media_id_fk" FOREIGN KEY ("background_music_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+      END IF;
+    END $$;`,
 
     // Phase 3: localized fields inside content blocks (hero/richText/image/
     // gallery/cta) converted to flat per-locale columns on each block table.

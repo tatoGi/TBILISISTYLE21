@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { createOrder as callPGOrder } from '@/lib/pgClient'
 import { generateQRCode, generateTicketQRData } from '@/lib/qr'
+import { createRedirectToken, createCallbackHmac } from '@/lib/payment-security'
+import { rateLimit } from '@/lib/rate-limit'
 import { v4 as uuidv4 } from 'uuid'
 
 function toDate(value: unknown): string | null {
@@ -11,8 +13,10 @@ function toDate(value: unknown): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  const blocked = rateLimit(req, { key: 'create-order', limit: 10, windowSeconds: 60 })
+  if (blocked) return blocked
+
   try {
-    console.log('API called: /api/create-order')
 
     const body = await req.json()
     const { name, surname, personalNumber, email, ticketId } = body
@@ -91,6 +95,12 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
     const userAgent = req.headers.get('user-agent') || ''
 
+    // Generate internal ticket ID before PG call so we can include an HMAC
+    // in the callback URL the payment gateway will redirect to.
+    const newTicketId = uuidv4().slice(0, 8).toUpperCase()
+    const callbackSig = createCallbackHmac(newTicketId)
+    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-callback?ref=${newTicketId}&sig=${callbackSig}`
+
     const pgOrderBody = {
       order: {
         typeRid: process.env.PG_TEST_TYPE_RID,
@@ -98,7 +108,7 @@ export async function POST(req: NextRequest) {
         currency: 'GEL',
         description: `${existingTicket.title} - ${name} ${surname}`,
         language: 'ka',
-        hppRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-callback`,
+        hppRedirectUrl: callbackUrl,
         initiationEnvKind: 'Browser',
         consumerDevice: {
           browser: {
@@ -118,7 +128,6 @@ export async function POST(req: NextRequest) {
     }
 
     const pgResponse = await callPGOrder(pgOrderBody)
-    console.log('PG Response:', pgResponse)
 
     if (!pgResponse.order?.id) {
       const pgErr = pgResponse.errorDescription || pgResponse.errorCode
@@ -133,7 +142,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const newTicketId = uuidv4().slice(0, 8).toUpperCase()
     const qrData = generateTicketQRData(newTicketId, personalNumber, ticketId)
     const qrCodeDataUrl = await generateQRCode(qrData)
 
@@ -146,6 +154,7 @@ export async function POST(req: NextRequest) {
         name,
         surname,
         pgOrderId: Number(pgResponse.order.id),
+        pgHppUrl: String(pgResponse.order.hppUrl ?? ''),
         pgPassword: String(pgResponse.order.password ?? ''),
         amount: ticketPrice,
         status: 'pending',
@@ -158,7 +167,9 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const redirectUrl = `${pgResponse.order.hppUrl}?id=${pgResponse.order.id}&password=${pgResponse.order.password}`
+    // Return a server-side redirect URL — the PG password never reaches the client.
+    const redirectToken = createRedirectToken(Number(pgResponse.order.id), 'soldTickets')
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-redirect?token=${redirectToken}`
 
     return NextResponse.json({
       success: true,

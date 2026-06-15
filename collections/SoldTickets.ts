@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+const isAdmin = ({ req }: { req: { user?: unknown } }) => Boolean(req.user);
+
 export const SoldTickets: CollectionConfig = {
   slug: "soldTickets",
   labels: {
@@ -13,6 +15,7 @@ export const SoldTickets: CollectionConfig = {
     description: "Read-only ticket purchases created by the payment flow.",
   },
   access: {
+    read: isAdmin,
     create: () => false,
     update: () => false,
     delete: () => false,
@@ -45,8 +48,9 @@ export const SoldTickets: CollectionConfig = {
     { name: "createdAt", type: "date", admin: { readOnly: true } },
     // Payment-flow internals (written by the create-order / pg-callback routes).
     { name: "pgOrderId", type: "number", admin: { readOnly: true, description: "Payment gateway order id." } },
-    { name: "pgPassword", type: "text", admin: { readOnly: true, hidden: true } },
-    { name: "qrCode", type: "textarea", admin: { readOnly: true, hidden: true } },
+    { name: "pgHppUrl", type: "text", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
+    { name: "pgPassword", type: "text", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
+    { name: "qrCode", type: "textarea", access: { read: () => false }, admin: { readOnly: true, hidden: true } },
     { name: "failedAt", type: "date", admin: { readOnly: true } },
     { name: "failReason", type: "text", admin: { readOnly: true } },
   ],

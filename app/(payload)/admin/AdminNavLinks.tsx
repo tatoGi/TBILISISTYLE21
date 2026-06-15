@@ -9,6 +9,7 @@ const groups = [
       { href: "/admin/news", label: "News", icon: "N" },
       { href: "/admin/partners", label: "Partners", icon: "Pr" },
       { href: "/admin/media", label: "Media", icon: "M" },
+      { href: "/admin/music-tracks", label: "Music Tracks", icon: "Mt" },
       { href: "/admin/menu", label: "Menu", icon: "Mn" },
     ],
   },

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient, getPgPool } from '@/lib/payload'
 import { getOrderDetails } from '@/lib/pgClient'
 import { sendProductOrderEmail } from '@/lib/email'
+import { verifyCallbackHmac } from '@/lib/payment-security'
+import { rateLimit } from '@/lib/rate-limit'
 
 function qrDataUrlToBuffer(dataUrl?: string): Buffer | null {
   if (!dataUrl || !dataUrl.includes(',')) return null
@@ -10,12 +12,23 @@ function qrDataUrlToBuffer(dataUrl?: string): Buffer | null {
 }
 
 export async function GET(req: NextRequest) {
+  const blocked = rateLimit(req, { key: 'pg-product-callback', limit: 30, windowSeconds: 60 })
+  if (blocked) return blocked
+
   const { searchParams } = req.nextUrl
 
   const id = searchParams.get('ID') || searchParams.get('id')
   const status = searchParams.get('STATUS') || searchParams.get('status')
+  const ref = searchParams.get('ref')
+  const sig = searchParams.get('sig')
 
-  console.log(' PG Product Callback received:', { id, status })
+  // Verify HMAC signature before any DB operations.
+  if (!ref || !sig || !verifyCallbackHmac(ref, sig)) {
+    console.error(' Invalid product callback signature:', { ref, sig: sig ? '[present]' : '[missing]' })
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/shop?error=invalid_callback`
+    )
+  }
 
   if (!id) {
     return NextResponse.redirect(
@@ -26,9 +39,15 @@ export async function GET(req: NextRequest) {
   try {
     const payload = await getPayloadClient()
 
+    // Look up by our internal order ID (from the signed ref param) for extra safety.
     const found = await payload.find({
       collection: 'productOrders',
-      where: { pgOrderId: { equals: parseInt(id) } },
+      where: {
+        and: [
+          { id: { equals: ref } },
+          { pgOrderId: { equals: parseInt(id) } },
+        ],
+      },
       limit: 1,
       pagination: false,
       depth: 0,
