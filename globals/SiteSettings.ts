@@ -42,6 +42,38 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      type: "collapsible",
+      label: "Festival landing — background music",
+      admin: {
+        initCollapsed: false,
+        description:
+          "Upload a track to play on /dashboard/festival. Visitors get a play/pause button in the corner of the page.",
+      },
+      fields: [
+        {
+          name: "backgroundMusic",
+          type: "upload",
+          relationTo: "media",
+          label: "Music track (audio file)",
+          filterOptions: { mimeType: { contains: "audio" } },
+          admin: {
+            description: "MP3/OGG/WAV. Leave empty to hide the player.",
+          },
+        },
+        {
+          name: "musicTitle",
+          type: "text",
+          label: "Track title (shown next to the player)",
+        },
+        {
+          name: "musicLoop",
+          type: "checkbox",
+          label: "Loop the track",
+          defaultValue: true,
+        },
+      ],
+    },
+    {
       name: "menu",
       type: "array",
       label: "Site menu — drag to reorder",

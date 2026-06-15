@@ -234,22 +234,5 @@ export async function sendTicketEmail(
     ],
   }
 
-  // DEBUG — log what we're actually sending
-  console.log('[email] sendTicketEmail debug:', {
-    to,
-    name,
-    ticketId,
-    subject,
-    textType: typeof text,
-    textLength: text?.length,
-    textPreview: text?.slice(0, 60),
-    htmlType: typeof html,
-    htmlLength: html?.length,
-    pdfBufferType: pdfBuffer?.constructor?.name,
-    pdfBufferLength: pdfBuffer?.length,
-    mailOptionsKeys: Object.keys(mailOptions),
-    mailOptionsTextField: typeof mailOptions.text,
-  })
-
   await getGmailTransporter().sendMail(mailOptions)
 }

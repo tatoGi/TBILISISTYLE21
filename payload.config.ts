@@ -17,6 +17,7 @@ import { SoldTickets } from "./collections/SoldTickets";
 import { ProductOrders } from "./collections/ProductOrders";
 import { JokerTickets } from "./collections/JokerTickets";
 import { MessageJobs } from "./collections/MessageJobs";
+import { MusicTracks } from "./collections/MusicTracks";
 import { SiteSettings } from "./globals/SiteSettings";
 
 const filename = fileURLToPath(import.meta.url);
@@ -98,6 +99,11 @@ export default buildConfig({
           exact: true,
           path: "/media",
         },
+        musicTracks: {
+          Component: "/app/(payload)/admin/MusicTracksListView.tsx",
+          exact: true,
+          path: "/music-tracks",
+        },
         menu: {
           Component: "/app/(payload)/admin/MenuView.tsx",
           exact: true,
@@ -152,6 +158,7 @@ export default buildConfig({
     ProductOrders,
     JokerTickets,
     MessageJobs,
+    MusicTracks,
     Media,
     Users,
   ],

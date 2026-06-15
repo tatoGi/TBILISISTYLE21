@@ -3,8 +3,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { getPayloadClient } from '@/lib/payload'
 import { createOrder as callPGOrder } from '@/lib/pgClient'
 import { generateQRCode } from '@/lib/qr'
+import { createRedirectToken, createCallbackHmac } from '@/lib/payment-security'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
+  const blocked = rateLimit(req, { key: 'create-product-order', limit: 10, windowSeconds: 60 })
+  if (blocked) return blocked
+
   try {
     const body = await req.json()
     const { productId, size, name, email, phone } = body
@@ -65,6 +70,12 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || '127.0.0.1'
     const userAgent = req.headers.get('user-agent') || ''
 
+    // Generate internal order ID before PG call so we can include an HMAC
+    // in the callback URL the payment gateway will redirect to.
+    const orderId = uuidv4().slice(0, 8).toUpperCase()
+    const callbackSig = createCallbackHmac(orderId)
+    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-product-callback?ref=${orderId}&sig=${callbackSig}`
+
     const pgOrderBody = {
       order: {
         typeRid: process.env.PG_TEST_TYPE_RID,
@@ -72,7 +83,7 @@ export async function POST(req: NextRequest) {
         currency: 'GEL',
         description: `${product.title} (${normalizedSize}) - ${name}`,
         language: 'ka',
-        hppRedirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-product-callback`,
+        hppRedirectUrl: callbackUrl,
         initiationEnvKind: 'Browser',
         consumerDevice: {
           browser: {
@@ -106,7 +117,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const orderId = uuidv4().slice(0, 8).toUpperCase()
     const qrData = JSON.stringify({
       orderId,
       productId,
@@ -128,6 +138,7 @@ export async function POST(req: NextRequest) {
         email: email.trim(),
         phone: phone.trim(),
         pgOrderId: Number(pgResponse.order.id),
+        pgHppUrl: String(pgResponse.order.hppUrl ?? ''),
         pgPassword: String(pgResponse.order.password ?? ''),
         amount: price,
         status: 'pending',
@@ -136,7 +147,9 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const redirectUrl = `${pgResponse.order.hppUrl}?id=${pgResponse.order.id}&password=${pgResponse.order.password}`
+    // Return a server-side redirect URL — the PG password never reaches the client.
+    const redirectToken = createRedirectToken(Number(pgResponse.order.id), 'productOrders')
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/pg-redirect?token=${redirectToken}`
 
     return NextResponse.json({
       success: true,

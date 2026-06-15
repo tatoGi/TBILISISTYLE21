@@ -1,5 +1,7 @@
 import type { CollectionConfig } from "payload";
 
+const isAdmin = ({ req }: { req: { user?: unknown } }) => Boolean(req.user);
+
 export const JokerTickets: CollectionConfig = {
   slug: "jokerTickets",
   labels: {
@@ -13,6 +15,7 @@ export const JokerTickets: CollectionConfig = {
     description: "Read-only mirror of paid Joker ticket purchases.",
   },
   access: {
+    read: isAdmin,
     create: () => false,
     update: () => false,
     delete: () => false,

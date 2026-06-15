@@ -76,6 +76,7 @@ export interface Config {
     productOrders: ProductOrder;
     jokerTickets: JokerTicket;
     messageJobs: MessageJob;
+    musicTracks: MusicTrack;
     media: Media;
     users: User;
     'payload-kv': PayloadKv;
@@ -94,6 +95,7 @@ export interface Config {
     productOrders: ProductOrdersSelect<false> | ProductOrdersSelect<true>;
     jokerTickets: JokerTicketsSelect<false> | JokerTicketsSelect<true>;
     messageJobs: MessageJobsSelect<false> | MessageJobsSelect<true>;
+    musicTracks: MusicTracksSelect<false> | MusicTracksSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -664,6 +666,7 @@ export interface SoldTicket {
    * Payment gateway order id.
    */
   pgOrderId?: number | null;
+  pgHppUrl?: string | null;
   pgPassword?: string | null;
   qrCode?: string | null;
   failedAt?: string | null;
@@ -694,6 +697,7 @@ export interface ProductOrder {
    * Payment gateway order id.
    */
   pgOrderId?: number | null;
+  pgHppUrl?: string | null;
   pgPassword?: string | null;
   failedAt?: string | null;
   failReason?: string | null;
@@ -749,6 +753,32 @@ export interface MessageJob {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "musicTracks".
+ */
+export interface MusicTrack {
+  id: string;
+  title: string;
+  title_en?: string | null;
+  title_ru?: string | null;
+  title_ua?: string | null;
+  artist?: string | null;
+  /**
+   * MP3/OGG/WAV/MPEG audio file.
+   */
+  audioFile: string | Media;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Only Active tracks appear on the public site.
+   */
+  status: 'draft' | 'active';
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -835,6 +865,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'messageJobs';
         value: string | MessageJob;
+      } | null)
+    | ({
+        relationTo: 'musicTracks';
+        value: string | MusicTrack;
       } | null)
     | ({
         relationTo: 'media';
@@ -1174,6 +1208,7 @@ export interface SoldTicketsSelect<T extends boolean = true> {
   scannedBy?: T;
   createdAt?: T;
   pgOrderId?: T;
+  pgHppUrl?: T;
   pgPassword?: T;
   qrCode?: T;
   failedAt?: T;
@@ -1199,6 +1234,7 @@ export interface ProductOrdersSelect<T extends boolean = true> {
   paidAt?: T;
   collectedAt?: T;
   pgOrderId?: T;
+  pgHppUrl?: T;
   pgPassword?: T;
   failedAt?: T;
   failReason?: T;
@@ -1241,6 +1277,22 @@ export interface MessageJobsSelect<T extends boolean = true> {
   updatedAt?: T;
   sentAt?: T;
   payload?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "musicTracks_select".
+ */
+export interface MusicTracksSelect<T extends boolean = true> {
+  title?: T;
+  title_en?: T;
+  title_ru?: T;
+  title_ua?: T;
+  artist?: T;
+  audioFile?: T;
+  order?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1380,6 +1432,12 @@ export interface Site {
   heroBadge_ua?: string | null;
   heroTitle_ua?: string | null;
   heroTagline_ua?: string | null;
+  /**
+   * MP3/OGG/WAV. Leave empty to hide the player.
+   */
+  backgroundMusic?: (string | null) | Media;
+  musicTitle?: string | null;
+  musicLoop?: boolean | null;
   menu?:
     | {
         page: string | Page;
@@ -1410,6 +1468,9 @@ export interface SiteSelect<T extends boolean = true> {
   heroBadge_ua?: T;
   heroTitle_ua?: T;
   heroTagline_ua?: T;
+  backgroundMusic?: T;
+  musicTitle?: T;
+  musicLoop?: T;
   menu?:
     | T
     | {

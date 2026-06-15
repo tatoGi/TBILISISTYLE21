@@ -98,14 +98,9 @@ export default function ScannerClient() {
     setSubmitting(true)
     setScanning(false)
     try {
-      const accessToken =
-        typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
       const res = await fetch('/api/validate-ticket', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qrData }),
       })
       const data = (await res.json()) as TicketInfo

@@ -3,14 +3,27 @@ import { getPayloadClient, getPgPool } from '@/lib/payload'
 import { getOrderDetails } from '@/lib/pgClient'
 import { enqueueTicketEmail, processTicketEmailJobs } from '@/lib/message-broker'
 import { isJokerTicketName, upsertJokerTicket } from '@/lib/sold-tickets'
+import { verifyCallbackHmac } from '@/lib/payment-security'
+import { rateLimit } from '@/lib/rate-limit'
 
 export async function GET(req: NextRequest) {
+  const blocked = rateLimit(req, { key: 'pg-callback', limit: 30, windowSeconds: 60 })
+  if (blocked) return blocked
+
   const { searchParams } = req.nextUrl
 
   const id = searchParams.get('ID') || searchParams.get('id')
   const status = searchParams.get('STATUS') || searchParams.get('status')
+  const ref = searchParams.get('ref')
+  const sig = searchParams.get('sig')
 
-  console.log(' PG Callback received:', { id, status })
+  // Verify HMAC signature before any DB operations.
+  if (!ref || !sig || !verifyCallbackHmac(ref, sig)) {
+    console.error(' Invalid callback signature:', { ref, sig: sig ? '[present]' : '[missing]' })
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=invalid_callback`
+    )
+  }
 
   if (!id) {
     return NextResponse.redirect(
@@ -21,9 +34,15 @@ export async function GET(req: NextRequest) {
   try {
     const payload = await getPayloadClient()
 
+    // Look up by our internal ticket ID (from the signed ref param) for extra safety.
     const found = await payload.find({
       collection: 'soldTickets',
-      where: { pgOrderId: { equals: parseInt(id) } },
+      where: {
+        and: [
+          { id: { equals: ref } },
+          { pgOrderId: { equals: parseInt(id) } },
+        ],
+      },
       limit: 1,
       pagination: false,
       depth: 0,
@@ -31,14 +50,12 @@ export async function GET(req: NextRequest) {
     const ticket = found.docs[0]
 
     if (!ticket) {
-      console.log(' Ticket not found for pgOrderId:', id)
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/tickets?error=ticket_not_found`
       )
     }
 
     const orderDetails = await getOrderDetails(parseInt(id), ticket.pgPassword as string)
-    console.log(' Order details:', orderDetails)
 
     const isPaid =
       orderDetails.order?.status === 'Paid' ||
@@ -46,8 +63,6 @@ export async function GET(req: NextRequest) {
       orderDetails.order?.status === 'FullyPaid' ||
       status === 'FullyPaid' ||
       status === 'Paid'
-
-    console.log(' isPaid:', isPaid, '| DB status:', ticket.status)
 
     if (isPaid && ticket.status === 'pending') {
       const paidAt = new Date().toISOString()
@@ -105,8 +120,7 @@ export async function GET(req: NextRequest) {
         qrCodeDataUrl: ticket.qrCode as string,
       })
 
-      const brokerResult = await processTicketEmailJobs()
-      console.log(' Email broker result:', brokerResult)
+      await processTicketEmailJobs()
 
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/success?ticketId=${ticket.id}`
