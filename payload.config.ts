@@ -197,6 +197,9 @@ export default buildConfig({
           enabled: Boolean(blobToken),
           collections: { media: true },
           token: blobToken || "",
+          // Upload straight from the browser to Blob, bypassing Vercel's
+          // 4.5 MB serverless body limit (fixes FUNCTION_PAYLOAD_TOO_LARGE).
+          clientUploads: true,
         }),
       ];
     })(),
