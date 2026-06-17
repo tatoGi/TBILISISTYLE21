@@ -4,6 +4,7 @@ import Link from "next/link";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { CONTENT_FALLBACK_LOCALE, pickField } from "@/lib/i18n-content";
+import { LightboxProvider, LightboxTrigger, type LightboxImage } from "./content/Lightbox";
 
 type MediaLike =
   | {
@@ -84,6 +85,24 @@ function mediaAlt(media: MediaLike, locale: string): string {
 // switch on blockType and read the relevant fields.
 type Block = Record<string, unknown> & { blockType?: string; id?: string };
 
+/** All gallery/image photos on the page, in render order, for the lightbox. */
+function collectImages(blocks: Block[], locale: string): LightboxImage[] {
+  const out: LightboxImage[] = [];
+  for (const block of blocks) {
+    if (block.blockType === "image") {
+      const url = mediaUrl(block.image as MediaLike);
+      if (url) out.push({ src: url, alt: mediaAlt(block.image as MediaLike, locale) });
+    } else if (block.blockType === "gallery") {
+      const images = (block.images as Array<Record<string, unknown>>) || [];
+      for (const item of images) {
+        const url = mediaUrl(item.image as MediaLike);
+        if (url) out.push({ src: url, alt: mediaAlt(item.image as MediaLike, locale) });
+      }
+    }
+  }
+  return out;
+}
+
 export function RenderBlocks({
   blocks,
   locale = CONTENT_FALLBACK_LOCALE,
@@ -152,7 +171,8 @@ export function RenderBlocks({
     }
   }
 
-  return <>{out}</>;
+  const lightboxImages = collectImages(blocks, locale);
+  return <LightboxProvider images={lightboxImages}>{out}</LightboxProvider>;
 }
 
 function isImageTextPair(a: Block, b: Block): boolean {
@@ -200,17 +220,25 @@ function SplitSection({
 }) {
   const content = pickField<SerializedEditorState>(text, "content", locale);
   const caption = pickField<string>(image, "caption", locale);
+  const url = mediaUrl(image.image as MediaLike);
 
   return (
     <Band tint={tint}>
       <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
         <figure className={`m-0 ${reverse ? "md:order-2" : "md:order-1"}`}>
-          <BlockImage
-            media={image.image as MediaLike}
-            locale={locale}
-            className="rounded-2xl"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+          {url ? (
+            <LightboxTrigger
+              src={url}
+              className="w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-xl shadow-black/40 transition hover:border-white/25 hover:shadow-black/60"
+            >
+              <BlockImage
+                media={image.image as MediaLike}
+                locale={locale}
+                className="rounded-xl transition group-hover:opacity-95"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </LightboxTrigger>
+          ) : null}
           {caption ? (
             <figcaption className="mt-2 text-center text-sm text-white/50">
               {caption}
@@ -281,12 +309,17 @@ function ImageBlock({ block, locale, tint }: { block: Block; locale: string; tin
   const contained = block.width === "contained";
   return (
     <Band tint={tint} inner={contained ? "max-w-3xl" : "max-w-6xl"}>
-      <BlockImage
-        media={block.image as MediaLike}
-        locale={locale}
-        className="rounded-xl"
-        sizes="100vw"
-      />
+      <LightboxTrigger
+        src={url}
+        className="w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-xl shadow-black/40 transition hover:border-white/25 hover:shadow-black/60"
+      >
+        <BlockImage
+          media={block.image as MediaLike}
+          locale={locale}
+          className="rounded-xl transition group-hover:opacity-95"
+          sizes="100vw"
+        />
+      </LightboxTrigger>
       {pickField<string>(block, "caption", locale) ? (
         <p className="mt-2 text-center text-sm text-white/50">
           {pickField<string>(block, "caption", locale)}
@@ -308,23 +341,27 @@ function Gallery({ block, locale, tint }: { block: Block; locale: string; tint?:
         : "sm:grid-cols-2 lg:grid-cols-3";
   return (
     <Band tint={tint}>
-      <div className={`grid gap-4 ${colClass}`}>
+      <div className={`grid gap-6 ${colClass}`}>
         {images.map((item, i) => {
           const url = mediaUrl(item.image as MediaLike);
           if (!url) return null;
           return (
-            <div
+            <LightboxTrigger
               key={i}
-              className="relative h-[360px] w-full overflow-hidden rounded-xl"
+              src={url}
+              className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-2 shadow-xl shadow-black/40 transition hover:border-white/25 hover:shadow-black/60"
             >
-              <Image
-                src={url}
-                alt={mediaAlt(item.image as MediaLike, locale)}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, 33vw"
-              />
-            </div>
+              <div className="relative h-[340px] w-full overflow-hidden rounded-xl">
+                <Image
+                  src={url}
+                  alt={mediaAlt(item.image as MediaLike, locale)}
+                  fill
+                  className="object-cover transition duration-300 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                />
+                <span className="absolute inset-0 bg-black/0 transition group-hover:bg-black/15" />
+              </div>
+            </LightboxTrigger>
           );
         })}
       </div>

@@ -1438,6 +1438,12 @@ export interface Site {
   backgroundMusic?: (string | null) | Media;
   musicTitle?: string | null;
   musicLoop?: boolean | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+  contactAddress?: string | null;
+  instagramUrl?: string | null;
+  tiktokUrl?: string | null;
+  acknowledgedTicketTier?: number | null;
   menu?:
     | {
         page: string | Page;
@@ -1471,6 +1477,12 @@ export interface SiteSelect<T extends boolean = true> {
   backgroundMusic?: T;
   musicTitle?: T;
   musicLoop?: T;
+  contactPhone?: T;
+  contactEmail?: T;
+  contactAddress?: T;
+  instagramUrl?: T;
+  tiktokUrl?: T;
+  acknowledgedTicketTier?: T;
   menu?:
     | T
     | {

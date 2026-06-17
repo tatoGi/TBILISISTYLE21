@@ -8,7 +8,8 @@
     "emailCta": "Написать",
     "payments": "Платежи",
     "paymentsNote": "Безопасная оплата картой",
-    "backToFestival": "На фестиваль"
+    "backToFestival": "На фестиваль",
+    "address": "Адрес"
   },
   "lineUp": {
     "festivalTitle": "ФЕСТИВАЛЬ TBILISI STYLE",
@@ -35,7 +36,8 @@
     "slogan": "СТОЙ В ЦЕНТРЕ МИРА С БОЛЬШИМИ ЗВЕЗДАМИ И ПОЧУВСТВУЙ ИХ ЭНЕРГИЮ",
     "buyTicket": "Купить билет",
     "buyTickets": "Купить билеты",
-    "language": "Язык"
+    "language": "Язык",
+    "followUs": "Подписывайтесь"
   },
   "nav": {
     "mainStage": "ГЛАВНАЯ СЦЕНА",

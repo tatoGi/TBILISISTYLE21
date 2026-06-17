@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import type { SocialLinks, SiteContact } from "@/lib/nav";
 import FestivalMenu, { type NavLink } from "./FestivalMenu";
 import Footer from "./Footer";
 import TicketCta from "./TicketCta";
@@ -23,9 +24,13 @@ function isBareRoute(pathname: string | null): boolean {
  */
 export default function SiteChrome({
   pages,
+  social,
+  contact,
   children,
 }: {
   pages: NavLink[];
+  social: SocialLinks;
+  contact: SiteContact;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -36,9 +41,9 @@ export default function SiteChrome({
 
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
-      <FestivalMenu pages={pages} />
+      <FestivalMenu pages={pages} social={social} />
       <div className="flex-1">{children}</div>
-      <Footer />
+      <Footer social={social} contact={contact} />
       <TicketCta />
     </div>
   );

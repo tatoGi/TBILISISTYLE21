@@ -8,7 +8,8 @@
     "emailCta": "მოგვწერეთ",
     "payments": "გადახდები",
     "paymentsNote": "უსაფრთხო ბარათით გადახდა",
-    "backToFestival": "ფესტივალზე დაბრუნება"
+    "backToFestival": "ფესტივალზე დაბრუნება",
+    "address": "მისამართი"
   },
   "lineUp": {
     "festivalTitle": "TBILISI STYLE ფესტივალი",
@@ -35,7 +36,8 @@
     "slogan": "დადექი მსოფლიოს ცენტრში დიდ ვარსკვლავებთან ერთად და იგრძენი მათი ენერგია",
     "buyTicket": "ბილეთის ყიდვა",
     "buyTickets": "ბილეთების ყიდვა",
-    "language": "ენა"
+    "language": "ენა",
+    "followUs": "გამოგვყევით"
   },
   "nav": {
     "mainStage": "მთავარი სცენა",

@@ -246,6 +246,15 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "background_music_id" uuid;`,
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "music_title" varchar;`,
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "music_loop" boolean DEFAULT true;`,
+    // Site global — social links (Instagram / TikTok) shown in the footer.
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "instagram_url" varchar;`,
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "tiktok_url" varchar;`,
+    // Site global — highest acknowledged 5000-ticket price tier (dashboard alert).
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "acknowledged_ticket_tier" numeric DEFAULT 0;`,
+    // Site global — editable contact details (Contact page + footer).
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_phone" varchar;`,
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_email" varchar;`,
+    `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_address" varchar;`,
     `CREATE INDEX IF NOT EXISTS "site_background_music_idx" ON "site" ("background_music_id");`,
     `DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_background_music_id_media_id_fk') THEN

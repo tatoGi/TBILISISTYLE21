@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { Analytics } from "@vercel/analytics/next";
 import { defaultLocale, isLocale, localeCookieName } from "@/i18n/config";
-import { getNavPages } from "@/lib/nav";
+import { getNavPages, getSocialLinks, getSiteContact } from "@/lib/nav";
 import SiteChrome from "./components/SiteChrome";
 import "./globals.css";
 
@@ -47,7 +47,11 @@ export default async function RootLayout({
   const store = await cookies();
   const requestedLocale = store.get(localeCookieName)?.value;
   const locale = isLocale(requestedLocale) ? requestedLocale : defaultLocale;
-  const pages = await getNavPages();
+  const [pages, social, contact] = await Promise.all([
+    getNavPages(),
+    getSocialLinks(),
+    getSiteContact(),
+  ]);
 
   return (
     <html
@@ -64,7 +68,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider>
-          <SiteChrome pages={pages}>{children}</SiteChrome>
+          <SiteChrome pages={pages} social={social} contact={contact}>{children}</SiteChrome>
         </NextIntlClientProvider>
         <Analytics />
       </body>

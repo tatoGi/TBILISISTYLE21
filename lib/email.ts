@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import nodemailer, { type Transporter } from 'nodemailer'
+import { isJokerTicketName } from '@/lib/ticket-utils'
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'TbilisiStyle21'
@@ -51,12 +52,26 @@ function buildText(name: string, ticketId: string) {
   ].join("\n");
 }
 
-function buildHtml(name: string, ticketId: string) {
+// Joker tickets get a custom banner image at the top of the email. Served from
+// /public so it loads as a remote image (no attachment / fs needed on Vercel).
+function jokerImageUrl(): string | null {
+  const base = process.env.NEXT_PUBLIC_APP_URL
+  if (!base) return null
+  return `${base.replace(/\/$/, '')}/images/ticket_mail_image.png`
+}
+
+function buildHtml(name: string, ticketId: string, joker = false) {
+  const imageUrl = joker ? jokerImageUrl() : null
+  const banner = imageUrl
+    ? `<img src="${imageUrl}" alt="Joker Ticket" style="display:block; width:100%; max-width:540px; height:auto; margin:0 auto 24px; border-radius:8px;" />`
+    : ''
+
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"></head>
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    ${banner}
     <h1 style="color: #2c3e50; text-align: center;">Thank You!</h1>
     <p style="font-size: 16px; color: #333;">Dear <strong>${escapeHtml(name)}</strong>,</p>
     <p style="font-size: 16px; color: #333;">Your ticket purchase has been completed successfully.</p>
@@ -188,9 +203,11 @@ export async function sendTicketEmail(
   name: string,
   pdfBuffer: Buffer,
   ticketId: string,
+  eventName?: string,
 ) {
+  const joker = isJokerTicketName(eventName)
   const subject = `Your Ticket #${ticketId}`
-  const html = buildHtml(name, ticketId)
+  const html = buildHtml(name, ticketId, joker)
   const text = buildText(name, ticketId)
   const filename = `ticket_${ticketId}.pdf`
 

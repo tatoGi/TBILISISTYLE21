@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import PaymentCardBadges from '../../components/PaymentCardBadges'
 
 interface BuyTicketModalProps {
   isOpen: boolean
@@ -407,6 +408,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
             </button>
 
             {/* Trust note */}
+            <PaymentCardBadges className="pt-1" />
             <p className="text-center text-[11px] text-white/45">
               🔒 Secure 3DS payment by Quipu · No card data stored
             </p>

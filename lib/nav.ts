@@ -87,6 +87,63 @@ export async function getFeaturedPages(): Promise<NavLink[]> {
   }
 }
 
+export type SiteContact = {
+  phone: string;
+  phoneHref: string;
+  email: string;
+  address: string | null;
+};
+
+/** Contact details from Site settings, falling back to the built-in defaults. */
+export async function getSiteContact(): Promise<SiteContact> {
+  const { SITE_EMAIL, SITE_PHONE_DISPLAY, SITE_PHONE_HREF } = await import(
+    "@/lib/site-contact"
+  );
+  const fallback: SiteContact = {
+    phone: SITE_PHONE_DISPLAY,
+    phoneHref: SITE_PHONE_HREF,
+    email: SITE_EMAIL,
+    address: null,
+  };
+
+  try {
+    const payload = await getPayloadClient();
+    const site = (await payload.findGlobal({
+      slug: "site",
+      depth: 0,
+    })) as unknown as Record<string, unknown>;
+
+    const phone = (site.contactPhone as string)?.trim() || fallback.phone;
+    const email = (site.contactEmail as string)?.trim() || fallback.email;
+    const address = (site.contactAddress as string)?.trim() || null;
+    // Derive the tel: target from the displayed phone (keep digits and +).
+    const phoneHref = phone.replace(/[^\d+]/g, "") || fallback.phoneHref;
+
+    return { phone, phoneHref, email, address };
+  } catch {
+    return fallback;
+  }
+}
+
+export type SocialLinks = { instagram: string | null; tiktok: string | null };
+
+/** Social profile URLs from Site settings — null when unset. Not localized. */
+export async function getSocialLinks(): Promise<SocialLinks> {
+  try {
+    const payload = await getPayloadClient();
+    const site = (await payload.findGlobal({
+      slug: "site",
+      depth: 0,
+    })) as unknown as Record<string, unknown>;
+    return {
+      instagram: (site.instagramUrl as string)?.trim() || null,
+      tiktok: (site.tiktokUrl as string)?.trim() || null,
+    };
+  } catch {
+    return { instagram: null, tiktok: null };
+  }
+}
+
 export type PartnerCard = { id: string; name: string; description: string | null; logoUrl: string | null; website: string | null };
 
 function mediaUrlOf(media: unknown): string | null {

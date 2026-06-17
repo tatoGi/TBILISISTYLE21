@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Product } from "@/lib/products";
+import PaymentCardBadges from "../../components/PaymentCardBadges";
 
 interface BuyProductModalProps {
   isOpen: boolean;
@@ -270,6 +271,7 @@ export default function BuyProductModal({
               )}
             </button>
 
+            <PaymentCardBadges className="pt-1" />
             <p className="text-center text-[11px] text-white/45">
               🔒 Secure 3DS payment by Quipu · Collect at the festival
             </p>

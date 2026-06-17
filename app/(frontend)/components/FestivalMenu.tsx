@@ -7,15 +7,22 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { navItems } from "./navItems";
 import LanguageSwitcher from "./LanguageSwitcher";
+import SocialLinksRow from "./SocialLinks";
+import type { SocialLinks } from "@/lib/nav";
 
 export type NavLink = { label: string; href: string };
 
 type FestivalMenuProps = {
   /** CMS-driven content links (Pages flagged "Show in site menu"). */
   pages?: NavLink[];
+  /** Social profile links from Site settings (Instagram / TikTok). */
+  social?: SocialLinks;
 };
 
-export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
+export default function FestivalMenu({
+  pages = [],
+  social = { instagram: null, tiktok: null },
+}: FestivalMenuProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const isFestivalPage = pathname === "/dashboard/festival";
@@ -71,10 +78,11 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
           </span>
         </Link>
 
-        {/* Language switcher — centered on desktop only */}
+        {/* Language switcher (+ social icons) — centered on desktop only */}
         <div className="pointer-events-none absolute inset-x-0 hidden justify-center sm:flex">
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto flex items-center gap-4">
             <LanguageSwitcher />
+            <SocialLinksRow social={social} />
           </div>
         </div>
 
@@ -163,6 +171,12 @@ export default function FestivalMenu({ pages = [] }: FestivalMenuProps) {
           </nav>
 
           <div className="w-full h-[1px] bg-white/20 my-4" />
+
+          <SocialLinksRow
+            social={social}
+            label={t("common.followUs")}
+            className="mb-4 items-start"
+          />
 
           <p className="text-white/50 uppercase text-xs leading-6">
             {t("common.slogan")}

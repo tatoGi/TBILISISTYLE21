@@ -74,6 +74,66 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      type: "collapsible",
+      label: "Contact details",
+      admin: {
+        initCollapsed: false,
+        description:
+          "Phone, email and address shown on the Contact page (/dashboard/contactUs) and in the site footer. Leave a field empty to fall back to the built-in default.",
+      },
+      fields: [
+        {
+          name: "contactPhone",
+          type: "text",
+          label: "Phone (as displayed)",
+          admin: { placeholder: "+995 558 35 83 62" },
+        },
+        {
+          name: "contactEmail",
+          type: "text",
+          label: "Email",
+          admin: { placeholder: "Tbilisistyle21@gmail.com" },
+        },
+        {
+          name: "contactAddress",
+          type: "text",
+          label: "Address / location (optional)",
+          admin: { placeholder: "Tbilisi, Georgia" },
+        },
+      ],
+    },
+    {
+      type: "collapsible",
+      label: "Social links",
+      admin: {
+        initCollapsed: false,
+        description:
+          "Instagram and TikTok profile URLs. Shown as icons in the site footer on the festival landing and every public page. Leave empty to hide the icon.",
+      },
+      fields: [
+        {
+          name: "instagramUrl",
+          type: "text",
+          label: "Instagram URL",
+          admin: { placeholder: "https://instagram.com/your_handle" },
+        },
+        {
+          name: "tiktokUrl",
+          type: "text",
+          label: "TikTok URL",
+          admin: { placeholder: "https://tiktok.com/@your_handle" },
+        },
+      ],
+    },
+    // Highest 5000-ticket price tier the admin has acknowledged on the
+    // dashboard. Managed by the "prices updated" button, not edited by hand.
+    {
+      name: "acknowledgedTicketTier",
+      type: "number",
+      defaultValue: 0,
+      admin: { hidden: true },
+    },
+    {
       name: "menu",
       type: "array",
       label: "Site menu — drag to reorder",

@@ -28,6 +28,18 @@ interface PGOrderDetailsResponse {
 
 
 function getAgent() {
+  // Fail loudly (and clearly) if the gateway certificates are not configured,
+  // instead of a cryptic "Buffer.from(undefined)" TypeError deep in the stack.
+  const missing = (["PG_CERT_BASE64", "PG_KEY_BASE64", "PG_CA_BASE64"] as const).filter(
+    (key) => !process.env[key],
+  );
+  if (missing.length) {
+    throw new Error(
+      `Payment gateway is not configured: missing env var(s) ${missing.join(", ")}. ` +
+        `Set them in the Vercel project (Settings → Environment Variables) and redeploy.`,
+    );
+  }
+
   return new https.Agent({
     cert: Buffer.from(process.env.PG_CERT_BASE64!, "base64"),
     key: Buffer.from(process.env.PG_KEY_BASE64!, "base64"),
@@ -37,6 +49,12 @@ function getAgent() {
 }
 
 export async function createOrder(body: unknown): Promise<PGOrderResponse> {
+  if (!process.env.PG_API_URL) {
+    throw new Error(
+      "Payment gateway is not configured: missing env var PG_API_URL. " +
+        "Set it in the Vercel project (Settings → Environment Variables) and redeploy.",
+    );
+  }
   const response = await fetch(`${process.env.PG_API_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import {
-  SITE_EMAIL,
-  SITE_PHONE_DISPLAY,
-  SITE_PHONE_HREF,
-} from "@/lib/site-contact";
+import type { SocialLinks, SiteContact } from "@/lib/nav";
+import SocialLinksRow from "./SocialLinks";
 
-export default function Footer() {
+export default function Footer({
+  social,
+  contact,
+}: {
+  social: SocialLinks;
+  contact: SiteContact;
+}) {
   const t = useTranslations();
 
   return (
@@ -21,16 +24,16 @@ export default function Footer() {
             {t("contactUs.title")}
           </p>
           <a
-            href={`mailto:${SITE_EMAIL}`}
+            href={`mailto:${contact.email}`}
             className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-yellow-300"
           >
-            {t("contactUs.email")}: {SITE_EMAIL}
+            {t("contactUs.email")}: {contact.email}
           </a>
           <a
-            href={`tel:${SITE_PHONE_HREF}`}
+            href={`tel:${contact.phoneHref}`}
             className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-yellow-300"
           >
-            {t("contactUs.phone")}: {SITE_PHONE_DISPLAY}
+            {t("contactUs.phone")}: {contact.phone}
           </a>
           <Link
             href="/dashboard/contactUs"
@@ -38,6 +41,18 @@ export default function Footer() {
           >
             {t("contactUs.title")} →
           </Link>
+          <Link
+            href="/dashboard/rulesAndTerms"
+            className="text-xs font-bold uppercase tracking-[0.2em] text-white/55 transition-colors hover:text-yellow-300"
+          >
+            {t("nav.festivalRulesTerms")} →
+          </Link>
+
+          <SocialLinksRow
+            social={social}
+            label={t("common.followUs")}
+            className="mt-4 items-center md:items-start"
+          />
         </div>
 
         {/* Quick actions */}

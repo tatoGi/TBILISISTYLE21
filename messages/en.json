@@ -8,7 +8,8 @@
     "emailCta": "Send email",
     "payments": "Payments",
     "paymentsNote": "Secure card payments accepted",
-    "backToFestival": "Back to festival"
+    "backToFestival": "Back to festival",
+    "address": "Address"
   },
   "lineUp": {
     "festivalTitle": "TBILISI STYLE FESTIVAL",
@@ -35,7 +36,8 @@
     "slogan": "STAND IN THE CENTRE OF THE WORLD WITH BIG STARS AND FEEL THEIR ENERGY",
     "buyTicket": "Buy Ticket",
     "buyTickets": "Buy Tickets",
-    "language": "Language"
+    "language": "Language",
+    "followUs": "Follow us"
   },
   "nav": {
     "mainStage": "MAIN STAGE",

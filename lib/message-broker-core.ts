@@ -40,7 +40,8 @@ export type TicketEmailProcessorDeps = {
     to: string,
     name: string,
     pdfBuffer: Buffer,
-    ticketId: string
+    ticketId: string,
+    eventName?: string
   ) => Promise<void>;
 };
 
@@ -95,7 +96,8 @@ export async function processTicketEmailJobsWithDeps(
         job.payload.email,
         job.payload.name,
         pdfBuffer,
-        job.payload.ticketId
+        job.payload.ticketId,
+        job.payload.eventName
       );
 
       await collection.updateOne(

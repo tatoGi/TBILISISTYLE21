@@ -8,7 +8,7 @@ export default async function Home() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden">
-      
+
       <Image
         src={MainImg}
         alt="Background"
@@ -21,10 +21,10 @@ export default async function Home() {
       <div className="absolute inset-0 bg-black/30" />
 
       <div className="absolute top-0 left-0 right-0 z-10 pt-8 md:pt-12 lg:pt-16 text-center">
-        <h1 className="font-heading text-[8vw] md:text-[3vw] lg:text-[2rem] font-extrabold uppercase tracking-tight whitespace-nowrap text-white">
+        <h1 className="font-heading text-[12vw] md:text-[7vw] lg:text-[5.5rem] xl:text-[6.5rem] font-extrabold uppercase tracking-tight whitespace-nowrap text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
           {t("title")}
         </h1>
-        <p className="font-heading text-[3.5vw] md:text-[2vw] lg:text-[1.5rem] font-bold uppercase tracking-wide whitespace-nowrap text-white mt-1 md:mt-2">
+        <p className="font-heading text-[4.5vw] md:text-[2.6vw] lg:text-[2.1rem] xl:text-[2.4rem] font-bold uppercase tracking-wide whitespace-nowrap text-white mt-1 md:mt-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
           {t("subtitle")}
         </p>
       </div>

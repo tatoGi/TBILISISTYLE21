@@ -38,6 +38,22 @@ export async function deleteProductAdmin(formData: FormData) {
   revalidatePath("/admin/collections/products");
 }
 
+/**
+ * Record that the admin has raised ticket prices for the 5000-ticket tier shown
+ * on the dashboard, so the red "raise prices" alert dismisses until the next
+ * 5000 boundary is crossed.
+ */
+export async function acknowledgeTicketTierAdmin(formData: FormData) {
+  const tier = Math.max(0, Math.floor(Number(formData.get("tier")) || 0));
+
+  const payload = await getPayloadClient();
+  await payload.updateGlobal({
+    slug: "site",
+    data: { acknowledgedTicketTier: tier },
+  });
+  revalidatePath("/admin");
+}
+
 export async function deletePageAdmin(formData: FormData) {
   const id = getString(formData, "id");
 

@@ -1,10 +1,27 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { getPgPool } from "@/lib/payload";
-import { Button, Card, CardBody, CardHeader, PageHeader, Progress } from "./_ui";
+import { Alert, Button, Card, CardBody, CardHeader, PageHeader, Progress } from "./_ui";
 import { RevenueAreaChart, SalesByTypeDonut } from "./charts/DashboardCharts";
+import { acknowledgeTicketTierAdmin } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+// Every TICKET_PRICE_TIER tickets sold (across ALL ticket types) the price
+// should be raised. The dashboard flags each new boundary so the admin can
+// update prices manually, then dismiss the alert.
+const TICKET_PRICE_TIER = 5000;
+
+/** Highest 5000-ticket tier the admin has marked as "prices updated". */
+async function loadAckTier(): Promise<number> {
+  try {
+    const pool = await getPgPool();
+    const r = await pool.query(`SELECT acknowledged_ticket_tier FROM site LIMIT 1`);
+    return Math.max(0, Math.floor(Number(r.rows[0]?.acknowledged_ticket_tier ?? 0)));
+  } catch {
+    return 0;
+  }
+}
 
 type Tone = "amber" | "emerald" | "sky" | "violet" | "rose" | "slate";
 
@@ -127,7 +144,13 @@ async function loadChartData() {
 const fmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
 export default async function DashboardView() {
-  const [s, charts] = await Promise.all([loadStats(), loadChartData()]);
+  const [s, charts, ackTier] = await Promise.all([loadStats(), loadChartData(), loadAckTier()]);
+
+  // 5000-ticket price-tier tracking (total tickets sold across every type).
+  const currentTier = Math.floor(s.ticketsSold / TICKET_PRICE_TIER);
+  const needsPriceBump = currentTier > ackTier;
+  const nextThreshold = (currentTier + 1) * TICKET_PRICE_TIER;
+  const untilNext = nextThreshold - s.ticketsSold;
 
   const kpis: Kpi[] = [
     {
@@ -199,6 +222,39 @@ export default async function DashboardView() {
           }
         />
 
+        {needsPriceBump ? (
+          <Alert tone="danger" icon={<AlertIcon />}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-bold">
+                  Raise ticket prices — {fmt(s.ticketsSold)} tickets sold
+                </p>
+                <p className="mt-0.5 text-rose-600/90">
+                  Sales have crossed {fmt(currentTier * TICKET_PRICE_TIER)} (every{" "}
+                  {fmt(TICKET_PRICE_TIER)} tickets the price should go up). Update the
+                  prices under Ticket Types, then dismiss this alert.
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Button href="/admin/tickets" color="danger" size="sm">
+                  Open Ticket Types
+                </Button>
+                <form action={acknowledgeTicketTierAdmin}>
+                  <input type="hidden" name="tier" value={currentTier} />
+                  <Button type="submit" color="danger" variant="outline" size="sm">
+                    Prices updated ✓
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </Alert>
+        ) : s.ticketsSold > 0 ? (
+          <Alert tone="slate" icon={<TicketIcon />}>
+            {fmt(s.ticketsSold)} tickets sold · next price step at{" "}
+            {fmt(nextThreshold)} ({fmt(untilNext)} to go).
+          </Alert>
+        ) : null}
+
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {kpis.map((k) => (
             <Link
@@ -259,6 +315,16 @@ function EmptyChart({ label }: { label: string }) {
     <div className="grid h-[320px] place-items-center rounded-lg border border-dashed border-slate-200 text-center">
       <p className="px-6 text-sm text-slate-500">{label}</p>
     </div>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
   );
 }
 
