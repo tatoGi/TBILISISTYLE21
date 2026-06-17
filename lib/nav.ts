@@ -79,7 +79,9 @@ export async function getFeaturedPages(): Promise<NavLink[]> {
       fallbackLocale: "ka",
       sort: "navOrder",
       depth: 0,
-      limit: 6,
+      // Show every page flagged "Feature on homepage" — a low cap silently hid
+      // pages past the 6th (by navOrder) even though their checkbox was on.
+      limit: 24,
     });
     return res.docs.map((p) => toLink(p as unknown as PageRef, locale));
   } catch {

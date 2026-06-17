@@ -109,18 +109,18 @@ export default function BuyProductModal({
         if (e.target === e.currentTarget && !isSubmitting) onClose();
       }}
     >
-      <div className="relative my-8 w-full max-w-md border border-white/20 bg-black">
+      <div className="relative my-8 w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#111111] to-black shadow-2xl shadow-black/70">
         <button
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
           aria-label="Close"
-          className="absolute right-4 top-4 text-white/60 hover:text-white disabled:opacity-30"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-30"
         >
           ✕
         </button>
 
-        <div className="border-b border-white/10 px-6 pb-4 pt-6">
+        <div className="border-b border-white/10 bg-white/[0.02] px-6 pb-5 pt-6">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-yellow-300">
             Checkout
           </p>
@@ -131,7 +131,7 @@ export default function BuyProductModal({
 
         <div className="px-6 py-5">
           {/* Order summary */}
-          <div className="mb-6 border border-yellow-300/20 bg-yellow-300/[0.04] p-4 text-sm">
+          <div className="mb-6 rounded-xl border border-yellow-300/20 bg-yellow-300/[0.04] p-4 text-sm">
             <div className="mb-2 flex justify-between text-white/70">
               <span>Product</span>
               <span className="text-white">{product.title}</span>
@@ -153,8 +153,8 @@ export default function BuyProductModal({
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
             {/* Size selector */}
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-[0.06em] text-white/60">
-                Size <span className="text-red-400">*</span>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.06em] text-white/90">
+                Size <span className="text-yellow-300">*</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {availableSizes.map((s) => (
@@ -163,7 +163,7 @@ export default function BuyProductModal({
                     key={s.size}
                     onClick={() => setSize(s.size)}
                     disabled={isSubmitting}
-                    className={`min-w-[3rem] border px-3 py-2 text-sm font-bold uppercase transition ${
+                    className={`min-w-[3rem] rounded-lg border px-3 py-2 text-sm font-bold uppercase transition ${
                       size === s.size
                         ? "border-yellow-300 bg-yellow-300 text-black"
                         : "border-white/20 text-white/80 hover:border-white/50"
@@ -248,7 +248,7 @@ export default function BuyProductModal({
             </label>
 
             {error ? (
-              <div className="border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
+              <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
                 {error}
               </div>
             ) : null}
@@ -256,7 +256,7 @@ export default function BuyProductModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 bg-yellow-300 py-4 text-sm font-black uppercase tracking-[0.06em] text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-yellow-300 py-4 text-sm font-black uppercase tracking-[0.06em] text-black shadow-lg shadow-yellow-300/20 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? (
                 <>
@@ -295,8 +295,8 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-bold uppercase tracking-[0.06em] text-white/60">
-        {label} {required ? <span className="text-red-400">*</span> : null}
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.06em] text-white/90">
+        {label} {required ? <span className="text-yellow-300">*</span> : null}
       </label>
       {children}
       {hint ? <p className="mt-1 text-xs text-white/45">{hint}</p> : null}
@@ -305,4 +305,4 @@ function Field({
 }
 
 const inputClass =
-  "w-full border border-white/20 bg-white/[0.04] p-3 text-white outline-none transition focus:border-yellow-300 disabled:opacity-50";
+  "w-full rounded-lg border border-white/15 bg-white/[0.04] p-3 text-white outline-none transition focus:border-yellow-300 focus:bg-white/[0.06] disabled:opacity-50";

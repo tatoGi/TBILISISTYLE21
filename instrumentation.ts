@@ -255,6 +255,44 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_phone" varchar;`,
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_email" varchar;`,
     `ALTER TABLE "site" ADD COLUMN IF NOT EXISTS "contact_address" varchar;`,
+
+    // "Contact" content block (blocks/contentBlocks.ts) — created via local dev
+    // push only, so prod (migrations only) needs the tables recreated here.
+    `CREATE TABLE IF NOT EXISTS "pages_blocks_contact" (
+      "_order" integer NOT NULL,
+      "_parent_id" uuid NOT NULL,
+      "_path" text NOT NULL,
+      "id" varchar PRIMARY KEY NOT NULL,
+      "show_payments" boolean DEFAULT true,
+      "block_name" varchar
+    );`,
+    `ALTER TABLE "pages_blocks_contact" ADD COLUMN IF NOT EXISTS "show_payments" boolean DEFAULT true;`,
+    `CREATE INDEX IF NOT EXISTS "pages_blocks_contact_order_idx" ON "pages_blocks_contact" ("_order");`,
+    `CREATE INDEX IF NOT EXISTS "pages_blocks_contact_parent_id_idx" ON "pages_blocks_contact" ("_parent_id");`,
+    `CREATE INDEX IF NOT EXISTS "pages_blocks_contact_path_idx" ON "pages_blocks_contact" ("_path");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'pages_blocks_contact_parent_id_fk') THEN
+        ALTER TABLE "pages_blocks_contact" ADD CONSTRAINT "pages_blocks_contact_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
+    `CREATE TABLE IF NOT EXISTS "_pages_v_blocks_contact" (
+      "_order" integer NOT NULL,
+      "_parent_id" uuid NOT NULL,
+      "_path" text NOT NULL,
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "show_payments" boolean DEFAULT true,
+      "_uuid" varchar,
+      "block_name" varchar
+    );`,
+    `ALTER TABLE "_pages_v_blocks_contact" ADD COLUMN IF NOT EXISTS "show_payments" boolean DEFAULT true;`,
+    `CREATE INDEX IF NOT EXISTS "_pages_v_blocks_contact_order_idx" ON "_pages_v_blocks_contact" ("_order");`,
+    `CREATE INDEX IF NOT EXISTS "_pages_v_blocks_contact_parent_id_idx" ON "_pages_v_blocks_contact" ("_parent_id");`,
+    `CREATE INDEX IF NOT EXISTS "_pages_v_blocks_contact_path_idx" ON "_pages_v_blocks_contact" ("_path");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_pages_v_blocks_contact_parent_id_fk') THEN
+        ALTER TABLE "_pages_v_blocks_contact" ADD CONSTRAINT "_pages_v_blocks_contact_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
     `CREATE INDEX IF NOT EXISTS "site_background_music_idx" ON "site" ("background_music_id");`,
     `DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_background_music_id_media_id_fk') THEN

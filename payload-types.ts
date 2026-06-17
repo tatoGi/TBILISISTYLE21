@@ -288,6 +288,12 @@ export interface Page {
             blockType: 'gallery';
           }
         | {
+            showPayments?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contact';
+          }
+        | {
             label_ka: string;
             label_en?: string | null;
             label_ru?: string | null;
@@ -495,6 +501,12 @@ export interface Post {
             id?: string | null;
             blockName?: string | null;
             blockType: 'gallery';
+          }
+        | {
+            showPayments?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contact';
           }
         | {
             label_ka: string;
@@ -1000,6 +1012,13 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        contact?:
+          | T
+          | {
+              showPayments?: T;
+              id?: T;
+              blockName?: T;
+            };
         cta?:
           | T
           | {
@@ -1100,6 +1119,13 @@ export interface PostsSelect<T extends boolean = true> {
                     id?: T;
                   };
               columns?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contact?:
+          | T
+          | {
+              showPayments?: T;
               id?: T;
               blockName?: T;
             };

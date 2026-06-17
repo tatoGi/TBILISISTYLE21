@@ -215,27 +215,27 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
         if (e.target === e.currentTarget && !isSubmitting) onClose()
       }}
     >
-      <div className="relative w-full max-w-md bg-black border border-white/20 my-8">
+      <div className="relative my-8 w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#111111] to-black shadow-2xl shadow-black/70">
         <button
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
           aria-label="Close"
-          className="absolute right-4 top-4 text-white/60 hover:text-white disabled:opacity-30"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-30"
         >
           ✕
         </button>
 
-        <div className="px-6 pt-6 pb-4 border-b border-white/10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-yellow-300 mb-1">
+        <div className="border-b border-white/10 bg-white/[0.02] px-6 pb-5 pt-6">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-yellow-300">
             Checkout
           </p>
-          <h2 className="text-2xl font-black uppercase text-white">{ticket.title}</h2>
+          <h2 className="text-2xl font-black uppercase leading-tight text-white">{ticket.title}</h2>
         </div>
 
         <div className="px-6 py-5">
           {/* FIX: Order Summary — transparency before payment */}
-          <div className="mb-6 border border-yellow-300/20 bg-yellow-300/[0.04] p-4 text-sm">
+          <div className="mb-6 rounded-xl border border-yellow-300/20 bg-yellow-300/[0.04] p-4 text-sm">
             <div className="flex justify-between mb-2 text-white/70">
               <span>Ticket</span>
               <span className="text-white">{ticket.title}</span>
@@ -383,7 +383,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
             </label>
 
             {error ? (
-              <div className="border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
+              <div className="rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-200">
                 {error}
               </div>
             ) : null}
@@ -392,7 +392,7 @@ export default function BuyTicketModal({ isOpen, onClose, ticket }: BuyTicketMod
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-yellow-300 py-4 font-black uppercase text-sm tracking-[0.06em] text-black hover:bg-white transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-yellow-300 py-4 text-sm font-black uppercase tracking-[0.06em] text-black shadow-lg shadow-yellow-300/20 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? (
                 <>
@@ -434,8 +434,8 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-bold uppercase tracking-[0.06em] text-white/60 mb-1">
-        {label} {required ? <span className="text-red-400">*</span> : null}
+      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.06em] text-white/90">
+        {label} {required ? <span className="text-yellow-300">*</span> : null}
       </label>
       {children}
       {hint ? (
@@ -457,8 +457,8 @@ function FormField({
 
 function inputClass(hintType: 'error' | 'success' | '') {
   const base =
-    'w-full bg-white/[0.04] border p-3 text-white outline-none transition disabled:opacity-50'
+    'w-full rounded-lg border bg-white/[0.04] p-3 text-white outline-none transition focus:bg-white/[0.06] disabled:opacity-50'
   if (hintType === 'error') return `${base} border-red-400/60 bg-red-500/[0.04] focus:border-red-400`
   if (hintType === 'success') return `${base} border-emerald-400/60 focus:border-emerald-400`
-  return `${base} border-white/20 focus:border-yellow-300`
+  return `${base} border-white/15 focus:border-yellow-300`
 }

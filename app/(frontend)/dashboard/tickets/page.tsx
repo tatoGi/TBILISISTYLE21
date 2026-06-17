@@ -12,7 +12,10 @@ export default async function TicketsPage() {
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-300">
           Tbilisi Style 21
         </p>
-        <h1 className="text-4xl font-black uppercase md:text-6xl">Tickets</h1>
+        <h1 className="font-heading text-4xl font-black uppercase tracking-[0.04em] md:text-6xl">
+          Tickets
+        </h1>
+        <span className="mt-1 block h-[3px] w-16 rounded-full bg-yellow-300" />
       </div>
 
       <TicketsClient tickets={tickets} />

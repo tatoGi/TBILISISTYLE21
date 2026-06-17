@@ -67,6 +67,22 @@ export const GalleryBlock: Block = {
   ],
 };
 
+// Renders the styled contact cards (phone / email / address from Site settings)
+// plus the Visa/Mastercard marks — so a CMS page can show a polished contact
+// section instead of a plain text list.
+export const ContactBlock: Block = {
+  slug: "contact",
+  labels: { singular: "Contact", plural: "Contact blocks" },
+  fields: [
+    {
+      name: "showPayments",
+      type: "checkbox",
+      defaultValue: true,
+      label: "Show payment methods (Visa / Mastercard)",
+    },
+  ],
+};
+
 export const CTABlock: Block = {
   slug: "cta",
   labels: { singular: "Call to action", plural: "Calls to action" },
@@ -81,5 +97,6 @@ export const contentBlocks = [
   RichTextBlock,
   ImageBlock,
   GalleryBlock,
+  ContactBlock,
   CTABlock,
 ];

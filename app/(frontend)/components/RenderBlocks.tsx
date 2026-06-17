@@ -5,6 +5,7 @@ import { RichText } from "@payloadcms/richtext-lexical/react";
 import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { CONTENT_FALLBACK_LOCALE, pickField } from "@/lib/i18n-content";
 import { LightboxProvider, LightboxTrigger, type LightboxImage } from "./content/Lightbox";
+import ContactBlock from "./content/ContactBlock";
 
 type MediaLike =
   | {
@@ -160,6 +161,14 @@ export function RenderBlocks({
         break;
       case "gallery":
         out.push(<Gallery key={key} block={block} locale={locale} tint={tint} />);
+        bandIndex += 1;
+        break;
+      case "contact":
+        out.push(
+          <Band key={key} tint={tint}>
+            <ContactBlock showPayments={block.showPayments !== false} />
+          </Band>,
+        );
         bandIndex += 1;
         break;
       case "cta":
