@@ -293,6 +293,45 @@ async function ensureSchema(payload: Awaited<ReturnType<typeof import("payload")
         ALTER TABLE "_pages_v_blocks_contact" ADD CONSTRAINT "_pages_v_blocks_contact_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
       END IF;
     END $$;`,
+
+    // The same "Contact" block also belongs to Posts/News (contentBlocks is
+    // shared). Prod (migrations only) never got these tables, so every posts
+    // query that joins the block tables fails — recreate them idempotently.
+    `CREATE TABLE IF NOT EXISTS "posts_blocks_contact" (
+      "_order" integer NOT NULL,
+      "_parent_id" uuid NOT NULL,
+      "_path" text NOT NULL,
+      "id" varchar PRIMARY KEY NOT NULL,
+      "show_payments" boolean DEFAULT true,
+      "block_name" varchar
+    );`,
+    `ALTER TABLE "posts_blocks_contact" ADD COLUMN IF NOT EXISTS "show_payments" boolean DEFAULT true;`,
+    `CREATE INDEX IF NOT EXISTS "posts_blocks_contact_order_idx" ON "posts_blocks_contact" ("_order");`,
+    `CREATE INDEX IF NOT EXISTS "posts_blocks_contact_parent_id_idx" ON "posts_blocks_contact" ("_parent_id");`,
+    `CREATE INDEX IF NOT EXISTS "posts_blocks_contact_path_idx" ON "posts_blocks_contact" ("_path");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'posts_blocks_contact_parent_id_fk') THEN
+        ALTER TABLE "posts_blocks_contact" ADD CONSTRAINT "posts_blocks_contact_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."posts"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
+    `CREATE TABLE IF NOT EXISTS "_posts_v_blocks_contact" (
+      "_order" integer NOT NULL,
+      "_parent_id" uuid NOT NULL,
+      "_path" text NOT NULL,
+      "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+      "show_payments" boolean DEFAULT true,
+      "_uuid" varchar,
+      "block_name" varchar
+    );`,
+    `ALTER TABLE "_posts_v_blocks_contact" ADD COLUMN IF NOT EXISTS "show_payments" boolean DEFAULT true;`,
+    `CREATE INDEX IF NOT EXISTS "_posts_v_blocks_contact_order_idx" ON "_posts_v_blocks_contact" ("_order");`,
+    `CREATE INDEX IF NOT EXISTS "_posts_v_blocks_contact_parent_id_idx" ON "_posts_v_blocks_contact" ("_parent_id");`,
+    `CREATE INDEX IF NOT EXISTS "_posts_v_blocks_contact_path_idx" ON "_posts_v_blocks_contact" ("_path");`,
+    `DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_posts_v_blocks_contact_parent_id_fk') THEN
+        ALTER TABLE "_posts_v_blocks_contact" ADD CONSTRAINT "_posts_v_blocks_contact_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_posts_v"("id") ON DELETE cascade ON UPDATE no action;
+      END IF;
+    END $$;`,
     `CREATE INDEX IF NOT EXISTS "site_background_music_idx" ON "site" ("background_music_id");`,
     `DO $$ BEGIN
       IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_background_music_id_media_id_fk') THEN

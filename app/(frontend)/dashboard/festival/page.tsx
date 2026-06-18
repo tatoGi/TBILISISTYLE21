@@ -1,12 +1,9 @@
 import AboutImg from "@/public/images/secondImg_1920x1080.jpeg";
 import { getTranslations } from "next-intl/server";
-import { getFestivalHeroContent, getFestivalMusic } from "@/lib/festival-landing";
+import { getFestivalHeroContent } from "@/lib/festival-landing";
 import { getFeaturedPages, getFeaturedPartners, getFeaturedNews } from "@/lib/nav";
 import { listProducts } from "@/lib/products";
-import { listMusicTracks } from "@/lib/music-tracks";
 import FestivalHero from "../../components/festival/FestivalHero";
-import FestivalMusic from "../../components/festival/FestivalMusic";
-import MusicTrackList from "../../components/festival/MusicTrackList";
 import ProductReel from "../../components/ProductReel";
 import PartnersStrip from "../../components/PartnersStrip";
 import NewsTeaser from "../../components/NewsTeaser";
@@ -18,14 +15,12 @@ export default async function FestivalPage() {
   const tHome = await getTranslations("home");
   const t = await getTranslations("festivalLanding");
 
-  const [hero, featured, products, partners, featuredNews, music, musicTracks] = await Promise.all([
+  const [hero, featured, products, partners, featuredNews] = await Promise.all([
     getFestivalHeroContent(),
     getFeaturedPages(),
     listProducts({ publicOnly: true }),
     getFeaturedPartners(),
     getFeaturedNews(6),
-    getFestivalMusic(),
-    listMusicTracks({ publicOnly: true }),
   ]);
 
   return (
@@ -37,21 +32,15 @@ export default async function FestivalPage() {
         emptyPagesMessage={t("emptyFeatured")}
       />
 
-      <PartnersStrip partners={partners} heading={tNav("partners")} />
-
       <ProductReel products={products} />
+
+      <PartnersStrip partners={partners} heading={tNav("partners")} />
 
       <NewsTeaser
         posts={featuredNews}
         heading={tNav("news")}
         viewAllLabel={tHome("allNews")}
       />
-
-      <MusicTrackList tracks={musicTracks} />
-
-      {music ? (
-        <FestivalMusic src={music.url} title={music.title} loop={music.loop} />
-      ) : null}
     </main>
   );
 }

@@ -2,9 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import type { SocialLinks, SiteContact } from "@/lib/nav";
+import type { MusicTrack } from "@/lib/music-tracks";
 import FestivalMenu, { type NavLink } from "./FestivalMenu";
 import Footer from "./Footer";
 import TicketCta from "./TicketCta";
+import FestivalMusic from "./festival/FestivalMusic";
+import MusicTrackList from "./festival/MusicTrackList";
+
+/** Background-music track shared site-wide (mirrors lib/festival-landing). */
+type SiteMusic = { url: string; title: string | null; loop: boolean };
 
 // Routes that render their own full-screen / standalone UI and must NOT get the
 // shared header, footer and burger menu.
@@ -26,11 +32,15 @@ export default function SiteChrome({
   pages,
   social,
   contact,
+  music,
+  musicTracks,
   children,
 }: {
   pages: NavLink[];
   social: SocialLinks;
   contact: SiteContact;
+  music: SiteMusic | null;
+  musicTracks: MusicTrack[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -45,6 +55,12 @@ export default function SiteChrome({
       <div className="flex-1">{children}</div>
       <Footer social={social} contact={contact} />
       <TicketCta />
+      {/* Site-wide background music: the mini track-list player lives in the
+          persistent layout so playback continues across page navigation. */}
+      <MusicTrackList tracks={musicTracks} />
+      {music ? (
+        <FestivalMusic src={music.url} title={music.title} loop={music.loop} />
+      ) : null}
     </div>
   );
 }

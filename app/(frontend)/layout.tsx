@@ -5,6 +5,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { Analytics } from "@vercel/analytics/next";
 import { defaultLocale, isLocale, localeCookieName } from "@/i18n/config";
 import { getNavPages, getSocialLinks, getSiteContact } from "@/lib/nav";
+import { getFestivalMusic } from "@/lib/festival-landing";
+import { listMusicTracks } from "@/lib/music-tracks";
 import SiteChrome from "./components/SiteChrome";
 import "./globals.css";
 
@@ -47,10 +49,12 @@ export default async function RootLayout({
   const store = await cookies();
   const requestedLocale = store.get(localeCookieName)?.value;
   const locale = isLocale(requestedLocale) ? requestedLocale : defaultLocale;
-  const [pages, social, contact] = await Promise.all([
+  const [pages, social, contact, music, musicTracks] = await Promise.all([
     getNavPages(),
     getSocialLinks(),
     getSiteContact(),
+    getFestivalMusic(),
+    listMusicTracks({ publicOnly: true }),
   ]);
 
   return (
@@ -68,7 +72,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <NextIntlClientProvider>
-          <SiteChrome pages={pages} social={social} contact={contact}>{children}</SiteChrome>
+          <SiteChrome pages={pages} social={social} contact={contact} music={music} musicTracks={musicTracks}>{children}</SiteChrome>
         </NextIntlClientProvider>
         <Analytics />
       </body>
