@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { deletePageAdmin, deleteProductAdmin, deleteTicketAdmin } from "../actions";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
@@ -49,6 +50,12 @@ type ListJsTableProps = {
 
 const pageSizes = [10, 25, 50];
 
+const deleteActions: Record<"ticket" | "product" | "page", (formData: FormData) => Promise<void>> = {
+  page: deletePageAdmin,
+  product: deleteProductAdmin,
+  ticket: deleteTicketAdmin,
+};
+
 export function ListJsTable({
   addHref,
   addLabel = "Add",
@@ -70,6 +77,8 @@ export function ListJsTable({
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const router = useRouter();
+  const [isDeleting, startDeleting] = useTransition();
 
   const statuses = useMemo(
     () => ["all", ...Array.from(new Set(rows.map((row) => row.status?.label).filter(Boolean)))],
@@ -128,6 +137,26 @@ export function ListJsTable({
     );
   }
 
+  function bulkRemove() {
+    if (!deleteKind || !selectedIds.length || isDeleting) return;
+
+    const message = `ნამდვილად გსურს მონიშნული ${selectedIds.length} ჩანაწერის წაშლა?`;
+    if (!window.confirm(message)) return;
+
+    const action = deleteActions[deleteKind];
+    const ids = [...selectedIds];
+
+    startDeleting(async () => {
+      for (const id of ids) {
+        const formData = new FormData();
+        formData.set("id", id);
+        await action(formData);
+      }
+      setSelectedIds([]);
+      router.refresh();
+    });
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-[#e9ebec] bg-white shadow-sm">
       <div className="border-b border-[#e9ebec] px-5 py-4">
@@ -146,11 +175,14 @@ export function ListJsTable({
                 type="button"
                 color="danger"
                 variant="soft"
-                disabled={!selectedIds.length}
-                title="Select rows first"
+                disabled={!deleteKind || !selectedIds.length || isDeleting}
+                title={selectedIds.length ? "Remove selected rows" : "Select rows first"}
                 icon={<TrashIcon />}
+                onClick={bulkRemove}
               >
-                <span className="sr-only sm:not-sr-only">Bulk remove</span>
+                <span className="sr-only sm:not-sr-only">
+                  {isDeleting ? "Removing…" : "Bulk remove"}
+                </span>
               </Button>
             </div>
             <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
@@ -344,12 +376,25 @@ export function ListJsTable({
   );
 }
 
+const deleteConfirmLabel: Record<"ticket" | "product" | "page", string> = {
+  page: "ნამდვილად გსურს ამ გვერდის წაშლა?",
+  product: "ნამდვილად გსურს ამ პროდუქციის წაშლა?",
+  ticket: "ნამდვილად გსურს ამ ბილეთის წაშლა?",
+};
+
 function DeleteButton({ id, kind }: { id: string; kind: "ticket" | "product" | "page" }) {
   const action =
     kind === "ticket" ? deleteTicketAdmin : kind === "product" ? deleteProductAdmin : deletePageAdmin;
 
   return (
-    <form action={action}>
+    <form
+      action={action}
+      onSubmit={(event) => {
+        if (!window.confirm(deleteConfirmLabel[kind])) {
+          event.preventDefault();
+        }
+      }}
+    >
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"

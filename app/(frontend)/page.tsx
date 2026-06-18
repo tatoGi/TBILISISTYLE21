@@ -1,5 +1,5 @@
 import Image from "next/image";
-import MainImg from "@/public/images/dashboardimage_1920x1080_full.jpeg";
+import MainImg from "@/public/images/FIRST.jpeg";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 

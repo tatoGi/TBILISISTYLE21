@@ -47,7 +47,7 @@ export default function FestivalHero({
                   href={item.href}
                   className="group"
                 >
-                  <p className="font-heading whitespace-nowrap text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-left md:text-xl lg:text-[1.35rem]">
+                  <p className="font-heading text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-left md:text-xl lg:text-[1.35rem] xl:whitespace-nowrap">
                     {item.label}
                   </p>
                 </Link>
@@ -61,7 +61,7 @@ export default function FestivalHero({
                   href={item.href}
                   className="group"
                 >
-                  <p className="font-heading whitespace-nowrap text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-right md:text-xl lg:text-[1.35rem]">
+                  <p className="font-heading text-center text-sm font-semibold tracking-[0.14em] text-white/90 transition-all duration-300 group-hover:tracking-[0.24em] group-hover:text-yellow-300 sm:text-lg sm:tracking-[0.22em] md:text-right md:text-xl lg:text-[1.35rem] xl:whitespace-nowrap">
                     {item.label}
                   </p>
                 </Link>

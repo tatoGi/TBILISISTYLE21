@@ -73,13 +73,14 @@ export default function FestivalMenu({
             priority
             className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/30 sm:h-11 sm:w-11"
           />
-          <span className="font-heading truncate text-[clamp(0.9rem,4.8vw,2.25rem)] font-extrabold uppercase leading-none tracking-[0.06em] text-white sm:text-4xl">
+          <span className="font-heading truncate text-[clamp(0.9rem,4.6vw,1.5rem)] font-extrabold uppercase leading-none tracking-[0.06em] text-white sm:text-2xl md:text-3xl lg:text-4xl">
             Tbilisi Style 21
           </span>
         </Link>
 
-        {/* Language switcher (+ social icons) — centered on desktop only */}
-        <div className="pointer-events-none absolute inset-x-0 hidden justify-center sm:flex">
+        {/* Language switcher (+ social icons) — centered on xl screens only.
+            Below xl it lives in the drawer so the title never overlaps it. */}
+        <div className="pointer-events-none absolute inset-x-0 hidden justify-center xl:flex">
           <div className="pointer-events-auto flex items-center gap-4">
             <LanguageSwitcher />
             <SocialLinksRow social={social} />
@@ -143,9 +144,9 @@ export default function FestivalMenu({
             <span className="absolute h-[2px] w-6 -rotate-45 bg-white" />
           </button>
 
-          {/* Language switcher — shown here on mobile (desktop uses the centered
-              one in the top bar). */}
-          <div className="mb-6 flex justify-center sm:hidden">
+          {/* Language switcher — shown here on mobile/tablet (xl+ uses the
+              centered one in the top bar). */}
+          <div className="mb-6 flex justify-center xl:hidden">
             <LanguageSwitcher />
           </div>
 
