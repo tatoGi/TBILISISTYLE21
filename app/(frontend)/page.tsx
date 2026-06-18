@@ -1,11 +1,10 @@
 import Image from "next/image";
 import MainImg from "@/public/images/FIRST.jpeg";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 
-export default async function Home() {
-  const t = await getTranslations("home");
-
+// The landing splash always shows the English brand wordmark, regardless of the
+// visitor's selected language — it reads as a logo, not localized copy.
+export default function Home() {
   return (
     <main className="relative w-full h-screen overflow-hidden">
 
@@ -22,10 +21,10 @@ export default async function Home() {
 
       <div className="absolute top-0 left-0 right-0 z-10 pt-8 md:pt-12 lg:pt-16 text-center">
         <h1 className="font-heading text-[12vw] md:text-[7vw] lg:text-[5.5rem] xl:text-[6.5rem] font-extrabold uppercase tracking-tight whitespace-nowrap text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
-          {t("title")}
+          TBILISI STYLE 21
         </h1>
         <p className="font-heading text-[4.5vw] md:text-[2.6vw] lg:text-[2.1rem] xl:text-[2.4rem] font-bold uppercase tracking-wide whitespace-nowrap text-white mt-1 md:mt-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
-          {t("subtitle")}
+          ELECTRONIC MUSIC FESTIVAL
         </p>
       </div>
 
@@ -34,7 +33,7 @@ export default async function Home() {
           href="/dashboard/festival"
           className="ts-ticket-pulse group inline-flex items-center gap-3 rounded-full bg-yellow-300 px-8 py-4 font-heading text-base md:text-lg lg:text-xl font-extrabold uppercase tracking-wide whitespace-nowrap text-black transition-all duration-300 hover:scale-105 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/60 sm:px-10 sm:py-5"
         >
-          <span>{t("enter")}</span>
+          <span>ENTER THE ENERGY</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
