@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { SocialLinks, SiteContact } from "@/lib/nav";
 import SocialLinksRow from "./SocialLinks";
+import PaymentCardBadges from "./PaymentCardBadges";
 
 export default function Footer({
   social,
@@ -72,8 +73,11 @@ export default function Footer({
         </div>
       </div>
 
-      <div className="mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6 text-center text-[11px] uppercase tracking-[0.2em] text-white/35">
-        © {new Date().getFullYear()} Tbilisi Style 21
+      <div className="mx-auto mt-10 flex max-w-6xl flex-col items-center gap-5 border-t border-white/10 pt-6">
+        <PaymentCardBadges />
+        <p className="text-center text-[11px] uppercase tracking-[0.2em] text-white/35">
+          © {new Date().getFullYear()} Tbilisi Style 21
+        </p>
       </div>
     </footer>
   );

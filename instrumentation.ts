@@ -413,14 +413,13 @@ async function seedDemoTshirts(payload: Awaited<ReturnType<typeof import("payloa
   if (process.env.SEED_DEMO_TSHIRTS === "false") return;
 
   try {
-    const { seedTshirts, TSHIRTS } = await import("./lib/seed-tshirts");
+    const { seedTshirts } = await import("./lib/seed-tshirts");
 
-    // Cheap guard: skip the per-title checks once everything is already seeded.
-    const { totalDocs } = await payload.count({
-      collection: "products",
-      where: { title: { like: "Tbilisi Style 21 Tee" } },
-    });
-    if (totalDocs >= TSHIRTS.length) return;
+    // Only ever seed a brand-new, empty storefront. Once ANY product exists we
+    // never seed again — otherwise products an admin deleted in production would
+    // be resurrected on the next server boot (Vercel cold starts are frequent).
+    const { totalDocs } = await payload.count({ collection: "products" });
+    if (totalDocs > 0) return;
 
     const { created } = await seedTshirts(payload);
     if (created > 0) {
