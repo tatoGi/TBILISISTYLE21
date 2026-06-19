@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { pickField } from "@/lib/i18n-content";
-import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
+import { getCachedSiteGlobal, getCurrentLocale, getPayloadClient } from "@/lib/payload";
 
 export type FestivalHeroContent = {
   badge: string;
@@ -21,11 +21,7 @@ export async function getFestivalHeroContent(): Promise<FestivalHeroContent> {
   };
 
   try {
-    const payload = await getPayloadClient();
-    const site = (await payload.findGlobal({
-      slug: "site",
-      depth: 0,
-    })) as unknown as Record<string, unknown>;
+    const site = await getCachedSiteGlobal();
 
     return {
       badge: pickField<string>(site, "heroBadge", locale) ?? fallbacks.badge,

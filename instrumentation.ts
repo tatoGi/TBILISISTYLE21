@@ -13,14 +13,32 @@ export async function register() {
   // DB access only makes sense on the Node.js runtime, never the Edge runtime.
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
-  const { getPayload } = await import("payload");
-  const { default: config } = await import("@payload-config");
-  const payload = await getPayload({ config });
+  // Best-effort, as the header promises: a DB outage (e.g. Postgres over its
+  // data-transfer quota) must NOT crash startup. Without this guard a failed
+  // getPayload() rejects register(), and Next.js then returns 500 ("error
+  // loading instrumentation") for EVERY request — even fully static pages like
+  // the homepage. Catching here keeps static/cached routes serving while the DB
+  // is unavailable, instead of taking the whole site down.
+  try {
+    const { getPayload } = await import("payload");
+    const { default: config } = await import("@payload-config");
+    const payload = await getPayload({ config });
 
-  await ensureSchema(payload);
-  await backfillLocaleColumns(payload);
-  await ensureAdminUser(payload);
-  await seedDemoTshirts(payload);
+    // Schema sync + locale backfill are heavy, one-time-ish operations (~150 DDL
+    // statements + UPDATEs across ~24 tables). Vercel cold-starts frequently, so
+    // running them on every boot needlessly burns the DB's data-transfer quota
+    // (the very thing that took the site down). Gate them behind an opt-in flag,
+    // exactly like ADMIN_BOOTSTRAP: flip RUN_SCHEMA_SYNC=true for the one deploy
+    // that changes the schema, let it boot once, then turn it back off.
+    if (process.env.RUN_SCHEMA_SYNC === "true") {
+      await ensureSchema(payload);
+      await backfillLocaleColumns(payload);
+    }
+    await ensureAdminUser(payload);
+    await seedDemoTshirts(payload);
+  } catch (err) {
+    console.error("[instrumentation] startup tasks skipped (DB unavailable?):", err);
+  }
 }
 
 /**

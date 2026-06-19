@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { defaultLocale, isLocale, localeCookieName, type Locale } from "@/i18n/config";
@@ -6,6 +7,26 @@ import { defaultLocale, isLocale, localeCookieName, type Locale } from "@/i18n/c
 export async function getPayloadClient() {
   return getPayload({ config });
 }
+
+/**
+ * Cached raw "site" global (depth 0). Locale-independent: all *_en/ru/ua columns
+ * are returned and the language is picked in JS by callers (pickField), so one
+ * cache entry serves every locale. The site global is read on nearly every page
+ * (landing hero + footer contact/social), so caching it keeps those reads off
+ * Postgres — directly cutting the data-transfer the DB plan is billed on.
+ * Revalidates every 5 min or when revalidateTag("site") is called.
+ */
+export const getCachedSiteGlobal = unstable_cache(
+  async (): Promise<Record<string, unknown>> => {
+    const payload = await getPayloadClient();
+    return (await payload.findGlobal({
+      slug: "site",
+      depth: 0,
+    })) as unknown as Record<string, unknown>;
+  },
+  ["site-global-depth0"],
+  { revalidate: 300, tags: ["site"] },
+);
 
 /**
  * Minimal shape of the node-postgres pool we rely on. Declared locally so the

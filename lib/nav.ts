@@ -1,6 +1,8 @@
+import { unstable_cache } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
+import { getCachedSiteGlobal, getCurrentLocale, getPayloadClient } from "@/lib/payload";
 import { pickField, pickLocalized } from "@/lib/i18n-content";
+import type { Locale } from "@/i18n/config";
 
 export type NavLink = { label: string; href: string };
 
@@ -39,18 +41,20 @@ function withFixedLinks(base: NavLink[], fixed: NavLink[]): NavLink[] {
  * flagged "Show in site menu" (ordered by navOrder) if the menu is empty. News
  * and Partners (fixed routes) are always appended so they stay reachable.
  */
-export async function getNavPages(): Promise<NavLink[]> {
-  const fixed = await getFixedNavLinks().catch(() => [] as NavLink[]);
-  try {
+// Locale-dependent base menu (everything that hits Postgres). Cached per locale
+// and revalidated every 5 min — the header runs on every page, so this was a
+// per-request DB read site-wide. getFixedNavLinks (translations/cookies) stays
+// outside the cache scope.
+const fetchNavBase = unstable_cache(
+  async (locale: Locale): Promise<NavLink[]> => {
     const payload = await getPayloadClient();
-    const locale = await getCurrentLocale();
 
     const site = await payload.findGlobal({ slug: "site", locale, fallbackLocale: "ka", depth: 1 });
     const menu = (site?.menu ?? []) as Record<string, unknown>[];
     const fromGlobal = menu
       .filter((i) => i.page && typeof i.page === "object")
       .map((i) => toLink(i.page as PageRef, locale, pickField<string>(i, "label", locale)));
-    if (fromGlobal.length) return withFixedLinks(fromGlobal, fixed);
+    if (fromGlobal.length) return fromGlobal;
 
     const res = await payload.find({
       collection: "pages",
@@ -61,17 +65,25 @@ export async function getNavPages(): Promise<NavLink[]> {
       depth: 0,
       limit: 100,
     });
-    return withFixedLinks(res.docs.map((p) => toLink(p as unknown as PageRef, locale)), fixed);
+    return res.docs.map((p) => toLink(p as unknown as PageRef, locale));
+  },
+  ["nav-base"],
+  { revalidate: 300, tags: ["site", "pages"] },
+);
+
+export async function getNavPages(): Promise<NavLink[]> {
+  const fixed = await getFixedNavLinks().catch(() => [] as NavLink[]);
+  try {
+    const locale = await getCurrentLocale();
+    return withFixedLinks(await fetchNavBase(locale), fixed);
   } catch {
     return fixed;
   }
 }
 
-/** Homepage featured pages — Pages flagged "Feature on homepage". */
-export async function getFeaturedPages(): Promise<NavLink[]> {
-  try {
+const fetchFeaturedPages = unstable_cache(
+  async (locale: Locale): Promise<NavLink[]> => {
     const payload = await getPayloadClient();
-    const locale = await getCurrentLocale();
     const res = await payload.find({
       collection: "pages",
       where: { featuredOnHome: { equals: true }, _status: { equals: "published" } },
@@ -84,6 +96,16 @@ export async function getFeaturedPages(): Promise<NavLink[]> {
       limit: 24,
     });
     return res.docs.map((p) => toLink(p as unknown as PageRef, locale));
+  },
+  ["featured-pages"],
+  { revalidate: 300, tags: ["pages"] },
+);
+
+/** Homepage featured pages — Pages flagged "Feature on homepage". */
+export async function getFeaturedPages(): Promise<NavLink[]> {
+  try {
+    const locale = await getCurrentLocale();
+    return await fetchFeaturedPages(locale);
   } catch {
     return [];
   }
@@ -109,11 +131,7 @@ export async function getSiteContact(): Promise<SiteContact> {
   };
 
   try {
-    const payload = await getPayloadClient();
-    const site = (await payload.findGlobal({
-      slug: "site",
-      depth: 0,
-    })) as unknown as Record<string, unknown>;
+    const site = await getCachedSiteGlobal();
 
     const phone = (site.contactPhone as string)?.trim() || fallback.phone;
     const email = (site.contactEmail as string)?.trim() || fallback.email;
@@ -132,11 +150,7 @@ export type SocialLinks = { instagram: string | null; tiktok: string | null };
 /** Social profile URLs from Site settings — null when unset. Not localized. */
 export async function getSocialLinks(): Promise<SocialLinks> {
   try {
-    const payload = await getPayloadClient();
-    const site = (await payload.findGlobal({
-      slug: "site",
-      depth: 0,
-    })) as unknown as Record<string, unknown>;
+    const site = await getCachedSiteGlobal();
     return {
       instagram: (site.instagramUrl as string)?.trim() || null,
       tiktok: (site.tiktokUrl as string)?.trim() || null,
@@ -155,11 +169,9 @@ function mediaUrlOf(media: unknown): string | null {
   return null;
 }
 
-/** Homepage/festival featured partners — partners flagged "Show on festival landing". */
-export async function getFeaturedPartners(): Promise<PartnerCard[]> {
-  try {
+const fetchFeaturedPartners = unstable_cache(
+  async (locale: Locale): Promise<PartnerCard[]> => {
     const payload = await getPayloadClient();
-    const locale = await getCurrentLocale();
     const res = await payload.find({
       collection: "partners",
       where: { featuredOnHome: { equals: true } },
@@ -181,6 +193,16 @@ export async function getFeaturedPartners(): Promise<PartnerCard[]> {
       logoUrl: mediaUrlOf(p.logo),
       website: ((p.website as string)?.trim() || null),
     }));
+  },
+  ["featured-partners"],
+  { revalidate: 300, tags: ["partners"] },
+);
+
+/** Homepage/festival featured partners — partners flagged "Show on festival landing". */
+export async function getFeaturedPartners(): Promise<PartnerCard[]> {
+  try {
+    const locale = await getCurrentLocale();
+    return await fetchFeaturedPartners(locale);
   } catch {
     return [];
   }
@@ -195,11 +217,9 @@ export type NewsCard = {
   publishedAt: string | null;
 };
 
-/** Admin-selected news for the festival landing — posts flagged "Feature on homepage". */
-export async function getFeaturedNews(limit = 6): Promise<NewsCard[]> {
-  try {
+const fetchFeaturedNews = unstable_cache(
+  async (locale: Locale, limit: number): Promise<NewsCard[]> => {
     const payload = await getPayloadClient();
-    const locale = await getCurrentLocale();
     const res = await payload.find({
       collection: "posts",
       where: {
@@ -223,6 +243,16 @@ export async function getFeaturedNews(limit = 6): Promise<NewsCard[]> {
         publishedAt: (p.publishedAt as string) || null,
       };
     });
+  },
+  ["featured-news"],
+  { revalidate: 300, tags: ["posts"] },
+);
+
+/** Admin-selected news for the festival landing — posts flagged "Feature on homepage". */
+export async function getFeaturedNews(limit = 6): Promise<NewsCard[]> {
+  try {
+    const locale = await getCurrentLocale();
+    return await fetchFeaturedNews(locale, limit);
   } catch {
     return [];
   }

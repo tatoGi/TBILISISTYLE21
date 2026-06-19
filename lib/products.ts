@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "./payload";
 import { pickLocalized } from "./i18n-content";
 
@@ -133,24 +134,33 @@ async function resolveLocale(locale?: string): Promise<string> {
   }
 }
 
+// Locale-independent raw rows (all *_en/ru/ua columns fetched, language picked in
+// JS), so one cache entry serves every locale. Keeps the products list off
+// Postgres on every request — it feeds both the shop page and the festival reel.
+const fetchProductDocs = unstable_cache(
+  async (publicOnly: boolean) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "products",
+      where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
+      sort: "-createdAt",
+      limit: 0,
+      pagination: false,
+      depth: 0,
+    });
+    return result.docs as unknown as Record<string, unknown>[];
+  },
+  ["products-docs"],
+  { revalidate: 60, tags: ["products"] },
+);
+
 export async function listProducts({
   publicOnly = false,
   locale,
 }: { publicOnly?: boolean; locale?: string } = {}) {
-  const payload = await getPayloadClient();
   const resolvedLocale = await resolveLocale(locale);
-  const result = await payload.find({
-    collection: "products",
-    where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
-    sort: "-createdAt",
-    limit: 0,
-    pagination: false,
-    depth: 0,
-  });
-
-  return result.docs.map((d) =>
-    serializeProduct(d as unknown as Record<string, unknown>, resolvedLocale),
-  );
+  const docs = await fetchProductDocs(publicOnly);
+  return docs.map((d) => serializeProduct(d, resolvedLocale));
 }
 
 export async function getProduct(id: string, locale?: string): Promise<Product | null> {

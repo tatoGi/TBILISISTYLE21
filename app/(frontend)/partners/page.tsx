@@ -1,9 +1,30 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
 import { pickLocalized } from "@/lib/i18n-content";
+import type { Locale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
+
+// Cache the partners read per locale (revalidate 5 min / revalidateTag
+// "partners"). Page stays dynamic (cookie locale); this keeps it off Postgres.
+const fetchPartnersList = unstable_cache(
+  async (locale: Locale) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "partners",
+      locale,
+      fallbackLocale: "ka",
+      depth: 1,
+      sort: "order",
+      limit: 100,
+    });
+    return result.docs;
+  },
+  ["partners-list"],
+  { revalidate: 300, tags: ["partners"] },
+);
 
 function mediaUrl(media: unknown): string | null {
   if (media && typeof media === "object" && "url" in media) {
@@ -13,20 +34,9 @@ function mediaUrl(media: unknown): string | null {
 }
 
 export default async function PartnersPage() {
-  const payload = await getPayloadClient();
   const locale = await getCurrentLocale();
   const t = await getTranslations("nav");
-
-  const result = await payload.find({
-    collection: "partners",
-    locale,
-    fallbackLocale: "ka",
-    depth: 1,
-    sort: "order",
-    limit: 100,
-  });
-
-  const partners = result.docs;
+  const partners = await fetchPartnersList(locale);
 
   return (
     <main className="relative mx-auto min-h-screen w-full max-w-6xl px-5 pb-16 pt-28 text-white md:px-10 overflow-hidden">

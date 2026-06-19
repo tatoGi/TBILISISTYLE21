@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
 import { pickField } from "@/lib/i18n-content";
+import type { Locale } from "@/i18n/config";
 import { RenderBlocks } from "../../components/RenderBlocks";
 
 export const dynamic = "force-dynamic";
@@ -18,21 +20,33 @@ function mediaUrl(media: unknown): string | null {
   return null;
 }
 
+// Cache the post lookup per (slug, locale). Called by both generateMetadata and
+// the component; revalidate 5 min / revalidateTag "posts". Keeps article reads
+// off Postgres on every request.
+const fetchPostBySlug = unstable_cache(
+  async (slug: string, locale: Locale) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "posts",
+      where: {
+        slug: { equals: slug },
+        _status: { equals: "published" },
+      },
+      locale,
+      fallbackLocale: "ka",
+      depth: 2,
+      limit: 1,
+    });
+    return result.docs[0] ?? null;
+  },
+  ["post-by-slug"],
+  { revalidate: 300, tags: ["posts"] },
+);
+
 async function findPost(slug: string) {
-  const payload = await getPayloadClient();
   const locale = await getCurrentLocale();
-  const result = await payload.find({
-    collection: "posts",
-    where: {
-      slug: { equals: slug },
-      _status: { equals: "published" },
-    },
-    locale,
-    fallbackLocale: "ka",
-    depth: 2,
-    limit: 1,
-  });
-  return { post: result.docs[0] ?? null, locale };
+  const post = await fetchPostBySlug(slug, locale);
+  return { post, locale };
 }
 
 export async function generateMetadata({ params }: PostProps): Promise<Metadata> {

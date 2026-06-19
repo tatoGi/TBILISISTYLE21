@@ -1,9 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
 import { pickField } from "@/lib/i18n-content";
+import type { Locale } from "@/i18n/config";
 
 export const dynamic = "force-dynamic";
+
+// Cache the published-posts read per locale (revalidate 5 min / revalidateTag
+// "posts"). The page stays dynamic because the locale comes from a cookie, but
+// this keeps the list query off Postgres on every visit.
+const fetchPublishedPosts = unstable_cache(
+  async (locale: Locale) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "posts",
+      locale,
+      fallbackLocale: "ka",
+      depth: 1,
+      sort: "-publishedAt",
+      limit: 50,
+      where: { _status: { equals: "published" } },
+    });
+    return result.docs;
+  },
+  ["news-list"],
+  { revalidate: 300, tags: ["posts"] },
+);
 
 function mediaUrl(media: unknown): string | null {
   if (media && typeof media === "object" && "url" in media) {
@@ -24,20 +47,8 @@ function formatDate(value?: string | null) {
 }
 
 export default async function NewsPage() {
-  const payload = await getPayloadClient();
   const locale = await getCurrentLocale();
-
-  const result = await payload.find({
-    collection: "posts",
-    locale,
-    fallbackLocale: "ka",
-    depth: 1,
-    sort: "-publishedAt",
-    limit: 50,
-    where: { _status: { equals: "published" } },
-  });
-
-  const posts = result.docs;
+  const posts = await fetchPublishedPosts(locale);
 
   return (
     <main className="relative mx-auto min-h-screen w-full max-w-6xl px-5 pb-16 pt-28 text-white md:px-10 overflow-hidden">

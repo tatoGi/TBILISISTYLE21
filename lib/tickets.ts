@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "./payload";
 import { pickLocalized } from "./i18n-content";
 
@@ -90,24 +91,36 @@ async function resolveLocale(locale?: string): Promise<string> {
   }
 }
 
+// Raw rows are locale-independent: all *_en/ru/ua columns are fetched (depth 0)
+// and the language is picked in JS by serializeTicket. So one cache entry serves
+// every locale. This keeps the tickets list off Postgres on every request — the
+// force-dynamic page hitting the DB per view is what burned the data-transfer
+// quota. The purchase flow re-validates inventory server-side, so a listing that
+// is up to `revalidate` seconds stale is only a display concern, never an oversell.
+const fetchTicketDocs = unstable_cache(
+  async (publicOnly: boolean) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "tickets",
+      where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
+      sort: "-createdAt",
+      limit: 0,
+      pagination: false,
+      depth: 0,
+    });
+    return result.docs as unknown as Record<string, unknown>[];
+  },
+  ["tickets-docs"],
+  { revalidate: 60, tags: ["tickets"] },
+);
+
 export async function listTickets({
   publicOnly = false,
   locale,
 }: { publicOnly?: boolean; locale?: string } = {}) {
-  const payload = await getPayloadClient();
   const resolvedLocale = await resolveLocale(locale);
-  const result = await payload.find({
-    collection: "tickets",
-    where: publicOnly ? { status: { in: ["active", "sold_out"] } } : {},
-    sort: "-createdAt",
-    limit: 0,
-    pagination: false,
-    depth: 0,
-  });
-
-  return result.docs.map((d) =>
-    serializeTicket(d as unknown as Record<string, unknown>, resolvedLocale),
-  );
+  const docs = await fetchTicketDocs(publicOnly);
+  return docs.map((d) => serializeTicket(d, resolvedLocale));
 }
 
 export async function getTicket(id: string, locale?: string): Promise<Ticket | null> {

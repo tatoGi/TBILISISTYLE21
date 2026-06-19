@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { getCurrentLocale, getPayloadClient } from "@/lib/payload";
 import { pickField } from "@/lib/i18n-content";
+import type { Locale } from "@/i18n/config";
 import { RenderBlocks } from "../components/RenderBlocks";
 
 export const dynamic = "force-dynamic";
@@ -10,18 +12,30 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+// Cache the page lookup per (slug, locale). Called by both generateMetadata and
+// the component; revalidate 5 min / revalidateTag "pages". Keeps CMS page reads
+// off Postgres on every request.
+const fetchPageBySlug = unstable_cache(
+  async (slug: string, locale: Locale) => {
+    const payload = await getPayloadClient();
+    const result = await payload.find({
+      collection: "pages",
+      where: { slug: { equals: slug } },
+      locale,
+      fallbackLocale: "ka",
+      depth: 2,
+      limit: 1,
+    });
+    return result.docs[0] ?? null;
+  },
+  ["page-by-slug"],
+  { revalidate: 300, tags: ["pages"] },
+);
+
 async function findPage(slug: string) {
-  const payload = await getPayloadClient();
   const locale = await getCurrentLocale();
-  const result = await payload.find({
-    collection: "pages",
-    where: { slug: { equals: slug } },
-    locale,
-    fallbackLocale: "ka",
-    depth: 2,
-    limit: 1,
-  });
-  return { page: result.docs[0] ?? null, locale };
+  const page = await fetchPageBySlug(slug, locale);
+  return { page, locale };
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
