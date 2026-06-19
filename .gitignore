@@ -62,3 +62,4 @@ TICKET_FLOW_REVIEW.md
 # Payload media uploads — stored in Vercel Blob (prod) / local disk (dev), not git
 public/media/
 scripts/.seed-result.txt
+scripts/.cms-snapshot.json

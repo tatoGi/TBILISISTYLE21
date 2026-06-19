@@ -9,6 +9,8 @@
     "ci": "payload migrate && next build",
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
+    "cms:export": "payload run scripts/push-cms-content.ts export",
+    "cms:import": "payload run scripts/push-cms-content.ts import",
     "start": "next start",
     "test": "node --test tests/*.test.mts",
     "lint": "eslint",

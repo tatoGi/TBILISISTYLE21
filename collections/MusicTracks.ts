@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { localeTabsKeepBase } from "../fields/localeTabs";
+import { revalidateMusicTracksCache } from "../lib/cms-revalidate";
 
 export const MusicTracks: CollectionConfig = {
   slug: "musicTracks",
@@ -13,6 +14,10 @@ export const MusicTracks: CollectionConfig = {
   },
   defaultSort: "order",
   timestamps: true,
+  hooks: {
+    afterChange: [() => { revalidateMusicTracksCache(); }],
+    afterDelete: [() => { revalidateMusicTracksCache(); }],
+  },
   fields: [
     localeTabsKeepBase([
       {
@@ -37,6 +42,7 @@ export const MusicTracks: CollectionConfig = {
         or: [
           { mimeType: { contains: "audio" } },
           { mimeType: { contains: "mpeg" } },
+          { mimeType: { equals: "video/mpeg" } },
         ],
       },
       admin: {

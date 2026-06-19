@@ -9,6 +9,9 @@ import * as migration_20260608_160000_posts_locale_columns from './20260608_1600
 import * as migration_20260608_170000_pages_media_menu_locale_columns from './20260608_170000_pages_media_menu_locale_columns';
 import * as migration_20260608_180000_block_locale_columns from './20260608_180000_block_locale_columns';
 import * as migration_20260608_190000_site_festival_hero_columns from './20260608_190000_site_festival_hero_columns';
+import * as migration_20260619_091300_products_tickets_partners_translation_columns from './20260619_091300_products_tickets_partners_translation_columns';
+import * as migration_20260619_143900_locked_documents_rels_columns from './20260619_143900_locked_documents_rels_columns';
+import * as migration_20260619_160000_contact_blocks_and_music_tracks from './20260619_160000_contact_blocks_and_music_tracks';
 
 export const migrations = [
   {
@@ -65,5 +68,20 @@ export const migrations = [
     up: migration_20260608_190000_site_festival_hero_columns.up,
     down: migration_20260608_190000_site_festival_hero_columns.down,
     name: '20260608_190000_site_festival_hero_columns'
+  },
+  {
+    up: migration_20260619_091300_products_tickets_partners_translation_columns.up,
+    down: migration_20260619_091300_products_tickets_partners_translation_columns.down,
+    name: '20260619_091300_products_tickets_partners_translation_columns'
+  },
+  {
+    up: migration_20260619_143900_locked_documents_rels_columns.up,
+    down: migration_20260619_143900_locked_documents_rels_columns.down,
+    name: '20260619_143900_locked_documents_rels_columns'
+  },
+  {
+    up: migration_20260619_160000_contact_blocks_and_music_tracks.up,
+    down: migration_20260619_160000_contact_blocks_and_music_tracks.down,
+    name: '20260619_160000_contact_blocks_and_music_tracks'
   },
 ];

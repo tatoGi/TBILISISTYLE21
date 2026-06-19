@@ -179,6 +179,8 @@ export default buildConfig({
   },
   db: postgresAdapter({
     idType: "uuid",
+    // Import/migrate scripts set PAYLOAD_PUSH=false so Neon is not hit with dev push prompts.
+    push: process.env.PAYLOAD_PUSH === "false" ? false : undefined,
     pool: {
       // DATABASE_URL for local/dev; POSTGRES_URL is what the Vercel/Neon
       // integration injects (use the pooled connection string in production).

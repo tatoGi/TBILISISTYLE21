@@ -1,5 +1,6 @@
 import type { GlobalConfig } from "payload";
 import { localeTabs } from "../fields/localeTabs";
+import { revalidateSiteCache } from "../lib/cms-revalidate";
 
 // "Menu" screen — drag-sortable list of pages that drives the site navigation.
 // (Homepage featured pages are controlled by the "Feature on homepage"
@@ -12,6 +13,9 @@ export const SiteSettings: GlobalConfig = {
     description: "Festival landing hero text and the public navigation menu.",
   },
   access: { read: () => true },
+  hooks: {
+    afterChange: [() => { revalidateSiteCache(); }],
+  },
   fields: [
     {
       type: "collapsible",
